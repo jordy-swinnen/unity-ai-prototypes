@@ -5,7 +5,7 @@
 - Commit messages use plain conventional commits (no `Refs:` trailer).
 
 ## Pinned versions
-- Unity Editor: 6000.6.8f1 (chosen by Jordy; LTS status not verified; from `unity editors -i`)
+- Unity Editor: 6000.6.8f1 (not an LTS release; the version Unity Hub recommended; from `unity editors -i`)
 - Blender: 5.2.3 LTS (from `blender --version`)
 - Blender binary on macOS: `/Applications/Blender.app/Contents/MacOS/Blender` (`blender` is not on PATH)
 
