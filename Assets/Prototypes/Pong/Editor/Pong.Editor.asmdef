@@ -2,7 +2,8 @@
     "name": "Pong.Editor",
     "rootNamespace": "Prototypes.Pong.Editor",
     "references": [
-        "Pong"
+        "Pong",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"
