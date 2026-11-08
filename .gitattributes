@@ -169,3 +169,6 @@ Packages/packages-lock.json linguist-generated
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+
+# Blender exports (added for this repo)
+*.glb filter=lfs diff=lfs merge=lfs -text
