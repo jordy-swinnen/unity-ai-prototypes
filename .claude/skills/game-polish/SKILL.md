@@ -35,4 +35,5 @@ Only polish the feature's own feel-table rows, in the existing style guide. Chec
 - Add an effect nobody asked for in the spec. If you think of a good one, propose it as an open question.
 - Copy another game's assets, names or sounds.
 - Make the state of the game harder to read (a glowing ball that hides the paddle).
-- Push, or add packages, without asking. Prefer a few lines of your own code over a package for small effects, and say why.
+- Push, change GitHub settings, or add packages without asking. Prefer a few lines of your own code over a package for small effects, and say why.
+- Change global git config, or rewrite history that is already pushed.

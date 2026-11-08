@@ -34,6 +34,7 @@ Build one stage of an approved plan at a time. Every stage ends compiled, tested
 Run the existing tests first and note the result. Then follow the same loop with the feature's tests. Reuse the settings asset, scene builder and test assemblies. Re-run `Tools/unity/check.sh all` at the end and compare with the starting result. Update the original spec and plan.
 
 ## Don't
-- Push, create remotes, or change GitHub settings without asking.
+- Push, create remotes, change GitHub settings, add a license or change a license without asking first. Say what will become public before you ask.
+- Change global git config, or rewrite history that is already pushed. Set `user.name` and `user.email` in this repository's local config only.
 - Leave test files, captures or scratch scripts in the repository. Write captures outside it (a temp folder).
 - Batch several stages together.

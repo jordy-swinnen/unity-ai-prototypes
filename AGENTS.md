@@ -49,7 +49,8 @@ Many people add prototypes here. Each prototype is self-contained, named in Pasc
 - After every C# change, run the compile check and fix errors before continuing.
 - Every mechanic gets an EditMode test for its logic. Write the test first.
 - For multi-file changes, plan first (files and tests), then wait for approval.
-- Ask before deleting files, changing `ProjectSettings/`, adding packages, pushing, or changing GitHub settings.
+- Ask before deleting files, changing `ProjectSettings/`, adding packages, pushing, adding or changing a license, or changing GitHub settings. Say what becomes public before you ask.
+- Never change global git config, and never rewrite history that is already pushed. Set `user.name` and `user.email` in this repository's local config only.
 - Commit only when the compile check and tests pass. Use conventional commit subjects.
 
 ## Agent harness config (Claude Code + OpenCode)
