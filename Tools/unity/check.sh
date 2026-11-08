@@ -86,13 +86,37 @@ sys.exit(1 if failed else 0)
 '
 }
 
+# How many tests Unity can see in a mode (EditMode or PlayMode). Prints -1 if it can't tell.
+count_tests() {
+  unity cmd test list --mode "$1" --timeout 90 --result-only --no-banner 2>/dev/null | python3 -I -c '
+import json, sys
+try:
+    print(json.load(sys.stdin).get("Count", -1))
+except Exception:
+    print(-1)
+'
+}
+
 run_editmode() {
   echo "--- EditMode"
+  local count
+  count="$(count_tests EditMode)"
+  if [ "$count" = "0" ]; then
+    echo "tests: 0/0 (no EditMode tests found)"
+    return 0
+  fi
   unity cmd test run --mode EditMode --timeout 300 --result-only --no-banner 2>/dev/null | summarise
 }
 
 run_playmode() {
   echo "--- PlayMode"
+  # With no PlayMode tests no run starts, and `test status` would still show the last old result.
+  local count
+  count="$(count_tests PlayMode)"
+  if [ "$count" = "0" ]; then
+    echo "tests: 0/0 (no PlayMode tests found)"
+    return 0
+  fi
   # PlayMode runs in the background: start it, then poll until the status says completed.
   unity cmd test run --mode PlayMode --async-tests --timeout 60 --result-only --no-banner >/dev/null 2>&1
   local status=""
