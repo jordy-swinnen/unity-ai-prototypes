@@ -1,6 +1,6 @@
 # Pong: plan and tasks
 
-Plan for `docs/prototypes/pong.md`. Status: draft, waiting for approval before any code is written.
+Plan for `docs/prototypes/pong.md`. Status: stage 1 done, waiting for review before stage 2.
 
 ## Decisions needed first
 1. **Importing `.glb` files.** Unity 6 has no built-in `.glb` importer. The existing `crate.glb.meta` uses the `DefaultImporter`, so Unity treats the file as an unknown asset. Two options:
@@ -45,10 +45,10 @@ Test assemblies `Pong.Tests.EditMode` and `Pong.Tests.PlayMode`.
 Each stage ends with a stop for your review.
 
 Stage 1: assets
-- [ ] Create the folders from `AGENTS.md` (the folders get `.meta` files when Unity opens).
-- [ ] Add the glTF package (decision 1) and check that Unity imports `crate.glb`.
-- [ ] Write `make_pong_assets.py`, run it headless, and check that all four `.glb` files and the `.blend` exist.
-- [ ] Commit: `feat(pong): add Blender asset script and exports`.
+- [x] Create the folders from `AGENTS.md`. Only the folders that hold files now exist (`Art/Exports`). The other folders are created in stages 2 and 3, when they get files.
+- [x] Add the glTF package (decision 1) and check that Unity imports `crate.glb`. Done with `com.unity.cloud.gltfast` 6.20.0.
+- [x] Write `make_pong_assets.py`, run it headless, and check that all four `.glb` files and the `.blend` exist. Checked the sizes, pivots and colours in the files, and the bounds and material count after Unity's import.
+- [x] Commit: `feat(pong): add Blender asset script and exports`.
 
 Stage 2: rules with tests first
 - [ ] Add the four assembly definitions (`Pong`, `Pong.Editor`, `Pong.Tests.EditMode`, `Pong.Tests.PlayMode`).
