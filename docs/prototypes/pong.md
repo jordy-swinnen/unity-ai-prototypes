@@ -45,6 +45,6 @@ Two players hit a ball back and forth across a small 3D table seen from above. T
 - Visual polish beyond flat colours.
 
 ## Open questions
-- Project structure for many prototypes. Proposal: one folder per prototype under `Assets/Prototypes/<Name>/`, with its own assembly definitions, tests, art exports and scenes, and shared code only in `Assets/Shared/`. Blender sources go in `Art/source/<Name>/` and scripts in `Tools/blender/<Name>/`.
-- Should the placeholder `crate.glb` and `make_crate.py` be removed once Pong has real assets?
+- Decided: this prototype lives in `Assets/Prototypes/Pong/`, with sources in `Art/source/Pong/` and scripts in `Tools/blender/Pong/`. See `AGENTS.md` for the full structure.
+- Should the placeholder `crate.glb` and `make_crate.py` be removed once Pong has real assets? Removal needs approval.
 - Is a fixed top-down camera right, or should the camera tilt slightly for a more 3D look?

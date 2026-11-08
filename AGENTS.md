@@ -10,18 +10,28 @@
 - Blender binary on macOS: `/Applications/Blender.app/Contents/MacOS/Blender` (`blender` is not on PATH)
 
 ## Layout
-- `Assets/`: everything Unity compiles and imports. Tests live in `Assets/Tests/EditMode/` and `Assets/Tests/PlayMode/`. Unity only compiles test assemblies inside Assets or a package.
-- `Assets/Art/Exports/`: `.glb` files written by Blender scripts. Never edit by hand.
-- `Assets/Editor/`: editor menu commands, including scene building.
-- `Art/source/`: `.blend` source files (Git LFS). Unity doesn't import these.
-- `Tools/blender/`: Python scripts for Blender, run headless with `blender -b -P <script>`.
-- `docs/prototypes/`: one spec per mechanic. Read the spec before writing code.
+Many people add prototypes here. Each prototype is self-contained, named in PascalCase (`<Name>`) and lives in its own folder.
+
+- `Assets/Prototypes/<Name>/`: one prototype. Unity only compiles test assemblies inside Assets or a package, so tests live here too.
+  - `Scripts/`: runtime code, assembly `<Name>`, namespace `Prototypes.<Name>`.
+  - `Editor/`: editor code, assembly `<Name>.Editor`. Holds the menu command `Prototypes/<Name>/Build Scene`.
+  - `Tests/EditMode/` and `Tests/PlayMode/`: assemblies `<Name>.Tests.EditMode` and `<Name>.Tests.PlayMode`.
+  - `Art/Exports/`: `.glb` files written by Blender scripts. Never edit by hand.
+  - `Scenes/`: scenes written by the build command. Never edit by hand.
+  - `Settings/`: ScriptableObjects with tuning values.
+- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
+- `Art/source/<Name>/`: `.blend` source files (Git LFS). Unity doesn't import these.
+- `Tools/blender/<Name>/`: Python scripts for Blender, run headless with `blender -b -P <script>`. They write into `Assets/Prototypes/<Name>/Art/Exports/`.
+- `docs/prototypes/<kebab-name>.md`: one spec per prototype or mechanic, from `TEMPLATE.md`. Read the spec before writing code.
 - `docs/research/`: background only.
+- Legacy placeholder: `Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`. Remove them once the first prototype has real assets.
 
 ## Rules
 - Logic lives in C#. Tuning values live in ScriptableObjects.
-- Never hand-edit `.unity` or `.prefab` files. Build scenes in code through a menu command under `Assets/Editor/`.
-- Never hand-edit files under `Assets/Art/Exports/`. Change the Blender script and re-run it.
+- Never hand-edit `.unity` or `.prefab` files. Build scenes in code through the prototype's menu command under `Assets/Prototypes/<Name>/Editor/`.
+- Never hand-edit files under `Assets/Prototypes/<Name>/Art/Exports/`. Change the Blender script and re-run it.
+- Work only inside the folder of the prototype you were asked about. Don't edit another prototype or `Assets/Shared/` unless the task says so.
+- New prototype: write or find its spec in `docs/prototypes/`, then create the folders above, then code and tests.
 - After every C# change, run the compile check and fix errors before continuing.
 - Every mechanic gets an EditMode test for its logic.
 - For multi-file changes, plan first (files and tests), then wait for approval.
@@ -34,6 +44,7 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 - Skills live in `.claude/skills/<name>/`. Both tools read that folder, so never copy skills into `.opencode/`. Keep skill frontmatter to the portable fields.
 - Path-scoped rules (`.claude/rules/*.md` with `paths:`) work in Claude Code only. OpenCode has no equivalent, so don't rely on them for anything both tools must follow.
 - Permissions, hooks and model choices differ between the tools. Write each in its own file (`.claude/settings.json`, `opencode.json`) and don't try to translate one into the other.
+- OpenCode models (Go plan): `plan` uses `opencode-go/glm-5.3`, `build` and the default use `opencode-go/deepseek-v4.1-flash`. Change them in `opencode.json` only.
 - MCP servers need an entry in both `.mcp.json` and `opencode.json`. Translate them with the skill's `sync_mcp.py`. The `unity-cli` skill replaces a Unity MCP server, so none is configured.
 - After any change, check that both tools load `AGENTS.md`.
 
