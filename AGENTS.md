@@ -24,6 +24,15 @@
 - Ask before deleting files, changing `ProjectSettings/`, or adding packages.
 - Commit only when the compile check and tests pass. Use conventional commit subjects.
 
+## Agent harness config (Claude Code + OpenCode)
+Follow the `dual-agent-config` skill whenever you touch agent config.
+- `AGENTS.md` is the only source of rules. `CLAUDE.md` stays one line: `@AGENTS.md`. Never put rules in `CLAUDE.md`.
+- Skills live in `.claude/skills/<name>/`. Both tools read that folder, so never copy skills into `.opencode/`. Keep skill frontmatter to the portable fields.
+- Path-scoped rules (`.claude/rules/*.md` with `paths:`) work in Claude Code only. OpenCode has no equivalent, so don't rely on them for anything both tools must follow.
+- Permissions, hooks and model choices differ between the tools. Write each in its own file (`.claude/settings.json`, `opencode.json`) and don't try to translate one into the other.
+- MCP servers need an entry in both `.mcp.json` and `opencode.json`. Translate them with the skill's `sync_mcp.py`. The `unity-cli` skill replaces a Unity MCP server, so none is configured.
+- After any change, check that both tools load `AGENTS.md`.
+
 ## Checks
 - Compile check: `unity recompile --project-path .` (needs the Editor open on this project; confirmed from `--help`, not yet run)
 - Tests: `unity test . --mode EditMode --output Logs/test-results.xml` (use `--mode PlayMode` for PlayMode; confirmed from `--help`, not yet run)
