@@ -1,5 +1,9 @@
 # Agent rules: unity-ai-prototypes
 
+## Project
+- Prototypes are mostly 3D, some 2D. The project uses the Universal 3D (URP) template.
+- Commit messages use plain conventional commits (no `Refs:` trailer).
+
 ## Pinned versions
 - Unity Editor: 6000.6.8f1 (chosen by Jordy; LTS status not verified; from `unity editors -i`)
 - Blender: 5.2.3 LTS (from `blender --version`)
