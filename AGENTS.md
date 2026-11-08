@@ -25,5 +25,6 @@
 - Commit only when the compile check and tests pass. Use conventional commit subjects.
 
 ## Checks
-- Compile check: not yet verified
-- Tests: not yet verified
+- Compile check: `unity recompile --project-path .` (needs the Editor open on this project; confirmed from `--help`, not yet run)
+- Tests: `unity test . --mode EditMode --output Logs/test-results.xml` (use `--mode PlayMode` for PlayMode; confirmed from `--help`, not yet run)
+- The `unity-cli` skill is installed in `.claude/skills/unity-cli/` and is read by both Claude Code and OpenCode.
