@@ -1,6 +1,6 @@
 # Pong
 
-Status: draft, waiting for review. This is the first prototype. It also exists to settle the project structure for later prototypes (see Open questions).
+Status: built and tested, waiting for a hands-on play test. This is the first prototype. It also exists to settle the project structure for later prototypes (see Open questions).
 
 ## Goal
 Two players hit a ball back and forth across a small 3D table seen from above. The first to 5 points wins. Everything you see (paddles, ball, table, walls) is a custom model made with a headless Blender script.
@@ -14,7 +14,7 @@ Two players hit a ball back and forth across a small 3D table seen from above. T
 - The ball bounces off a paddle. The bounce angle depends on where it hits: centre of the paddle sends it straight back, and the edges send it out at up to 60 degrees from the straight line.
 - The ball speed starts at a base value and rises by a fixed step on every paddle hit, up to a maximum. It resets to the base value after each point.
 - A ball that passes an end line scores one point for the other player. Then the ball resets to the centre and the next serve starts after a short pause.
-- At 5 points the game ends and shows the winner. A key press starts a new game.
+- At 5 points the game ends and shows the winner. Pressing Space starts a new game.
 - Speeds, angles, paddle size, win score and pause length live in one ScriptableObject, not in code.
 - Game rules are plain C# with no Unity physics. The simulation steps with a fixed time step, so tests can run it deterministically. The scene only draws the current state.
 
@@ -24,20 +24,23 @@ Two players hit a ball back and forth across a small 3D table seen from above. T
 - The scene is built by an editor menu command from these assets. Nobody edits the `.unity` file by hand.
 
 ## Acceptance criteria
-- [ ] The Blender script runs headless and writes all four `.glb` files without errors.
-- [ ] A menu command builds the Pong scene from nothing, and running it twice gives the same scene.
-- [ ] The ball reflects off the top and bottom walls with the correct angle.
-- [ ] A hit at the centre of a paddle returns the ball straight back. A hit at the edge returns it at the maximum angle.
-- [ ] Ball speed rises by the set step on each paddle hit and never goes above the maximum.
-- [ ] A ball passing the left end line gives player 2 a point, and passing the right end line gives player 1 a point.
-- [ ] After a point, the ball resets to the centre and speed returns to the base value.
-- [ ] The game ends at 5 points and shows the winner, and a key press starts a new game.
-- [ ] A paddle never moves outside the table.
-- [ ] `unity recompile` reports no errors and `unity test` passes for EditMode and PlayMode.
+- [x] The Blender script runs headless and writes all four `.glb` files without errors.
+- [x] A menu command builds the Pong scene from nothing, and running it twice gives the same scene. The tests compare the content: Unity writes new object IDs into the file on every save, so the file text differs between runs.
+- [x] The ball reflects off the top and bottom walls with the correct angle.
+- [x] A hit at the centre of a paddle returns the ball straight back. A hit at the edge returns it at the maximum angle.
+- [x] Ball speed rises by the set step on each paddle hit and never goes above the maximum.
+- [x] A ball passing the left end line gives player 2 a point, and passing the right end line gives player 1 a point.
+- [x] After a point, the ball resets to the centre and speed returns to the base value.
+- [x] The game ends at 5 points and shows the winner.
+- [ ] Pressing Space starts a new game. The restart itself is tested, but the key press needs a person at the keyboard.
+- [ ] W/S and the Up/Down arrows move the paddles. The paddle movement is tested through a stand-in for the keyboard, so the real key mapping needs a person at the keyboard.
+- [x] A paddle never moves outside the table.
+- [x] `unity recompile` reports no errors and the tests pass for EditMode (28) and PlayMode (7).
 
 ## Tests
 - EditMode: wall reflection angle, paddle bounce angle at centre and edge, speed step and maximum, scoring for each side, reset after a point, win at 5, paddle clamped to the table, and the same input always gives the same simulation result.
-- PlayMode: the built scene contains a paddle for each player, a ball and four walls. After simulating a ball past an end line, the score on screen goes up.
+- PlayMode: the built scene contains a table, two walls, a paddle for each player and a ball. Paddles and ball follow the game state, input moves the right paddle, a point updates the score on screen, and a win shows the winner.
+- EditMode (scene builder): the scene has every part, the models sit where the rules expect them, and building twice gives the same content.
 
 ## Out of scope
 - A computer opponent, online play, sound, menus, and power-ups.

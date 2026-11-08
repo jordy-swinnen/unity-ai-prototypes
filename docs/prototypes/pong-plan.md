@@ -1,6 +1,6 @@
 # Pong: plan and tasks
 
-Plan for `docs/prototypes/pong.md`. Status: stages 1 and 2 done, waiting for review before stage 3.
+Plan for `docs/prototypes/pong.md`. Status: stages 1 to 3 done. Waiting for a hands-on play test, then stage 4.
 
 ## Decisions needed first
 1. **Importing `.glb` files.** Unity 6 has no built-in `.glb` importer. The existing `crate.glb.meta` uses the `DefaultImporter`, so Unity treats the file as an unknown asset. Two options:
@@ -57,11 +57,11 @@ Stage 2: rules with tests first
 - [x] Commit: `feat(pong): add game rules with EditMode tests`.
 
 Stage 3: scene and play
-- [ ] Write `PongSettings`, `PongGame`, `PongView` and `PongSceneBuilder`.
-- [ ] Build the scene with the menu command, run it twice, and check that the scene is the same.
-- [ ] Write the PlayMode tests and run `unity test --mode PlayMode`.
-- [ ] Play the game and check the acceptance criteria in the spec by hand.
-- [ ] Commit: `feat(pong): add playable scene and PlayMode tests`.
+- [x] Write `PongSettings`, `PongGame`, `PongView` and `PongSceneBuilder`. The score uses Unity's plain UI `Text`, not TextMeshPro, because the project has no TextMeshPro font resources imported.
+- [x] Build the scene with the menu command, run it twice, and check that the scene is the same. The scene files differ byte for byte, because Unity writes new object IDs on every save. A test compares the content instead (objects, transforms, components and references), and it passes.
+- [x] Write the PlayMode tests and run them. 7 pass, and a deliberate bug in `PongView` made the matching test fail. The PlayMode assembly covers all platforms, because Unity runs an Editor-only assembly as EditMode. PlayMode runs need `--async-tests`.
+- [ ] Play the game and check the acceptance criteria in the spec by hand. Waiting for you. The scene renders correctly in Play Mode and the scores show, but the real keyboard keys and the feel of the game need a person.
+- [x] Commit: `feat(pong): add playable scene and PlayMode tests`.
 
 Stage 4: tidy up
 - [ ] Decide what happens to the placeholder `crate.glb` and `make_crate.py`. Removing them needs approval.

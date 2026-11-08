@@ -52,6 +52,8 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 - Compile check: `unity recompile --project-path .` (needs the Editor open on this project; exits 0 with no output when it compiles. It failed once with "Invalid response format from Pipeline server" while the Editor was reloading after a package change. Wait until `unity status` shows `ready`, then run it again.)
 - Packages: `com.unity.cloud.gltfast` 6.20.0 imports the `.glb` files. Unity 6 can't import `.glb` without it.
 - Tests, Editor open on this project: `unity cmd test run --mode EditMode --result-only` (use `--mode PlayMode` for PlayMode). It prints JSON with a `Summary` of total, passed and failed. Run `unity cmd test list --mode EditMode` to see what exists. Verified: 25 EditMode tests pass.
+- Tests, PlayMode, Editor open: `unity cmd test run --mode PlayMode --async-tests --result-only`, then poll `unity cmd test status --result-only` until `status` is `completed`. Without `--async-tests` it returns 0 results. Verified: 7 PlayMode tests pass.
+- A PlayMode test assembly must cover all platforms. Unity runs an Editor-only test assembly as EditMode. Code that needs `UnityEditor` goes inside `#if UNITY_EDITOR`.
 - Tests, Editor closed: `unity test . --mode EditMode --output Logs/test-results.xml`. With the Editor open it refuses and exits 6. Not run with the Editor closed.
 - `unity recompile` can exit 7 right after the Editor reloads. Wait until `unity status` shows `ready` and run it again.
 - The `unity-cli` skill is installed in `.claude/skills/unity-cli/` and is read by both Claude Code and OpenCode.

@@ -54,9 +54,10 @@ With the Unity Editor open on the project (the usual case when working with an a
 ```bash
 unity recompile --project-path .
 unity cmd test run --mode EditMode --result-only
-unity cmd test run --mode PlayMode --result-only
+unity cmd test run --mode PlayMode --async-tests --result-only
+unity cmd test status --result-only
 ```
-Each test command prints JSON. Look at `Summary` for the totals.
+The EditMode command prints JSON. Look at `Summary` for the totals. PlayMode tests start in the background: run `unity cmd test status --result-only` again until `status` is `completed`.
 
 With the Editor closed (for example on a build machine), `unity test` starts its own Editor in batch mode. It refuses to run while the project is open elsewhere.
 ```bash
