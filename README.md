@@ -50,13 +50,19 @@ Unity only compiles test assemblies inside `Assets/`, and only imports files fro
 7. **Commit** with a conventional commit message, for example `feat(pong): add ball bounce rules`. Open a pull request if you don't have write access.
 
 ## Checks
-These commands come from the Unity CLI's own help. They haven't been run on this project yet, because it has no tests so far.
+With the Unity Editor open on the project (the usual case when working with an agent):
 ```bash
 unity recompile --project-path .
-unity test . --mode EditMode --output Logs/test-results.xml
-unity test . --mode PlayMode --output Logs/test-results.xml
+unity cmd test run --mode EditMode --result-only
+unity cmd test run --mode PlayMode --result-only
 ```
-`recompile` needs the Unity Editor open on this project.
+Each test command prints JSON. Look at `Summary` for the totals.
+
+With the Editor closed (for example on a build machine), `unity test` starts its own Editor in batch mode. It refuses to run while the project is open elsewhere.
+```bash
+unity test . --mode EditMode --output Logs/test-results.xml
+```
+The batch-mode form hasn't been run on this project yet.
 
 ## Working with coding agents
 - `AGENTS.md` holds all the rules. Claude Code reads it through `CLAUDE.md`, which contains only `@AGENTS.md`. OpenCode reads `AGENTS.md` directly. Don't put rules in `CLAUDE.md`.

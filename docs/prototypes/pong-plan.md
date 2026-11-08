@@ -1,6 +1,6 @@
 # Pong: plan and tasks
 
-Plan for `docs/prototypes/pong.md`. Status: stage 1 done, waiting for review before stage 2.
+Plan for `docs/prototypes/pong.md`. Status: stages 1 and 2 done, waiting for review before stage 3.
 
 ## Decisions needed first
 1. **Importing `.glb` files.** Unity 6 has no built-in `.glb` importer. The existing `crate.glb.meta` uses the `DefaultImporter`, so Unity treats the file as an unknown asset. Two options:
@@ -51,10 +51,10 @@ Stage 1: assets
 - [x] Commit: `feat(pong): add Blender asset script and exports`.
 
 Stage 2: rules with tests first
-- [ ] Add the four assembly definitions (`Pong`, `Pong.Editor`, `Pong.Tests.EditMode`, `Pong.Tests.PlayMode`).
-- [ ] Write the EditMode tests listed in the spec, then make `PongSimulation` pass them.
-- [ ] Run `unity recompile` and `unity test --mode EditMode`.
-- [ ] Commit: `feat(pong): add game rules with EditMode tests`.
+- [x] Add the four assembly definitions (`Pong`, `Pong.Editor`, `Pong.Tests.EditMode`, `Pong.Tests.PlayMode`).
+- [x] Write the EditMode tests listed in the spec, then make `PongSimulation` pass them. 25 tests, written before the simulation.
+- [x] Run `unity recompile` and the EditMode tests. All 25 pass. A deliberate bug in the paddle bounce made 5 fail, and the original code passes again. `unity test` can't run with the Editor open, so the tests ran with `unity cmd test run --mode EditMode`.
+- [x] Commit: `feat(pong): add game rules with EditMode tests`.
 
 Stage 3: scene and play
 - [ ] Write `PongSettings`, `PongGame`, `PongView` and `PongSceneBuilder`.
