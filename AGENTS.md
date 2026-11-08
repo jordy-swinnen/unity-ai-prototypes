@@ -49,6 +49,7 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 - After any change, check that both tools load `AGENTS.md`.
 
 ## Checks
-- Compile check: `unity recompile --project-path .` (needs the Editor open on this project; confirmed from `--help`, not yet run)
+- Compile check: `unity recompile --project-path .` (needs the Editor open on this project; exits 0 with no output when it compiles. It failed once with "Invalid response format from Pipeline server" while the Editor was reloading after a package change. Wait until `unity status` shows `ready`, then run it again.)
+- Packages: `com.unity.cloud.gltfast` 6.20.0 imports the `.glb` files. Unity 6 can't import `.glb` without it.
 - Tests: `unity test . --mode EditMode --output Logs/test-results.xml` (use `--mode PlayMode` for PlayMode; confirmed from `--help`, not yet run)
 - The `unity-cli` skill is installed in `.claude/skills/unity-cli/` and is read by both Claude Code and OpenCode.
