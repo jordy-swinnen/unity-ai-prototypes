@@ -1,12 +1,36 @@
 # Unity AI Prototypes
 
-A shared repository for small Unity game prototypes, mostly 3D with some 2D. Models are made with Blender scripts, and coding agents (Claude Code and OpenCode) build much of the code from written specs. Anyone can add a prototype.
+An AI-native starting point for building Unity games with coding agents. Fork it or use it as a template, then go from a game idea to a playable, tested, good-looking prototype with Claude Code or OpenCode. Models are made with headless Blender scripts, scenes are built by code, and every stage is checked by tests and renders before a person reviews it.
+
+It is generic. It contains no game of its own. Games and features you add live in their own folders and follow the same process.
+
+## What you get
+- **Four skills** in `.claude/skills/` (both Claude Code and OpenCode read that folder). Together they are the process from idea to polished game:
+
+  | Skill | Use it to |
+  |---|---|
+  | `game-spec` | Turn an idea or a feature into a spec: design pillars, a researched look-and-feel brief, a feel table, mechanics, acceptance criteria and tests. |
+  | `game-plan` | Turn an approved spec into a staged plan: decisions first, greybox, tests before code, a polish stage, a review stop after every stage. |
+  | `game-build` | Build the plan one stage at a time with compile and test loops, render captures and a check that the tests can fail. |
+  | `game-polish` | Apply the look brief and feel table to a working game in small steps, each judged on a render. |
+
+- **A Unity CLI skill** (`unity-cli`, made by Unity) for driving the Editor from the command line.
+- **Scripts** in `Tools/unity/`: `check.sh` compiles and runs EditMode and PlayMode tests, and `capture.sh` saves renders of the game so an agent can look at it.
+- **Conventions** in `AGENTS.md`: one folder per prototype, tests beside the code, tuning values in settings assets, scenes and models built by scripts, never by hand.
+- **Research** in `docs/research/`, including a sourced note on game feel and look development.
+
+## Use it as a starting point
+1. Fork the repository. GitHub's "Use this template" option isn't available: GitHub refuses to make a repository with Git LFS content a template. If you want a clean history, clone it, delete `.git`, run `git init`, and push to your own new repository.
+2. Open the folder in Unity Hub with the pinned Unity version (see `AGENTS.md`). Install Blender and Git LFS (see below).
+3. Edit `AGENTS.md`: the pinned versions, and your own rules. Edit this README. Change the license if you want a different one.
+4. Ask your agent to use `game-spec` for your idea, then `game-plan`, `game-build` and `game-polish`. Each ends with a stop for your review. For example: "Use game-spec to write a spec for a small 3D arcade game where..."
+5. Delete what you don't need, such as the placeholder crate (`Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`).
 
 ## What you need
-- Unity **6000.6.8f1** (installed through Unity Hub). This is not an LTS release. It's the version Unity Hub recommended when the project was created. Use the Universal 3D (URP) project as it is.
-- Blender **5.2.3 LTS**, used headless (without the window) to export models.
+- Unity **6000.6.8f1** through Unity Hub. This is not an LTS release. It's the version Unity Hub recommended when the project was created. You must be signed in to Unity Hub to add packages.
+- Blender **5.2.3 LTS**, run headless to export models.
 - Git and [Git LFS](https://git-lfs.com). Run `git lfs install` once on your machine.
-- Optional: the Unity CLI (`unity`), Claude Code and OpenCode.
+- The Unity CLI (`unity`), Python 3, and Claude Code or OpenCode.
 
 ## Get started
 ```bash
@@ -15,61 +39,45 @@ cd unity-ai-prototypes
 git lfs install
 git lfs pull
 ```
-Then add the folder in Unity Hub and open it with 6000.6.8f1. The first open takes a while because Unity builds its `Library/` folder. That folder is not committed.
+Open the folder in Unity Hub with 6000.6.8f1. The first open takes a while because Unity builds its `Library/` folder, which is not committed. Keep the Editor open while an agent works: the compile and test commands talk to the running Editor.
 
 ## Repository layout
 ```
-Assets/Prototypes/<Name>/     one folder per prototype (PascalCase)
+Assets/Prototypes/<Name>/     one folder per game or prototype (PascalCase)
   Scripts/                    runtime code, assembly <Name>
   Editor/                     editor code and the "Build Scene" menu command
   Tests/EditMode/             logic tests
   Tests/PlayMode/             scene and behaviour tests
   Art/Exports/                .glb files written by Blender scripts
+  Audio/                      sounds written by scripts
   Scenes/                     scenes written by the build command
   Settings/                   ScriptableObjects with tuning values
 Assets/Shared/                code and assets used by two or more prototypes
 Art/source/<Name>/            .blend source files (Git LFS)
 Tools/blender/<Name>/         Blender Python scripts
-docs/prototypes/<name>.md     one spec per prototype
-docs/research/                background notes
+Tools/audio/<Name>/           sound scripts
+Tools/unity/                  check.sh and capture.sh
+docs/prototypes/              one spec and one plan per game or feature (start from TEMPLATE.md)
+docs/research/                background and sourced research notes
+.claude/skills/               the skills
 AGENTS.md                     rules for coding agents (source of truth)
 ```
 Unity only compiles test assemblies inside `Assets/`, and only imports files from `Assets/`. That's why tests and exported models live there.
 
-## Add a prototype
-1. **Write the spec.** Copy `docs/prototypes/TEMPLATE.md` to `docs/prototypes/<kebab-name>.md` and fill it in. Say what the player does, how you can tell it works, and which tests prove it. `docs/prototypes/pong.md` is the first example.
-2. **Create the folder** `Assets/Prototypes/<Name>/` with the sub-folders above. Give each code folder its own assembly definition, named as shown in `AGENTS.md`. Prototypes never reference each other. Shared code goes in `Assets/Shared/`, and only when a second prototype needs it.
-3. **Make the art.** Write a Python script in `Tools/blender/<Name>/` that builds each model and exports a `.glb` into `Assets/Prototypes/<Name>/Art/Exports/`. Run it like this on macOS:
-   ```bash
-   /Applications/Blender.app/Contents/MacOS/Blender -b -P Tools/blender/<Name>/<script>.py
-   ```
-   On other systems, use the path to your Blender program. Don't edit the exported `.glb` files by hand. Change the script and run it again.
-4. **Write the code and the tests.** Game rules live in plain C# so EditMode tests can run them without the Unity physics engine. Tuning values live in ScriptableObjects.
-5. **Build the scene in code.** A menu command `Prototypes/<Name>/Build Scene` creates the scene from nothing. Don't edit `.unity` or `.prefab` files by hand, because an agent can't reproduce hand placement.
-6. **Check it.** Compile, then run the tests (see below).
-7. **Commit** with a conventional commit message, for example `feat(pong): add ball bounce rules`. Open a pull request if you don't have write access.
-
 ## Checks
-With the Unity Editor open on the project (the usual case when working with an agent):
+With the Unity Editor open on the project:
 ```bash
-unity recompile --project-path .
-unity cmd test run --mode EditMode --result-only
-unity cmd test run --mode PlayMode --async-tests --result-only
-unity cmd test status --result-only
+Tools/unity/check.sh compile     # compile scripts
+Tools/unity/check.sh all         # compile, then EditMode and PlayMode tests
+Tools/unity/capture.sh camera /tmp/shot.png   # render the main camera
 ```
-The EditMode command prints JSON. Look at `Summary` for the totals. PlayMode tests start in the background: run `unity cmd test status --result-only` again until `status` is `completed`.
-
-With the Editor closed (for example on a build machine), `unity test` starts its own Editor in batch mode. It refuses to run while the project is open elsewhere.
-```bash
-unity test . --mode EditMode --output Logs/test-results.xml
-```
-The batch-mode form hasn't been run on this project yet.
+`check.sh` prints how many tests passed and exits non-zero on a compile error or a failing test. The raw `unity` commands behind it are in `AGENTS.md` and `.claude/skills/game-build/references/unity-loop.md`. With the Editor closed, `unity test` starts its own Editor in batch mode (not run in this repository yet).
 
 ## Working with coding agents
 - `AGENTS.md` holds all the rules. Claude Code reads it through `CLAUDE.md`, which contains only `@AGENTS.md`. OpenCode reads `AGENTS.md` directly. Don't put rules in `CLAUDE.md`.
 - Both tools read skills from `.claude/skills/`. The `unity-cli` skill there is by Unity and is not covered by this repository's license.
 - OpenCode models are set in `opencode.json`. Planning uses `opencode-go/glm-5.3`, and building uses `opencode-go/deepseek-v4.1-flash`. Claude Code models are set in Claude Code, not in this repo.
-- Agents plan multi-file changes first and wait for approval before they write code.
+- Agents plan multi-file changes first and wait for approval. They stop for your review after every stage, and they say what they could not check. They can check numbers, tests and renders, but not how a game feels, so playing it is your job.
 
 ## License
 MIT. See `LICENSE`. The files under `.claude/skills/unity-cli/` belong to Unity and are not under this license.
