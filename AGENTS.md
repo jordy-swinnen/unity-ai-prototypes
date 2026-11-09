@@ -75,7 +75,7 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 - Permissions, hooks and model choices differ between the tools. Write each in its own file (`.claude/settings.json`, `opencode.json`) and don't try to translate one into the other.
 - OpenCode models (Go plan): `plan` uses `opencode-go/glm-5.3`, `build` and the default use `opencode-go/deepseek-v4.1-flash`. Change them in `opencode.json` only.
 - MCP servers need an entry in both `.mcp.json` and `opencode.json`. Translate them with the skill's `sync_mcp.py`. The `unity-cli` skill replaces a Unity MCP server, so none is configured.
-- After any change, check that both tools load `AGENTS.md`.
+- After any change, run `python3 Tools/agents/check_config.py` (one rules file, portable skill frontmatter, MCP parity). It checks files only. To see that each tool loads the rules, start a session in each and ask for the first heading of the rules and the skill names. Last verified with OpenCode: it loads `AGENTS.md` (including `Project structure`) and the four game skills.
 
 ## Checks
 The Unity Editor must be open on this project. `unity status` should show `ready`.
