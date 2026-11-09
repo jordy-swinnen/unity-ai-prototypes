@@ -11,6 +11,27 @@ It is generic. The process and the tools do not depend on any game. Two example 
 
 To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by both (camera shake and hit-stop) lives in `Assets/Shared/`.
 
+## Showcase
+Renders from the two example prototypes, made by following the four skills. Neon Pong is flat colour, emission and Bloom by design. Medieval Chess adds procedural textures, baked occlusion and a hand-written burn shader.
+
+### Neon Pong
+| The serve | A hit |
+|---|---|
+| ![Neon Pong at the serve: a cyan paddle on the left, a pink paddle on the right and a glowing ball in the middle of a dark grid table.](docs/images/neon-pong-serve.png) | ![Neon Pong at a hit: the ball leaves a trail and pink sparks fly from the right paddle, which lights the table.](docs/images/neon-pong-hit.png) |
+
+The ball is the brightest thing on the table and lights its surroundings. Each hit adds a flash, sparks, screen shake and a short hit-stop.
+
+### Medieval Chess
+![Medieval Chess: a chessboard in a torch-lit hall, with limestone and slate squares, a wooden frame and gold-trimmed red and bone-white pieces.](docs/images/medieval-chess-board.png)
+
+| The pieces | A capture |
+|---|---|
+| ![Close-up of the white king, queen and bishop: turned bodies, gold trim, crowns, shields and swords.](docs/images/medieval-chess-pieces.png) | ![A white rook has struck a red piece, which burns away into glowing embers.](docs/images/medieval-chess-burn.png) |
+
+Every capture is a fight: the attacker strikes and the victim burns away. The pieces are built by Blender scripts, with baked occlusion in their vertex colours. The board, frame and floor use generated textures.
+
+These are stills. The board and piece images are camera renders without Bloom or Vignette. How the games feel in motion is not something a picture shows, so play them: open a scene in `Assets/Prototypes/<Name>/Scenes/` and press Play.
+
 ## What you get
 - **Four skills** in `.claude/skills/` (both Claude Code and OpenCode read that folder). Together they are the process from idea to polished game:
 
@@ -71,6 +92,7 @@ Tools/audio/<Name>/           sound scripts
 Tools/textures/<Name>/        texture scripts (run in Blender for numpy)
 Tools/unity/                  check.sh and capture.sh
 docs/prototypes/              one spec and one plan per game or feature (start from TEMPLATE.md)
+docs/images/                  the renders shown in this README
 docs/research/                background and sourced research notes
 .claude/skills/               the skills
 AGENTS.md                     rules for coding agents (source of truth)
