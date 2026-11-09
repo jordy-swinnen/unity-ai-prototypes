@@ -105,7 +105,24 @@ run_editmode() {
     echo "tests: 0/0 (no EditMode tests found)"
     return 0
   fi
-  unity cmd test run --mode EditMode --timeout 300 --result-only --no-banner 2>/dev/null | summarise
+  # Right after new test files compile, the first run can come back with zero results.
+  # If Unity listed tests but the run found none, wait and run again (up to 3 tries).
+  local out total
+  for _ in 1 2 3; do
+    out="$(unity cmd test run --mode EditMode --timeout 300 --result-only --no-banner 2>/dev/null)"
+    total="$(printf '%s' "$out" | python3 -I -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    print((d.get("Summary") or d.get("summary") or {}).get("Total", 0))
+except Exception:
+    print(0)')"
+    if [ "$total" != "0" ] || [ "$count" = "0" ]; then break; fi
+    sleep 6
+    count="$(count_tests EditMode)"
+    [ "$count" = "0" ] && break
+  done
+  printf '%s' "$out" | summarise
 }
 
 run_playmode() {

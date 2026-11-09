@@ -16,3 +16,5 @@ Each of these happened while building the first prototype in this repository.
 12. **Assets and models.** Blender exports are checked on the file (sizes, pivot, colour) and again after Unity imports them (bounds, material count).
 13. **Don't leave test scenes behind.** A test that builds a scene to a temp path must delete it in its teardown.
 14. **The Editor must be open.** If `unity status` doesn't show a ready Editor for this project, the loop can't run.
+15. **The first test run after new test files compile can report zero results**, even though `test list` shows the tests. Wait a few seconds and run again. `Tools/unity/check.sh` retries.
+16. **A rules test that plays for many seconds can end the game.** With the win score reached, the paddles freeze. Raise the win score in the test, or set up the state directly.
