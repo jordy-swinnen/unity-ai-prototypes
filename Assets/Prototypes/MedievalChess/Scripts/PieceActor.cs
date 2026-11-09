@@ -1,0 +1,77 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Prototypes.MedievalChess
+{
+    /// <summary>
+    /// One piece in the scene. It finds the model's named parts, sets the side colour, and applies a
+    /// pose from a plan: a root move, a heading, a tilt, a size and a rotation for each part.
+    /// It holds no rules.
+    /// </summary>
+    public sealed class PieceActor : MonoBehaviour
+    {
+        struct PartRest
+        {
+            public Transform Transform;
+            public Quaternion Rotation;
+        }
+
+        readonly Dictionary<string, PartRest> parts = new Dictionary<string, PartRest>();
+        Vector3 startPosition;
+        float startYaw;
+
+        public PieceType Type { get; private set; }
+        public Vector3 StartPosition => startPosition;
+
+        /// <summary>
+        /// Adds the actor to an instance of a piece model and sets its materials by the model's material names:
+        /// "body" gets the side's material and "iron" gets the iron material.
+        /// </summary>
+        public static PieceActor Bind(GameObject instance, PieceType type, Material body, Material iron)
+        {
+            var actor = instance.AddComponent<PieceActor>();
+            actor.Type = type;
+            foreach (var t in instance.GetComponentsInChildren<Transform>(true))
+                actor.parts[t.name] = new PartRest { Transform = t, Rotation = t.localRotation };
+
+            foreach (var r in instance.GetComponentsInChildren<Renderer>(true))
+            {
+                var slots = r.sharedMaterials;
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    string name = slots[i] != null ? slots[i].name : string.Empty;
+                    if (name.StartsWith("body")) slots[i] = body;
+                    else if (name.StartsWith("iron")) slots[i] = iron;
+                }
+                r.sharedMaterials = slots;
+            }
+            return actor;
+        }
+
+        public bool HasPart(string name) => parts.ContainsKey(name);
+
+        public Transform Part(string name) => parts.TryGetValue(name, out var p) ? p.Transform : null;
+
+        public void Place(Vector3 position, float yawDegrees)
+        {
+            startPosition = position;
+            startYaw = yawDegrees;
+            Apply(new ActorFrame { Yaw = yawDegrees });
+        }
+
+        public void Apply(ActorFrame frame)
+        {
+            gameObject.SetActive(frame.Visible);
+            transform.position = startPosition + frame.RootOffset;
+            transform.rotation = Quaternion.Euler(0f, frame.Yaw, 0f) * Quaternion.Euler(frame.Pitch, 0f, 0f);
+            transform.localScale = Vector3.one * Mathf.Max(frame.Scale, 0.0001f);
+
+            foreach (var kv in parts)
+            {
+                if (kv.Value.Transform == transform) continue;
+                var euler = frame.PartEuler.TryGetValue(kv.Key, out var e) ? e : Vector3.zero;
+                kv.Value.Transform.localRotation = kv.Value.Rotation * Quaternion.Euler(euler);
+            }
+        }
+    }
+}

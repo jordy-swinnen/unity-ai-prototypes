@@ -25,3 +25,8 @@ Each of these happened while building the first prototype in this repository.
 21. **Edit Mode captures can show garbled or missing UI text** (the dynamic font atlas goes stale after a rebuild or a test run). Judge UI on `capture.sh play`, which enters Play Mode.
 22. **To get a still frame of a moving moment**, enter Play Mode, set up the state with `unity cmd script eval`, then set `autoStep` off and `Time.timeScale = 0` before `capture.sh screen`. Particles and trails freeze in place.
 23. **A test that changes a settings asset must restore it** (use a teardown). A ScriptableObject changed in a PlayMode test can stay changed in the Editor.
+24. **`Object.FindFirstObjectByType` is deprecated in this Unity version** (it warns). Use `FindAnyObjectByType` in new code.
+25. **Articulated models through Blender and glTFast:** the node hierarchy and names survive, and an empty object with an origin at a joint keeps that pivot. An object scale in Blender becomes a node scale, so apply it to the mesh. **Blender +x arrives as Unity -x**, so write a piece's right side on Blender -x. A root empty merges into the asset's own root node. The piece script in `Tools/blender/MedievalChess/make_pieces.py` shows the pattern.
+26. **Resolve a repository path in a Blender script with `parents[3]`** from `Tools/blender/<Name>/script.py`. `parents[2]` silently writes into `Tools/Assets/`.
+27. **A camera that moves without re-aiming loses the subject.** Push and lower the camera, then `LookRotation` at the focus point.
+28. **For a still frame of an animation, make the animation a pure function of time** and call `ShowAt(t)` from `unity cmd script eval` in Play Mode, then capture. It does not depend on frame timing or on the Editor being in front.

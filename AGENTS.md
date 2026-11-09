@@ -31,7 +31,7 @@ Many people add prototypes here. Each prototype is self-contained, named in Pasc
   - `Audio/`: sounds written by scripts.
   - `Scenes/`: scenes written by the build command. Never edit by hand.
   - `Settings/`: ScriptableObjects with tuning values.
-- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
+- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Today it holds `Feel/ShakeState` and `Feel/TimeFeel` (camera shake and hit-stop), used by Neon Pong and Medieval Chess. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
 - `Art/source/<Name>/`: `.blend` source files (Git LFS). Unity doesn't import these.
 - `Tools/blender/<Name>/`: Python scripts for Blender, run headless with `blender -b -P <script>`. They write into `Assets/Prototypes/<Name>/Art/Exports/`.
 - `Tools/audio/<Name>/`: Python scripts that write sounds.

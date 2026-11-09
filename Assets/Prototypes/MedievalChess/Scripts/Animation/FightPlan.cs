@@ -1,0 +1,51 @@
+using UnityEngine;
+
+namespace Prototypes.MedievalChess
+{
+    /// <summary>The pose of both pieces and the camera at one moment of a fight.</summary>
+    public sealed class FightFrame
+    {
+        public readonly ActorFrame Attacker = new ActorFrame();
+        public readonly ActorFrame Victim = new ActorFrame();
+        /// <summary>0 to 1: how far the camera has pushed in toward the fight.</summary>
+        public float CameraPush;
+    }
+
+    /// <summary>
+    /// One piece killing another, as a plan. The poses are a pure function of time (<see cref="Evaluate"/>),
+    /// so a test or a capture can look at any moment exactly. The plan never touches the game rules:
+    /// the capture has already happened, and this only shows it.
+    /// </summary>
+    public sealed class FightPlan
+    {
+        public PieceType AttackerType;
+        public PieceType VictimType;
+        /// <summary>World positions the plan was made for.</summary>
+        public Vector3 AttackerStart;
+        public Vector3 VictimPosition;
+
+        public ActorPlan Attacker;
+        public ActorPlan Victim;
+        public Channel Camera = new Channel();
+
+        /// <summary>When the attacker has reached the victim and starts to strike.</summary>
+        public float ApproachEnd;
+        /// <summary>The moment the blow lands.</summary>
+        public float BlowTime;
+        /// <summary>When the victim has collapsed and disappears.</summary>
+        public float CollapseEnd;
+        public float Duration;
+
+        public float CameraPush(float t) => Camera.EvaluateScalar(Clamp(t));
+
+        public void Evaluate(float t, FightFrame frame)
+        {
+            t = Clamp(t);
+            Attacker.Evaluate(t, frame.Attacker);
+            Victim.Evaluate(t, frame.Victim);
+            frame.CameraPush = Camera.EvaluateScalar(t);
+        }
+
+        float Clamp(float t) => Mathf.Clamp(t, 0f, Duration);
+    }
+}

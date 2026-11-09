@@ -108,17 +108,26 @@ Test assemblies `MedievalChess.Tests.EditMode` and `MedievalChess.Tests.PlayMode
 Each stage ends compiled, tested and committed, then stops for your review. All commits go on `feat/chess`, and I push at each stop.
 
 ### Stage 1: the duel slice (one piece kills another)
-- [ ] Run `Tools/unity/check.sh all` and note the starting result (Neon Pong's tests).
-- [ ] If decision 1 is approved: move `ShakeState` and `TimeFeel` to `Assets/Shared/` with their tests, make Neon Pong reference it, and check that Neon Pong's tests and look are unchanged. Commit: `refactor(shared): move shake and hit-stop out of Neon Pong`.
-- [ ] Create the folders and four assembly definitions.
-- [ ] Write `make_pieces.py` (plain articulated shapes for all six pieces), run it headless, and check names, pivots, sizes and the x mirror. Check the imported parts in Unity (a part meant for the right side is on the right).
-- [ ] Write the EditMode tests first: `Evaluate(0)` is the rest pose, `Evaluate(end)` is the final pose, poses are repeatable and never NaN, the blow and collapse moments are in order and inside the plan, the attacker ends on the victim's square, the victim ends removed, the speed settings scale the times, hit-stop stretches only the blow.
-- [ ] Write `PartPose`, `Track`, `Easing`, `FightPlan`, the pawn and rook attack routines, the collapse, `Timeline` and `PartAnimator`. Run `check.sh editmode`.
-- [ ] `Build Duel Scene`: a bare board with two pieces (rook and pawn, with a button to swap who kills whom), a camera and a key light, and a Play button. Build it twice and compare content.
-- [ ] PlayMode tests: the duel plays, the victim ends removed and the attacker ends on its square, and the same state results at Quick and Off.
-- [ ] Deliberate-bug check (swap the blow time and the collapse time), and see a test fail.
-- [ ] Freeze the fight at six moments (start, approach, wind-up, blow, mid-collapse, end) with the scenario approach from Neon Pong, and read the renders. Judge: is it clearly one piece killing the other?
-- [ ] Commit: `feat(medieval-chess): add the duel slice with pawn and rook fights`. Stop for review with the six frames.
+Done. Decision 1 was approved (move to Shared).
+- [x] Run `Tools/unity/check.sh all` and note the starting result: compile ok, 76/76 EditMode and 12/12 PlayMode (Neon Pong).
+- [x] Move `ShakeState` and `TimeFeel` to `Assets/Shared/Feel/` with their tests (`Shared.Tests.EditMode`), and make Neon Pong reference `Shared`. Neon Pong's counts stayed 76 and 12 in total, and its render of a paddle hit looked the same before and after. Commit `3556714`.
+- [x] Create the folders and four assembly definitions.
+- [x] Write `make_pieces.py` (plain articulated shapes for all six pieces) and run it. The script refuses to export if a part is missing, a height is off by more than 0.06, a base is wider than 0.9, or a part has a scale that is not 1. It caught three wrong heights on its first run. Checked in Unity by `PieceModelTests`: part names, weapon under the right arm and shield under the left, the right arm on +x, joint pivots, scale 1, heights, triangle budget (180 to 774 per piece), material names `body` and `iron`.
+- [x] Write the EditMode tests first (fight plan, timeline, models), then `PartPose`-style channels, `ActorPlan`, `FightPlan`, `FightLibrary` (pawn and rook), `FightTimeline` and `PieceActor`. `check.sh editmode`: 220/220 (144 new).
+- [x] `Build Duel Scene` (a strip of board with two pieces' models, camera, key light, label) and `DuelController`. Built twice gives the same content, and a test checks the committed scene matches a fresh build.
+- [x] PlayMode tests: the duel plays to the right end state at Full, Quick and Off, arms return to rest, the camera pushes in and settles back exactly, strength 0 never moves the camera, replays end the same. 23/23 including Neon Pong's 12.
+- [x] Deliberate-bug check: made the victim start falling before the blow, 8 tests failed, restored and 220/220 pass.
+- [x] Frozen frames of both fights (start, approach, wind-up, blow, collapse, end) read on renders. Both read as one piece killing the other.
+- [x] Commit: `feat(medieval-chess): add the duel slice with pawn and rook fights`.
+
+What differed from the plan, and why:
+- **Rook slam angle:** the first version slammed straight down beside the rook, so the fists never touched the pawn. The fists now come down and forward (-80 degrees), and the stand-off is 0.8 m. Found on the blow frame.
+- **Camera push:** moving the camera toward the duel without re-aiming it cut the rook's head off. The camera now keeps looking at the focus point while it pushes and lowers.
+- **Hit-stop in Quick:** Quick has no hit-stop, as well as no camera cut and no shake.
+- **Step owns the camera:** `DuelController.Step` moves the fight and the camera, so tests and captures drive it by hand with `Step` and `ShowAt`.
+- **Speed lives on the controller:** the F, Q and O keys change the controller's `speed`, not the settings asset, so playing never edits an asset.
+- **No `.blend` file:** the script is the source, so there is no `Art/source/MedievalChess/` file this time.
+- **Colours:** bone looks tan and the red looks bright under the warm key light. The look stage will tune this.
 
 ### Stage 2: all six fights and the moves
 - [ ] Tests first: each of the six attacker types has a routine, with its own blow time and its own pose at the blow, and every routine ends in the right state.
