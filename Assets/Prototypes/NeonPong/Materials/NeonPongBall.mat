@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NeonPong Table Grid
+  m_Name: NeonPongBall
   m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -109,7 +109,7 @@ Material:
     - _ReceiveShadows: 1
     - _ScreenSpaceReflections: 1
     - _ScreenSpaceReflectionsContributeTransparent: 1
-    - _Smoothness: 0.1
+    - _Smoothness: 0.3
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -119,13 +119,13 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.07058824, g: 0.1882353, b: 0.3529412, a: 1}
-    - _Color: {r: 0.07058821, g: 0.18823525, b: 0.35294116, a: 1}
-    - _EmissionColor: {r: 0.031260367, g: 0.11104209, b: 0.22347692, a: 0.4}
+    - _BaseColor: {r: 1, g: 0.8862745, b: 0.47843137, a: 1}
+    - _Color: {r: 1, g: 0.8862745, b: 0.47843128, a: 1}
+    - _EmissionColor: {r: 1.2381744, g: 1.0933077, b: 0.59382635, a: 1.6}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &3894075393615056030
+--- !u!114 &7254021719609986980
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
