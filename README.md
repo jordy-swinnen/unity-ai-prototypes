@@ -69,9 +69,16 @@ With the Unity Editor open on the project:
 ```bash
 Tools/unity/check.sh compile     # compile scripts
 Tools/unity/check.sh all         # compile, then EditMode and PlayMode tests
-Tools/unity/capture.sh camera /tmp/shot.png   # render the main camera
+Tools/unity/capture.sh play /tmp/shot.png     # enter Play Mode and capture the Game window (glow and UI included)
 ```
 `check.sh` prints how many tests passed and exits non-zero on a compile error or a failing test. The raw `unity` commands behind it are in `AGENTS.md` and `.claude/skills/game-build/references/unity-loop.md`. With the Editor closed, `unity test` starts its own Editor in batch mode (not run in this repository yet).
+
+### Tests on pull requests
+`.github/workflows/tests.yml` runs the EditMode and PlayMode tests on every pull request, in Unity's official editor image through [GameCI](https://game.ci). It only runs when two things are set up in your own repository, because Unity needs a licence:
+1. GitHub Actions is turned on (Settings > Actions).
+2. Three repository secrets exist: `UNITY_LICENSE`, `UNITY_EMAIL` and `UNITY_PASSWORD`. [GameCI explains how to get them](https://game.ci/docs/github/activation).
+
+Without the licence secret the job fails with a message instead of passing without testing anything. Pull requests from forks get no secrets, so the tests are skipped there with a warning.
 
 ## Working with coding agents
 - `AGENTS.md` holds all the rules. Claude Code reads it through `CLAUDE.md`, which contains only `@AGENTS.md`. OpenCode reads `AGENTS.md` directly. Don't put rules in `CLAUDE.md`.

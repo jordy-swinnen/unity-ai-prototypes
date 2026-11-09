@@ -70,4 +70,5 @@ The Unity Editor must be open on this project. `unity status` should show `ready
 - The raw `unity` commands behind these, and the traps found while building the first prototype, are in `.claude/skills/game-build/references/unity-loop.md` and `pitfalls.md`.
 - Packages: `com.unity.cloud.gltfast` 6.20.0 imports the `.glb` files. Unity 6 can't import `.glb` without it.
 - Tests with the Editor closed: `unity test . --mode EditMode --output Logs/test-results.xml`. With the Editor open it refuses and exits 6. Not run in this repository.
+- Pull requests: `.github/workflows/tests.yml` runs both test modes in CI. It needs Actions turned on and the `UNITY_LICENSE`, `UNITY_EMAIL` and `UNITY_PASSWORD` secrets (see the README). Don't turn Actions on or add secrets without asking.
 - The `unity-cli` skill is installed in `.claude/skills/unity-cli/` and is read by both Claude Code and OpenCode.
