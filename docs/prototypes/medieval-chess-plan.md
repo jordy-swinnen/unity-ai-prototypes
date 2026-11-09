@@ -153,10 +153,21 @@ What differed from the plan, and why:
 - **Footfall times exist but are silent.** The thuds and the dust come in stage 6.
 
 ### Stage 3: the chess rules
-- [ ] Tests first: perft for the start position (depths 1 to 4), Kiwipete (1 to 3), positions 3 (1 to 4), 4, 5 and 6 (1 to 3), using the numbers in the spec. FEN read and write. Castling, en passant and promotion special cases. Check, checkmate, stalemate, threefold repetition, fifty-move rule, insufficient material. Make and unmake restore the position.
-- [ ] Write `Position`, `MoveGenerator`, `Fen` and `ChessGame`. Run `check.sh editmode` and note how long the tests take.
-- [ ] Play a game from a list of known moves to a known checkmate, and one to a known stalemate.
-- [ ] Deliberate-bug check (break en passant or castling through check), and commit: `feat(medieval-chess): add the chess rules with perft tests`. Stop for review.
+Done.
+- [x] Tests first: perft for the start position (depths 1 to 5), Kiwipete (1 to 3), position 3 (1 to 4), position 4 and its mirror, 5 and 6 (1 to 3), with the numbers from the Chess Programming Wiki. FEN read and write, with bad FENs refused. Castling (each way, through, out of and into check, blocked, rights lost by a king move, a rook move, a rook taken), en passant (one move only, both colours, the pinned case, answering a check), promotion (four pieces, with capture), pins, checks, kings side by side, pawn pushes and captures, move flags. Make and unmake restore the position and the hash over long random games. Mate, stalemate, threefold repetition, the fifty-move rule, insufficient material (ten cases), resignation, illegal moves refused.
+- [x] Wrote `Position`, `MoveGenerator`, `Fen`, `Perft`, `ChessGame` and the helpers (`Pieces`, `Squares`, `Move`, tables, hash keys). Every published perft number matched on the first run of the real tests.
+- [x] `check.sh editmode`: 509 tests pass. Speed: perft(4) of the start in 72 ms, Kiwipete perft(3) in 33 ms, perft(5) of the start (4,865,609 nodes) in 1.7 s, about 2.8 million moves a second. That is plenty for the search in stage 4.
+- [x] Played known games: Fool's mate (black wins), the Scholar's mate (white wins), Sam Loyd's ten-move stalemate, a knight shuffle to threefold repetition, and fifty-move and insufficient-material endings from FENs.
+- [x] Deliberate-bug check: made a captured rook keep its castling right, and 1 test failed. The perft numbers did **not** catch it (they do not reach a rook captured on its corner at those depths), which is why the direct castling-rights test exists.
+- [x] Commit: `feat(medieval-chess): add the chess rules with perft tests`.
+
+What differed from the plan, and why:
+- **Perft does not catch everything.** The deliberate bug passed every perft count. The special-rule tests are not optional.
+- **FENs are validated.** A position where the side not to move is in check is refused. Three of my own test positions broke that rule and had to be fixed, so the check works.
+- **Perft depth 5 of the start position is included** (1.7 s). The plan listed depths 1 to 4.
+- **A finished game has no legal moves** (`LegalMoves` is empty after any ending, including a draw), so the controller cannot offer a move after the end.
+- **Repetition keys ignore an en passant square nobody can use,** as the FIDE rule says, so a position is the same only if the same moves exist.
+- **Not done here:** turning a rules move into a `MoveDescription` for the director. That is stage 5.
 
 ### Stage 4: the computer and its three difficulties
 - [ ] Tests first: only legal moves, mate in one found at Knight and Marshal, a free queen is not left hanging at Knight and Marshal, Squire sometimes plays worse than its best, a fixed seed gives the same move, the time cap holds within a margin, a cancelled search stops, and the strength order over seeded games (Squire against Knight, Knight against Marshal, with depth limits so the test stays fast).

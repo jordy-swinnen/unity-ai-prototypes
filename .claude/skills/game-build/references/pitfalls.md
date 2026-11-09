@@ -31,3 +31,5 @@ Each of these happened while building the first prototype in this repository.
 27. **A camera that moves without re-aiming loses the subject.** Push and lower the camera, then `LookRotation` at the focus point.
 28. **For a still frame of an animation, make the animation a pure function of time** and call `ShowAt(t)` from `unity cmd script eval` in Play Mode, then capture. It does not depend on frame timing or on the Editor being in front.
 29. **Don't name a type `Key` in code that uses the Input System.** `UnityEngine.InputSystem.Key` clashes with it and gives confusing errors. Use a name like `ChannelKey`.
+30. **A rules engine can pass every perft number and still be wrong.** Perft at shallow depth did not reach a rook captured on its corner. Write a direct test for each special rule, and break a rule on purpose to see a test fail.
+31. **Test positions must be legal.** The side not to move cannot be in check, so a position with a rook giving check to the wrong king is refused by the FEN reader. Put the kings on squares nothing attacks.
