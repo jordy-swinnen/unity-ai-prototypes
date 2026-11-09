@@ -38,7 +38,6 @@ Many people add prototypes here. Each prototype is self-contained, named in Pasc
 - `Tools/unity/`: `check.sh` (compile and tests) and `capture.sh` (renders).
 - `docs/prototypes/<kebab-name>.md`: one spec per game or feature, from `TEMPLATE.md`. Read the spec before writing code.
 - `docs/research/`: background and sourced research notes.
-- Legacy placeholder: `Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`. Remove them once a prototype has real assets.
 
 ## Rules
 - Logic lives in C#. Tuning values live in ScriptableObjects.

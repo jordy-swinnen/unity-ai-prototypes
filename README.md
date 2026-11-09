@@ -31,7 +31,7 @@ To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and pr
 2. Open the folder in Unity Hub with the pinned Unity version (see `AGENTS.md`). Install Blender and Git LFS (see below).
 3. Edit `AGENTS.md`: the pinned versions, and your own rules. Edit this README. Change the license if you want a different one.
 4. Ask your agent to use `game-spec` for your idea, then `game-plan`, `game-build` and `game-polish`. Each ends with a stop for your review. For example: "Use game-spec to write a spec for a small 3D arcade game where..."
-5. Delete what you don't need, such as the placeholder crate (`Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`).
+5. Delete what you don't need, such as the two example prototypes under `Assets/Prototypes/` and their specs, plans and tools.
 
 ## What you need
 - Unity **6000.6.8f1** through Unity Hub. This is not an LTS release. It's the version Unity Hub recommended when the project was created. You must be signed in to Unity Hub to add packages.
