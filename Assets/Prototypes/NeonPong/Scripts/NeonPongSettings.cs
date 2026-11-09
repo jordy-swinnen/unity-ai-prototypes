@@ -33,5 +33,29 @@ namespace Prototypes.NeonPong
         public int winScore = 5;
         [Tooltip("The largest time slice the rules take in one go. Longer steps are split.")]
         public float maxSubstep = 1f / 120f;
+
+        [Header("Palette (from the spec)")]
+        public Color baseColor = new Color32(0x05, 0x06, 0x0D, 0xFF);
+        public Color gridColor = new Color32(0x12, 0x30, 0x5A, 0xFF);
+        public Color player1Color = new Color32(0x22, 0xD3, 0xEE, 0xFF);
+        public Color player2Color = new Color32(0xFF, 0x2E, 0x93, 0xFF);
+        public Color ballColor = new Color32(0xFF, 0xE2, 0x7A, 0xFF);
+        public Color textColor = new Color32(0xE6, 0xF0, 0xFF, 0xFF);
+
+        [Header("Look: starting values, tuned on renders in stage 3")]
+        [Tooltip("Emission is the colour times this number. Brightest first: ball, paddles, rails, grid.")]
+        public float ballEmission = 4f;
+        public float paddleEmission = 2.5f;
+        public float railEmission = 1f;
+        public float gridEmission = 0.6f;
+        public float bloomThreshold = 0.9f;
+        public float bloomIntensity = 1.2f;
+        [Range(0f, 1f)] public float bloomScatter = 0.7f;
+        [Range(0f, 1f)] public float vignetteIntensity = 0.25f;
+        [Tooltip("Degrees the camera is pitched down. 90 looks straight down.")]
+        public float cameraPitch = 62f;
+        public float cameraFieldOfView = 35f;
+        [Tooltip("Metres from the table centre to the camera.")]
+        public float cameraDistance = 19f;
     }
 }

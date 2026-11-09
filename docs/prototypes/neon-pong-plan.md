@@ -1,6 +1,6 @@
 # Neon Pong: plan and tasks
 
-Plan for `docs/prototypes/neon-pong.md`. Status: stage 1 done
+Plan for `docs/prototypes/neon-pong.md`. Status: stage 2 done
 
 ## Decisions needed first
 1. **No new packages.** Everything fits the packages the project has: URP 17.6.0 (Bloom, Vignette, Tonemapping, Volume), Input System 1.20.1, glTFast 6.20.0 (imports the `.glb` files), uGUI 2.6.0 (score text). Camera shake, hit-stop and the trail are small scripts of our own, not Cinemachine (see `game-polish/references/urp-effects.md`). Nothing to approve here.
@@ -80,16 +80,16 @@ Each stage ends with a stop for review.
 - [x] Commit: `feat(neon-pong): add Blender assets and rules with EditMode tests`.
 
 ### Stage 2: playable
-- [ ] Write the builder tests first (every part present, models where the rules expect them, building twice gives the same content, Volume has Bloom with intensity above 0 and Tonemapping Neutral, camera has post-processing on, Volume Mask includes the Volume layer).
-- [ ] `NeonPongGame`, `NeonPongView`, input, score text, `NeonPongSceneBuilder`. Build the scene twice and compare content.
-- [ ] PlayMode tests: paddles and ball follow the state, input moves the paddles, a point updates the score on screen, a win shows the winner. Run `Tools/unity/check.sh all`.
-- [ ] Deliberate-bug check on the view.
-- [ ] Capture the scene (`Tools/unity/capture.sh camera`) and check it against the layout table. Bloom and emission are rough here, and that is fine.
-- [ ] Commit: `feat(neon-pong): add playable scene and PlayMode tests`.
+- [x] Write the builder tests first (every part present, models where the rules expect them, building twice gives the same content, Volume has Bloom with intensity above 0 and Tonemapping Neutral, camera has post-processing on, Volume Mask includes the Volume layer). Also a keyboard mapping test with a simulated keyboard.
+- [x] `NeonPongGame`, `NeonPongView`, input, score text, `NeonPongSceneBuilder`. Build the scene twice and compare content (test passes). The scene steps from `Update` with a clamped frame time, not `FixedUpdate`: the rules split long steps themselves, so no `TimeManager` change is needed.
+- [x] PlayMode tests: paddles and ball follow the state, input moves the paddles, a point updates the score on screen, a win shows the winner. `Tools/unity/check.sh all`: 46/46 EditMode and 6/6 PlayMode. `Space` is tested in PlayMode with a test keyboard, because `wasPressedThisFrame` does not update in EditMode.
+- [x] Deliberate-bug check on the view: flipped a paddle's z, 2 PlayMode tests failed, restored.
+- [x] Capture the scene and check it against the layout table. `capture.sh camera` has no post-processing, so I also took a `screen` capture: it shows bloom and the vignette. Layout matches: table, two rails, two paddles, centre ball, scores above the table. Rough points left for stage 3: the ball reads white, not yellow, and the rails are bright.
+- [x] Commit: `feat(neon-pong): add playable scene and PlayMode tests`.
 
 ### Stage 3: look and feel (game-polish)
 Each step has a before and after capture, tests for its logic, a keep or cut decision and its own commit. The order follows `game-polish/references/polish-order.md`.
-- [ ] Baseline capture.
+- [ ] Baseline capture with `capture.sh screen` (not `camera`).
 - [ ] Materials and emission from the palette (ball brightest, then paddles, then rails, then grid).
 - [ ] Volume: Bloom, Vignette, Tonemapping Neutral. Tune intensity and threshold on renders. Settle the HDR question on a render.
 - [ ] Camera pitch, field of view and distance, judged on a render for the far side.
