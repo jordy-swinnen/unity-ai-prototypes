@@ -150,7 +150,22 @@ except Exception:
     echo "tests: PlayMode run did not finish (last status: ${status:-none})"
     return 1
   fi
-  unity cmd test status --result-only --no-banner 2>/dev/null | summarise
+  local out total
+  out="$(unity cmd test status --result-only --no-banner 2>/dev/null)"
+  total="$(printf '%s' "$out" | python3 -I -c '
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    s = d.get("Summary") or d.get("summary") or {}
+    print(s.get("Total", s.get("total", -1)))
+except Exception:
+    print(-1)')"
+  # A leftover "completed" status from an earlier run would have a different test count.
+  if [ "$count" != "-1" ] && [ "$total" != "$count" ]; then
+    echo "tests: the PlayMode result has $total tests but Unity lists $count. It may be an old result, so run again."
+    return 1
+  fi
+  printf '%s' "$out" | summarise
 }
 
 mode="${1:-}"

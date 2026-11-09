@@ -29,6 +29,8 @@ namespace Prototypes.NeonPong.Editor
         [MenuItem("Prototypes/NeonPong/Build Scene")]
         public static void BuildDefault()
         {
+            // Build replaces the open scene, so offer to save any unsaved changes first.
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             Build(ScenePath);
         }
 
@@ -174,32 +176,27 @@ namespace Prototypes.NeonPong.Editor
                 AssetDatabase.CreateAsset(profile, ProfilePath);
             }
 
-            // Rebuild the overrides so the profile always matches the settings.
-            foreach (var old in new List<VolumeComponent>(profile.components))
-            {
-                AssetDatabase.RemoveObjectFromAsset(old);
-                UnityEngine.Object.DestroyImmediate(old, true);
-            }
-            profile.components.Clear();
-
-            var bloom = Add<Bloom>(profile);
+            // Reuse the overrides that are already in the profile, so a rebuild keeps the same
+            // file content (new objects get new IDs, and the asset would change on every build).
+            var bloom = GetOrAdd<Bloom>(profile);
             bloom.threshold.Override(s.bloomThreshold);
             bloom.intensity.Override(s.bloomIntensity);
             bloom.scatter.Override(s.bloomScatter);
 
-            var vignette = Add<Vignette>(profile);
+            var vignette = GetOrAdd<Vignette>(profile);
             vignette.intensity.Override(s.vignetteIntensity);
-            vignette.smoothness.Override(0.4f);
+            vignette.smoothness.Override(s.vignetteSmoothness);
 
-            var tone = Add<Tonemapping>(profile);
+            var tone = GetOrAdd<Tonemapping>(profile);
             tone.mode.Override(TonemappingMode.Neutral);
 
             EditorUtility.SetDirty(profile);
             return profile;
         }
 
-        static T Add<T>(VolumeProfile profile) where T : VolumeComponent
+        static T GetOrAdd<T>(VolumeProfile profile) where T : VolumeComponent
         {
+            if (profile.TryGet(out T existing)) return existing;
             var component = profile.Add<T>(false);
             component.name = typeof(T).Name;
             AssetDatabase.AddObjectToAsset(component, profile);

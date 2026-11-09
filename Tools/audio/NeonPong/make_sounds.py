@@ -8,7 +8,6 @@ triangle tones with a fast attack, an exponential decay and a short fade to zero
 The script checks its own output. Whether the sounds sound good is a person's call.
 """
 import math
-import random
 import struct
 import sys
 import wave
@@ -121,7 +120,6 @@ def check(path):
 
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    random.seed(1)
     failed = False
     for name, make in SOUNDS.items():
         path = OUT_DIR / f"{name}.wav"

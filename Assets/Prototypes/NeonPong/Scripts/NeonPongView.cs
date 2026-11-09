@@ -59,6 +59,9 @@ namespace Prototypes.NeonPong
         Vector3 ballScale = Vector3.one;
         Vector3 leftPaddleScale = Vector3.one, rightPaddleScale = Vector3.one;
         Vector3 scoreScale = Vector3.one;
+        int shownLeft = -1, shownRight = -1;
+        bool shownOver;
+        Side shownWinner;
 
         void Awake()
         {
@@ -124,23 +127,30 @@ namespace Prototypes.NeonPong
             {
                 trail.emitting = state.Phase == Phase.Playing;
                 trail.time = Mathf.Lerp(s.trailTimeMin, s.trailTimeMax, fast);
-                trail.widthMultiplier = s.trailWidth * Mathf.Lerp(0.6f, 1f, fast);
+                trail.widthMultiplier = s.trailWidth * Mathf.Lerp(s.trailWidthAtBaseSpeed, 1f, fast);
             }
             if (ballLight != null)
             {
-                ballLight.intensity = s.lightIntensity * Mathf.Lerp(0.7f, 1.2f, fast);
+                ballLight.intensity = s.lightIntensity * Mathf.Lerp(s.lightAtBaseSpeed, s.lightAtMaxSpeed, fast);
                 ballLight.range = s.lightRange;
             }
 
-            scoreLeft.text = state.GetScore(Side.Left).ToString();
-            scoreRight.text = state.GetScore(Side.Right).ToString();
+            // Only build new strings when something changed.
+            int left = state.GetScore(Side.Left), right = state.GetScore(Side.Right);
+            if (left != shownLeft) { shownLeft = left; scoreLeft.text = left.ToString(); }
+            if (right != shownRight) { shownRight = right; scoreRight.text = right.ToString(); }
             scoreLeft.transform.localScale = scoreScale * (1f + feel.ScorePop[(int)Side.Left] * s.scorePop);
             scoreRight.transform.localScale = scoreScale * (1f + feel.ScorePop[(int)Side.Right] * s.scorePop);
 
             bool over = state.Phase == Phase.GameOver;
-            message.text = over
-                ? $"PLAYER {(state.Winner == Side.Left ? 1 : 2)} WINS\nPRESS SPACE"
-                : string.Empty;
+            if (over != shownOver || state.Winner != shownWinner)
+            {
+                shownOver = over;
+                shownWinner = state.Winner;
+                message.text = over
+                    ? $"PLAYER {(state.Winner == Side.Left ? 1 : 2)} WINS\nPRESS SPACE"
+                    : string.Empty;
+            }
             // The message fades in with the win. With effects off it is simply there.
             var messageColor = s.textColor;
             messageColor.a = k > 0f ? Mathf.Clamp01(feel.WinProgress * 3f) : 1f;

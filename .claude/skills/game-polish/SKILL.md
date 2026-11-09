@@ -14,7 +14,7 @@ Make a working game look and feel the way its spec says. Polish is not decoratio
 - Read `Tools/unity/capture.sh` usage, and `game-build/references/pitfalls.md`.
 
 ## The loop for one step
-1. **Baseline capture.** Before the first change, save a render with `capture.sh screen` (the `camera` mode has no post-processing, so it hides Bloom and Vignette). Look at it and write down what is off against the look brief.
+1. **Baseline capture.** Before the first change, save a render with `capture.sh play` (or `screen` for a scene with no UI text). The `camera` mode has no post-processing, so it hides Bloom and Vignette. Look at it and write down what is off against the look brief.
 2. **Pick one step** from `references/polish-order.md`: one visual pillar or one feel-table row.
 3. **Make the change** through code, settings and the scene builder. Never hand-edit scenes or models. Put every strength, duration, colour and speed on the settings asset.
 4. **Add tests for the logic** that tests can reach: a shake decays to zero, a hit-stop ends, an effect triggers on the right event, a setting of zero turns it off. Run `Tools/unity/check.sh all`.

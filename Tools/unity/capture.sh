@@ -27,6 +27,8 @@ if [ -z "$mode" ] || [ -z "$out" ]; then
   exit 2
 fi
 mkdir -p "$(dirname "$out")"
+# An old file at the same path would make a failed capture look like a success.
+rm -f "$out"
 
 grab() {
   unity cmd capture game_view "$@" --output-path "$out" --timeout 90 --result-only --no-banner 2>&1 \

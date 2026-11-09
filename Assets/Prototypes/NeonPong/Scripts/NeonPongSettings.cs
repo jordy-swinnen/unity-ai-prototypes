@@ -52,6 +52,7 @@ namespace Prototypes.NeonPong
         public float bloomIntensity = 2.4f;
         [Range(0f, 1f)] public float bloomScatter = 0.7f;
         [Range(0f, 1f)] public float vignetteIntensity = 0.25f;
+        [Range(0.01f, 1f)] public float vignetteSmoothness = 0.4f;
         [Tooltip("Degrees the camera is pitched down. 90 looks straight down.")]
         public float cameraPitch = 62f;
         public float cameraFieldOfView = 35f;
@@ -70,6 +71,14 @@ namespace Prototypes.NeonPong
         public float paddleShake = 0.12f;
         public float scoreShake = 0.3f;
         public float shakeDuration = 0.3f;
+        [Tooltip("Shake durations for a wall hit and a point, in seconds.")]
+        public float wallShakeDuration = 0.18f;
+        public float scoreShakeDuration = 0.39f;
+        [Tooltip("How fast the shake swings, in radians per second.")]
+        public float shakeFrequency = 90f;
+        [Tooltip("A paddle hit shakes this many times the paddle shake at base speed, and at max speed.")]
+        public float shakeAtBaseSpeed = 0.6f;
+        public float shakeAtMaxSpeed = 1.4f;
         [Tooltip("Seconds the rules pause on a hit or a point. The camera and effects keep running.")]
         public float hitStopPaddle = 0.04f;
         public float hitStopScore = 0.08f;
@@ -80,6 +89,8 @@ namespace Prototypes.NeonPong
         public float ballPop = 0.35f;
         public float popDecay = 0.15f;
         public float scorePop = 0.5f;
+        [Tooltip("The score number settles back this many seconds after a pop.")]
+        public float scorePopDecay = 0.25f;
         [Tooltip("A paddle stretches by this fraction at full speed, and leans by this many degrees.")]
         public float paddleStretch = 0.1f;
         public float paddleLean = 5f;
@@ -105,9 +116,14 @@ namespace Prototypes.NeonPong
         public float trailTimeMin = 0.06f;
         public float trailTimeMax = 0.3f;
         public float trailWidth = 0.4f;
+        [Tooltip("The trail is this fraction of its full width at base speed.")]
+        public float trailWidthAtBaseSpeed = 0.6f;
         public float trailEmission = 1.5f;
         public float lightIntensity = 3f;
         public float lightRange = 5f;
+        [Tooltip("The light is this many times its intensity at base speed, and at max speed.")]
+        public float lightAtBaseSpeed = 0.7f;
+        public float lightAtMaxSpeed = 1.2f;
 
         [Header("Audio")]
         [Range(0f, 1f)] public float masterVolume = 0.6f;

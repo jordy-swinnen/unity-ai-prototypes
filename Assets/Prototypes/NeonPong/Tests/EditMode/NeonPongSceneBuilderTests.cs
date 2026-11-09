@@ -19,15 +19,16 @@ namespace Prototypes.NeonPong.Tests
 
         NeonPongSettings settings;
 
-        [SetUp]
-        public void SetUp()
+        // The tests only read the scene, so it is built once for the whole fixture.
+        [OneTimeSetUp]
+        public void BuildOnce()
         {
             NeonPongSceneBuilder.Build(TempScene);
             settings = AssetDatabase.LoadAssetAtPath<NeonPongSettings>(NeonPongSceneBuilder.SettingsPath);
         }
 
-        [TearDown]
-        public void TearDown()
+        [OneTimeTearDown]
+        public void CleanUp()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             AssetDatabase.DeleteAsset(TempScene);
@@ -229,6 +230,24 @@ namespace Prototypes.NeonPong.Tests
             Assert.AreEqual(first, second);
         }
 
+        [Test]
+        public void The_committed_scene_matches_what_the_builder_makes_now()
+        {
+            string fresh = Describe(SceneManager.GetActiveScene());
+            string committed;
+            try
+            {
+                EditorSceneManager.OpenScene(NeonPongSceneBuilder.ScenePath, OpenSceneMode.Single);
+                committed = Describe(SceneManager.GetActiveScene());
+            }
+            finally
+            {
+                EditorSceneManager.OpenScene(TempScene, OpenSceneMode.Single); // back to the fixture's scene
+            }
+            Assert.AreEqual(fresh, committed,
+                "NeonPong.unity is out of date. Run Prototypes > NeonPong > Build Scene and commit the result.");
+        }
+
         // A readable dump of the scene: objects, transforms, components, meshes and materials.
         // The scene file text differs on every save (new object IDs), so content is compared.
         static string Describe(Scene scene)
@@ -242,9 +261,17 @@ namespace Prototypes.NeonPong.Tests
         static void DescribeObject(StringBuilder sb, GameObject go, int depth)
         {
             var t = go.transform;
+            // A canvas and the things on it are laid out from the screen size, so compare their
+            // anchors and sizes, which the builder sets, and not the positions Unity works out.
+            bool isCanvas = go.GetComponent<Canvas>() != null;
+            var rect = t as RectTransform;
+            string placement = isCanvas
+                ? "(canvas, sized by the screen)"
+                : rect != null
+                    ? $"anchors={rect.anchorMin:F2}{rect.anchorMax:F2} anchored={rect.anchoredPosition:F1} size={rect.sizeDelta:F1}"
+                    : $"pos={t.localPosition:F3} rot={t.localEulerAngles:F2} scale={t.localScale:F3}";
             sb.Append(' ', depth * 2)
-              .Append($"{go.name} layer={go.layer} tag={go.tag} active={go.activeSelf} ")
-              .Append($"pos={t.localPosition:F3} rot={t.localEulerAngles:F2} scale={t.localScale:F3}\n");
+              .Append($"{go.name} layer={go.layer} tag={go.tag} active={go.activeSelf} {placement}\n");
             foreach (var c in go.GetComponents<Component>())
             {
                 if (c == null || c is Transform) continue;
