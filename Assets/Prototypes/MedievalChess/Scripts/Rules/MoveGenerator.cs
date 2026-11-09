@@ -15,10 +15,15 @@ namespace Prototypes.MedievalChess
         }
 
         /// <summary>Fills the list with the legal moves (the list is cleared first).</summary>
-        public static void GenerateLegal(Position p, List<Move> moves)
+        public static void GenerateLegal(Position p, List<Move> moves) => GenerateLegal(p, moves, capturesOnly: false);
+
+        /// <summary>Fills the list with the legal captures and promotions only (used by the search at the end of a line).</summary>
+        public static void GenerateLegalCaptures(Position p, List<Move> moves) => GenerateLegal(p, moves, capturesOnly: true);
+
+        static void GenerateLegal(Position p, List<Move> moves, bool capturesOnly)
         {
             moves.Clear();
-            GeneratePseudoLegal(p, moves);
+            GeneratePseudoLegal(p, moves, capturesOnly);
             var mover = p.SideToMove;
             int kept = 0;
             for (int i = 0; i < moves.Count; i++)
@@ -33,7 +38,7 @@ namespace Prototypes.MedievalChess
         }
 
         /// <summary>The moves of each piece, not yet checking whether they leave the king in check.</summary>
-        static void GeneratePseudoLegal(Position p, List<Move> moves)
+        static void GeneratePseudoLegal(Position p, List<Move> moves, bool capturesOnly)
         {
             var side = p.SideToMove;
             var enemy = Pieces.Opposite(side);
@@ -43,30 +48,30 @@ namespace Prototypes.MedievalChess
                 if (piece == Pieces.Empty || Pieces.SideOf(piece) != side) continue;
                 switch (Pieces.TypeOf(piece))
                 {
-                    case PieceType.Pawn: Pawn(p, sq, side, moves); break;
-                    case PieceType.Knight: Steps(p, sq, side, Tables.KnightTargets[sq], moves); break;
+                    case PieceType.Pawn: Pawn(p, sq, side, moves, capturesOnly); break;
+                    case PieceType.Knight: Steps(p, sq, side, Tables.KnightTargets[sq], moves, capturesOnly); break;
                     case PieceType.King:
-                        Steps(p, sq, side, Tables.KingTargets[sq], moves);
-                        Castling(p, sq, side, enemy, moves);
+                        Steps(p, sq, side, Tables.KingTargets[sq], moves, capturesOnly);
+                        if (!capturesOnly) Castling(p, sq, side, enemy, moves);
                         break;
-                    case PieceType.Bishop: Slide(p, sq, side, moves, straight: false, diagonal: true); break;
-                    case PieceType.Rook: Slide(p, sq, side, moves, straight: true, diagonal: false); break;
-                    case PieceType.Queen: Slide(p, sq, side, moves, straight: true, diagonal: true); break;
+                    case PieceType.Bishop: Slide(p, sq, side, moves, straight: false, diagonal: true, capturesOnly: capturesOnly); break;
+                    case PieceType.Rook: Slide(p, sq, side, moves, straight: true, diagonal: false, capturesOnly: capturesOnly); break;
+                    case PieceType.Queen: Slide(p, sq, side, moves, straight: true, diagonal: true, capturesOnly: capturesOnly); break;
                 }
             }
         }
 
-        static void Steps(Position p, int from, ChessSide side, int[] targets, List<Move> moves)
+        static void Steps(Position p, int from, ChessSide side, int[] targets, List<Move> moves, bool capturesOnly)
         {
             foreach (int to in targets)
             {
                 int target = p[to];
-                if (target == Pieces.Empty) moves.Add(new Move(from, to));
+                if (target == Pieces.Empty) { if (!capturesOnly) moves.Add(new Move(from, to)); }
                 else if (Pieces.SideOf(target) != side) moves.Add(new Move(from, to, MoveFlags.Capture));
             }
         }
 
-        static void Slide(Position p, int from, ChessSide side, List<Move> moves, bool straight, bool diagonal)
+        static void Slide(Position p, int from, ChessSide side, List<Move> moves, bool straight, bool diagonal, bool capturesOnly)
         {
             foreach (var ray in Tables.Rays[from])
             {
@@ -74,14 +79,14 @@ namespace Prototypes.MedievalChess
                 foreach (int to in ray.Squares)
                 {
                     int target = p[to];
-                    if (target == Pieces.Empty) { moves.Add(new Move(from, to)); continue; }
+                    if (target == Pieces.Empty) { if (!capturesOnly) moves.Add(new Move(from, to)); continue; }
                     if (Pieces.SideOf(target) != side) moves.Add(new Move(from, to, MoveFlags.Capture));
                     break;
                 }
             }
         }
 
-        static void Pawn(Position p, int from, ChessSide side, List<Move> moves)
+        static void Pawn(Position p, int from, ChessSide side, List<Move> moves, bool capturesOnly)
         {
             int dir = side == ChessSide.White ? 8 : -8;
             int rank = Squares.RankOf(from), file = Squares.FileOf(from);
@@ -92,7 +97,7 @@ namespace Prototypes.MedievalChess
             if (p[one] == Pieces.Empty)
             {
                 if (rank == beforePromotion) AddPromotions(from, one, MoveFlags.None, moves);
-                else
+                else if (!capturesOnly)
                 {
                     moves.Add(new Move(from, one));
                     if (rank == startRank && p[one + dir] == Pieces.Empty) moves.Add(new Move(from, one + dir, MoveFlags.DoublePush));

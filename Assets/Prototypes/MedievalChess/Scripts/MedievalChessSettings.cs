@@ -16,6 +16,10 @@ namespace Prototypes.MedievalChess
         [Tooltip("0 turns off the shake, the hit-stop and the camera push. 1 is full.")]
         [Range(0f, 1f)] public float effectStrength = 1f;
 
+        [Header("The computer")]
+        public DifficultyProfile[] difficulties = DifficultyProfile.Defaults();
+        public EvaluationSettings evaluation = new EvaluationSettings();
+
         [Header("Palette (from the spec)")]
         public Color boneColor = new Color32(0xE8, 0xDC, 0xC0, 0xFF);
         public Color cinnabarColor = new Color32(0xB8, 0x30, 0x1F, 0xFF);

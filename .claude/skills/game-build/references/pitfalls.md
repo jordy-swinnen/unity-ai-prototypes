@@ -33,3 +33,5 @@ Each of these happened while building the first prototype in this repository.
 29. **Don't name a type `Key` in code that uses the Input System.** `UnityEngine.InputSystem.Key` clashes with it and gives confusing errors. Use a name like `ChannelKey`.
 30. **A rules engine can pass every perft number and still be wrong.** Perft at shallow depth did not reach a rook captured on its corner. Write a direct test for each special rule, and break a rule on purpose to see a test fail.
 31. **Test positions must be legal.** The side not to move cannot be in check, so a position with a rook giving check to the wrong king is refused by the FEN reader. Put the kings on squares nothing attacks.
+32. **A few games prove nothing about which engine is stronger.** Two games of depth 4 against depth 3 lost, while ten games won 7 to 3. Use a large sample, and keep a slow check as an `[Explicit]` test. Measure speed and depth with `unity cmd script eval` (give it a `--timeout`).
+33. **A search with a time cap is not repeatable.** For a test that must give the same answer every run, set a long cap and limit the depth.

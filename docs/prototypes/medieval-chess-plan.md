@@ -170,10 +170,33 @@ What differed from the plan, and why:
 - **Not done here:** turning a rules move into a `MoveDescription` for the director. That is stage 5.
 
 ### Stage 4: the computer and its three difficulties
-- [ ] Tests first: only legal moves, mate in one found at Knight and Marshal, a free queen is not left hanging at Knight and Marshal, Squire sometimes plays worse than its best, a fixed seed gives the same move, the time cap holds within a margin, a cancelled search stops, and the strength order over seeded games (Squire against Knight, Knight against Marshal, with depth limits so the test stays fast).
-- [ ] Write `Evaluator`, `Search`, `DifficultyProfile` data and `ComputerPlayer` with the worker thread.
-- [ ] Measure: how deep Marshal gets in 3 s, how long Knight takes, and how long the strength test takes. Adjust the profiles and write the real numbers in the plan and spec.
-- [ ] Deliberate-bug check (make the evaluator reward losing material), and commit: `feat(medieval-chess): add the computer with three difficulties`. Stop for review.
+Done.
+- [x] Tests first: the evaluator (mirror symmetry, material, knight placement, king safety, endgame king, bishop pair, passed and doubled pawns, dead draws score zero), the search (a mate in one at depths 1 to 4, mate in two, a free piece, a defended pawn, an attacked queen, a trap that a shallow search falls into, the time cap, cancelling, repeatability, slack, mate scores), and the player (the three levels and their numbers, only legal moves through whole games, mate in one at every level, Squire slips and Marshal never does, blunder chance 1 and 0, repeatable with a seed, the async player waits, can be cancelled while searching or waiting).
+- [x] Wrote `Evaluator`, `Searcher` (alpha-beta, iterative deepening, transposition table, move ordering with killers and history, a search of captures at the end of each line, check extension, repetition and fifty-move draws, the clock), `ComputerPlayer` (a synchronous `Choose` and an async `ChooseAsync` on a worker thread), `DifficultyProfile` and `EvaluationSettings`. The three profiles and the evaluation numbers are on `MedievalChessSettings`.
+- [x] `check.sh all`: 565 EditMode (one slow test is `Explicit` and does not run by default) and 34 PlayMode pass, in about 55 s.
+- [x] Deliberate-bug check: flipped the sign of the evaluation, 11 tests failed, restored.
+- [x] Measured on this machine (Unity Editor, one thread):
+
+| Position | Squire | Knight | Marshal (limit 12 plies, 3 s cap) |
+|---|---|---|---|
+| Start | 1 ply, 1 ms | 3 plies, 6 ms | 7 plies in 1.3 s |
+| Kiwipete (busy) | 1 ply, 1 ms | 3 plies, 106 ms | 5 plies, stopped by the cap at 3.0 s |
+| Italian-style middlegame | 1 ply, 2 ms | 3 plies, 74 ms | 6 plies in 2.8 s |
+| Sicilian-style middlegame | not run | not run | 6 plies in 2.0 s |
+| Rook endgame | 1 ply, 0 ms | 3 plies, 2 ms | 9 plies in 1.3 s |
+
+  The search runs at about 220,000 to 430,000 positions a second. Marshal's depth varies from 5 to 9 plies, typically 6 or 7.
+- [x] Measured strength, over many games (adjudicated by material after 100 plies, 3 pawns or more ahead wins): **Knight (3 plies) beat Squire (1 ply) 16 to 0 in 16 games.** **Marshal (4 plies) beat Knight (3 plies) 7 to 3 in 10 games.** Marshal at its real depth should be stronger still.
+- [x] Commit: `feat(medieval-chess): add the computer with three difficulties`.
+
+What differed from the plan, and why:
+- **Marshal looks up to 8 plies, not 5.** Five plies finished in 0.02 to 1.2 s, so the 3 s cap was mostly unused. The spec said "five moves ahead", but my numbers count plies (half-moves), so five was only two and a half moves each. Marshal now searches until the 3 s cap, or 8 plies. I changed the spec to match.
+- **Depth means plies.** Squire looks 1 ply, Knight 3 plies plus a capture search, Marshal up to 8.
+- **Knight is fast.** It uses at most 0.11 s of its 1.5 s cap. If it feels too weak in the play test, give it a fourth ply: it is one number.
+- **The strength order is proved by games, but a short run is too noisy.** Two games of Marshal against Knight gave a loss and a draw by material, which says little. A test that counted how often each depth agrees with a deeper search was not steady either (depth 1 agreed 8 times out of 10 and depth 3 only 7). So the default run checks Knight against Squire (four games, deterministic), and the Marshal against Knight check is `Explicit` (ten games, about six minutes) and was run by hand: 7 to 3.
+- **A dead draw scores exactly zero** (king against king, one minor piece, same-coloured bishops), so the search does not chase an endgame it cannot win.
+- **The position tables are made from the numbers in `EvaluationSettings`** (distance from the middle of the board for knights, bishops, queens and the endgame king, and small tables for pawns, rooks and the king's shelter). Nothing is copied from the Simplified Evaluation Function, which I used only for the piece values and the ideas.
+- **Not done here:** the pause for show (`minThinkSeconds`) is built into `ChooseAsync`, but the scene does not use it yet. Stage 5 wires it up.
 
 ### Stage 5: playable
 - [ ] Tests first: the controller state machine (menu to player turn to animating to computer to game over), an illegal click does nothing, a promotion needs a choice before the move, the computer replies once, Play Again resets. Builder tests (every part, building twice, committed scene matches).

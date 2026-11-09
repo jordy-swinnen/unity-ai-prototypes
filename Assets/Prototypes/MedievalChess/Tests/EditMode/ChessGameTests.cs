@@ -240,6 +240,15 @@ namespace Prototypes.MedievalChess.Tests
         }
 
         [Test]
+        public void The_game_keeps_a_hash_for_every_position_it_has_been_in()
+        {
+            var game = PlayUci("e2e4 e7e5 g1f3");
+            Assert.AreEqual(4, game.Hashes.Count, "the start and one after each move");
+            Assert.AreEqual(game.Position.Hash, game.Hashes[game.Hashes.Count - 1]);
+            Assert.AreEqual(new ChessGame().Position.Hash, game.Hashes[0]);
+        }
+
+        [Test]
         public void The_history_lists_the_moves_played_in_order()
         {
             var game = PlayUci("e2e4 e7e5 g1f3");

@@ -94,7 +94,7 @@ Weighty and dry: stone and wood on stone, iron on iron, a low war drum, a horn f
 - **The three difficulties** (the computer plays by the same rules, sees only the position, and has no hidden advantage):
   - **Squire (easy):** looks one move ahead. It picks at random among moves that are within 120 centipawns of its best, and one move in seven it plays any legal move. It takes a free piece but often misses a two-move trap. It "thinks" for about 0.8 s so its move is easy to follow.
   - **Knight (medium):** a three-move search with a capture search at the end of it, and picks the best move, choosing randomly only between moves that are within 10 centipawns. It sees a piece hanging, forks and simple mates in two. Time cap 1.5 s.
-  - **Marshal (hard):** iterative deepening to five moves ahead inside a 3 s cap, with a transposition table, move ordering and a capture search. It plays the strongest move it finds. A person who plays chess regularly should find it hard.
+  - **Marshal (hard):** iterative deepening up to 8 plies (half-moves) inside a 3 s cap, with a transposition table, move ordering and a capture search. Measured on a development machine it reaches 5 to 9 plies, typically 6 or 7. It plays the strongest move it finds. A person who plays chess regularly should find it hard.
 - **How the computer evaluates:** material (pawn 100, knight 320, bishop 330, rook 500, queen 900 centipawns), plus its own position tables that reward centre control, developed pieces, a castled king in the middlegame and an active king in the endgame, and a mate score that prefers the quicker mate. The search runs on a background thread and can be cancelled, so the game never freezes.
 - **Game end:** the game ends on checkmate, a draw, or a resignation. The result shows with a Play Again button and a Change Difficulty button.
 - **First slice (the riskiest part):** because the fight is the point of this game and the hardest thing to get right, the plan builds one piece killing another, animated, on a bare board, before the chess rules exist.
@@ -157,7 +157,7 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 - **Font:** the built-in font is plain. A medieval font needs a free licence (for example an Open Font Licence file) recorded in the repository, and adding a font file needs your approval.
 - **Fight length:** about 1.8 s at Full is a guess. Judge it in play, and cut it if it wears out.
 - **Readability:** red pieces on the dark slate squares, the knight's silhouette (pony and rider) and the pawn against the rook. Judged on renders.
-- **Search time:** a depth 5 search inside 3 s in C# is unmeasured. The time cap protects the player, but Marshal may be weaker than planned if it only reaches depth 4.
+- **Search time:** measured in stage 4. Marshal reaches 5 to 9 plies in 3 s on a development machine. A slower machine reaches less, and the time cap protects the player either way.
 - **Shadows and torches:** realtime shadows from four lights may cost more than they earn. Cut them if a render shows no gain.
 - **How good simple generated sounds are:** the person decides after listening.
 - **Tonemapping:** ACES or Neutral, chosen on a render.

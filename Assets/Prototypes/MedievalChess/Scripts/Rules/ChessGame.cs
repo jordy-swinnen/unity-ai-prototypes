@@ -21,6 +21,7 @@ namespace Prototypes.MedievalChess
     public sealed class ChessGame
     {
         readonly List<Move> history = new List<Move>();
+        readonly List<ulong> hashes = new List<ulong>();
         readonly Dictionary<ulong, int> seen = new Dictionary<ulong, int>();
         List<Move> legal = new List<Move>();
 
@@ -29,6 +30,8 @@ namespace Prototypes.MedievalChess
         /// <summary>The side that won, or null for a draw or a game still going.</summary>
         public ChessSide? Winner { get; private set; }
         public IReadOnlyList<Move> History => history;
+        /// <summary>The hash of every position the game has been in, the start first and the current one last.</summary>
+        public IReadOnlyList<ulong> Hashes => hashes;
         public IReadOnlyList<Move> LegalMoves => legal;
         public bool IsOver => Status != GameStatus.Ongoing;
 
@@ -38,8 +41,23 @@ namespace Prototypes.MedievalChess
         {
             Position = position;
             seen[Position.RepetitionKey()] = 1;
+            hashes.Add(Position.Hash);
             Refresh();
         }
+
+        ChessGame(ChessGame other)
+        {
+            Position = other.Position.Clone();
+            history.AddRange(other.history);
+            hashes.AddRange(other.hashes);
+            foreach (var kv in other.seen) seen[kv.Key] = kv.Value;
+            Status = other.Status;
+            Winner = other.Winner;
+            legal = new List<Move>(other.legal);
+        }
+
+        /// <summary>A copy that another thread can read while the game goes on. Move history and repetition counts are kept.</summary>
+        public ChessGame Snapshot() => new ChessGame(this);
 
         public IEnumerable<Move> LegalMovesFrom(int square) => legal.Where(m => m.From == square);
 
@@ -58,6 +76,7 @@ namespace Prototypes.MedievalChess
 
             Position.MakeMove(found);
             history.Add(found);
+            hashes.Add(Position.Hash);
             var key = Position.RepetitionKey();
             seen[key] = seen.TryGetValue(key, out int count) ? count + 1 : 1;
             Refresh();
