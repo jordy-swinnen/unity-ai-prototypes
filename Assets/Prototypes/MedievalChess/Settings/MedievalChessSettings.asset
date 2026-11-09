@@ -15,28 +15,143 @@ MonoBehaviour:
   fight:
     approachTime: 0.35
     windUpPawn: 0.3
+    windUpKnight: 0.5
+    windUpBishop: 0.4
     windUpRook: 0.45
+    windUpQueen: 0.35
+    windUpKing: 0.55
     collapseTime: 0.6
     stepInTime: 0.3
     settleTime: 0.2
     quickFactor: 3
     standOff: 0.85
     lungeDistance: 0.25
+    knightExtraStandOff: 0.3
+    knightLunge: 0.5
     pushBack: 0.3
     hitStop: 0.07
     cameraPush: 0.35
     cameraLower: 0.25
     shakeStrength: 0.12
     shakeDuration: 0.3
+  moves:
+    stepTime: 0.35
+    maxWalkTime: 1.4
+    turnTime: 0.15
+    bobHeight: 0.04
+    leapTime: 0.55
+    leapHeight: 0.5
+    slideBase: 0.3
+    slidePerSquare: 0.08
+    castleRookDelay: 0.15
+    castleHopHeight: 0.35
+    kneelTime: 0.4
+    riseTime: 0.45
+    braceTime: 0.5
+    fallTime: 0.9
+    resignTime: 1
   animationSpeed: 0
   effectStrength: 1
+  difficulties:
+  - name: Squire
+    depth: 1
+    quiescence: 0
+    slackCentipawns: 120
+    blunderOneIn: 7
+    minThinkSeconds: 0.8
+    timeCapSeconds: 0.5
+    tableLog2: 0
+  - name: Knight
+    depth: 3
+    quiescence: 1
+    slackCentipawns: 10
+    blunderOneIn: 0
+    minThinkSeconds: 0.5
+    timeCapSeconds: 1.5
+    tableLog2: 16
+  - name: Marshal
+    depth: 8
+    quiescence: 1
+    slackCentipawns: 0
+    blunderOneIn: 0
+    minThinkSeconds: 0.3
+    timeCapSeconds: 3
+    tableLog2: 18
+  evaluation:
+    pawn: 100
+    knight: 320
+    bishop: 330
+    rook: 500
+    queen: 900
+    mateScore: 100000
+    bishopPair: 30
+    rookOnSeventh: 15
+    rookOnCentralFile: 4
+    knightCentre: 14
+    bishopCentre: 5
+    queenCentre: 3
+    kingEndgameCentre: 16
+    tempo: 10
+    doubledPawn: 10
+    isolatedPawn: 8
+    pawnRankBonus: 0000000000000000050000000c000000190000002d0000005000000000000000i
+    passedPawnBonus: 00000000000000000a00000014000000230000003c0000006400000000000000i
+    kingBackRank: 050000001900000014000000f6fffffff1ffffff050000001e0000000f000000i
+    kingSecondRank: fbffffff00000000fbffffffecffffffe7fffffff6fffffffbfffffffbffffffi
+    kingAdvanced: d8ffffffc4ffffffb0ffffffb0ffffffb0ffffffb0ffffffi
+    maxQuiescenceDepth: 8
   boneColor: {r: 0.9098039, g: 0.8627451, b: 0.7529412, a: 1}
   cinnabarColor: {r: 0.72156864, g: 0.1882353, b: 0.12156863, a: 1}
   ironColor: {r: 0.3529412, g: 0.37254903, b: 0.3882353, a: 1}
   lightSquareColor: {r: 0.6039216, g: 0.6117647, b: 0.5803922, a: 1}
   darkSquareColor: {r: 0.36862746, g: 0.4, b: 0.3764706, a: 1}
   floorColor: {r: 0.16862746, g: 0.15294118, b: 0.14117648, a: 1}
+  frameColor: {r: 0.2901961, g: 0.2, b: 0.13333334, a: 1}
   keyLightColor: {r: 1, g: 0.8509804, b: 0.627451, a: 1}
+  game:
+    cameraPitch: 50
+    cameraFieldOfView: 35
+    cameraDistance: 15
+    cameraFocusHeight: 0.3
+    trayX: 6
+    trayScale: 0.6
+    ringSize: 0.88
+    ringHeight: 0.03
+    selectionColor: {r: 0.8901961, g: 0.7019608, b: 0.25490198, a: 1}
+    moveColor: {r: 0.8901961, g: 0.7019608, b: 0.25490198, a: 1}
+    captureColor: {r: 0.8784314, g: 0.3254902, b: 0.23529412, a: 1}
+    lastMoveColor: {r: 0.5411765, g: 0.41960785, b: 0.12156863, a: 1}
+    checkColor: {r: 1, g: 0.23137255, b: 0.1882353, a: 1}
+    hoverColor: {r: 0.94509804, g: 0.8352941, b: 0.5411765, a: 1}
+    startingDifficulty: 1
+    panelColor: {r: 0.05882353, g: 0.047058824, b: 0.039215688, a: 0.9019608}
+    buttonColor: {r: 0.22745098, g: 0.18039216, b: 0.14117648, a: 1}
+    buttonSelectedColor: {r: 0.5411765, g: 0.41960785, b: 0.12156863, a: 1}
+    textColor: {r: 0.9137255, g: 0.8745098, b: 0.77254903, a: 1}
+  look:
+    keyLightIntensity: 1
+    keyLightColor: {r: 0.82, g: 0.85, b: 0.93, a: 1}
+    torchColor: {r: 1, g: 0.6039216, b: 0.23529412, a: 1}
+    torchX: 6.2
+    torchZ: 5.6
+    torchHeight: 1.7
+    torchLightIntensity: 38
+    torchLightRange: 17
+    flickerAmplitude: 0.18
+    flickerSpeed: 7
+    flameEmission: 4
+    bloomThreshold: 1
+    bloomIntensity: 0.5
+    bloomScatter: 0.6
+    vignetteIntensity: 0.38
+    vignetteSmoothness: 0.45
+    postExposure: 0
+    contrast: 10
+    saturation: -6
+    tonemapping: 1
+    ambientColor: {r: 0.15686275, g: 0.16470589, b: 0.19607843, a: 1}
+    fogColor: {r: 0.05882353, g: 0.047058824, b: 0.039215688, a: 1}
+    fogDensity: 0.025
   duelCameraPitch: 32
   duelCameraDistance: 6.5
   duelCameraFieldOfView: 35

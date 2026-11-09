@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ namespace Prototypes.MedievalChess.Editor
     {
         const string Root = "Assets/Prototypes/MedievalChess";
         public const string ScenePath = Root + "/Scenes/MedievalChess.unity";
+        const string ProfilePath = Root + "/Settings/MedievalChessVolumeProfile.asset";
 
         [MenuItem("Prototypes/MedievalChess/Build Scene")]
         public static void BuildDefault()
@@ -41,8 +43,11 @@ namespace Prototypes.MedievalChess.Editor
 
             RenderSettings.skybox = null;
             RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.07f, 0.065f, 0.06f);
-            RenderSettings.fog = false;
+            RenderSettings.ambientLight = settings.look.ambientColor;
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = settings.look.fogColor;
+            RenderSettings.fogDensity = settings.look.fogDensity;
 
             var bone = DuelSceneBuilder.Material("Bone", settings.boneColor, 0.25f);
             var cinnabar = DuelSceneBuilder.Material("Cinnabar", settings.cinnabarColor, 0.25f);
@@ -51,6 +56,8 @@ namespace Prototypes.MedievalChess.Editor
             BuildBoard(settings);
             var cam = BuildCamera(settings);
             BuildLight(settings);
+            BuildTorches(settings);
+            BuildVolume(settings);
             var highlights = BuildHighlights(settings);
             var ui = BuildUi(settings);
             BuildEventSystem();
@@ -115,6 +122,10 @@ namespace Prototypes.MedievalChess.Editor
             go.transform.rotation = rotation;
             go.transform.position = centre - (rotation * Vector3.forward) * s.game.cameraDistance;
 
+            var data = go.AddComponent<UniversalAdditionalCameraData>();
+            data.renderPostProcessing = true;
+            data.volumeLayerMask = ~0;
+
             var rig = go.AddComponent<GameCameraRig>();
             rig.settings = s;
             rig.cam = cam;
@@ -126,10 +137,127 @@ namespace Prototypes.MedievalChess.Editor
             var go = new GameObject("Key Light");
             var light = go.AddComponent<Light>();
             light.type = LightType.Directional;
-            light.color = s.keyLightColor;
-            light.intensity = 1.4f;
+            light.color = s.look.keyLightColor;
+            light.intensity = s.look.keyLightIntensity;
             light.shadows = LightShadows.Soft;
             go.transform.rotation = Quaternion.Euler(48f, -28f, 0f);
+        }
+
+        // --- torches and post-processing ---
+
+        static void BuildTorches(MedievalChessSettings s)
+        {
+            var look = s.look;
+            var stone = DuelSceneBuilder.Material("Torch Stone", s.floorColor, 0.1f);
+            var iron = DuelSceneBuilder.Material("Iron", s.ironColor, 0.45f);
+            var flameMaterial = Emissive("Flame", look.torchColor, look.flameEmission);
+
+            var group = new GameObject("Torches");
+            int index = 0;
+            foreach (float sx in new[] { -1f, 1f })
+            {
+                foreach (float sz in new[] { -1f, 1f })
+                {
+                    var torch = new GameObject($"Torch {index + 1}");
+                    torch.transform.SetParent(group.transform, false);
+                    torch.transform.position = new Vector3(sx * look.torchX, 0f, sz * look.torchZ);
+
+                    float h = look.torchHeight;
+                    Child(DuelSceneBuilder.Box("Pillar", Vector3.zero, new Vector3(0.5f, h, 0.5f), stone), torch, new Vector3(0f, h * 0.5f, 0f));
+                    Child(DuelSceneBuilder.Box("Pillar Cap", Vector3.zero, new Vector3(0.7f, 0.12f, 0.7f), stone), torch, new Vector3(0f, h + 0.06f, 0f));
+                    var bowl = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    bowl.name = "Bowl";
+                    UnityEngine.Object.DestroyImmediate(bowl.GetComponent<Collider>());
+                    bowl.GetComponent<Renderer>().sharedMaterial = iron;
+                    bowl.transform.localScale = new Vector3(0.5f, 0.1f, 0.5f);
+                    Child(bowl, torch, new Vector3(0f, h + 0.22f, 0f));
+
+                    var flame = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    flame.name = "Flame";
+                    UnityEngine.Object.DestroyImmediate(flame.GetComponent<Collider>());
+                    flame.GetComponent<Renderer>().sharedMaterial = flameMaterial;
+                    flame.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+                    flame.transform.localScale = new Vector3(0.3f, 0.55f, 0.3f);
+                    Child(flame, torch, new Vector3(0f, h + 0.55f, 0f));
+
+                    var lightGo = new GameObject("Torch Light");
+                    var light = lightGo.AddComponent<Light>();
+                    light.type = LightType.Point;
+                    light.color = look.torchColor;
+                    light.intensity = look.torchLightIntensity;
+                    light.range = look.torchLightRange;
+                    light.shadows = LightShadows.None;
+                    Child(lightGo, torch, new Vector3(0f, h + 0.8f, 0f));
+
+                    var flicker = torch.AddComponent<TorchFlicker>();
+                    flicker.torchLight = light;
+                    flicker.flame = flame.transform;
+                    flicker.settings = s;
+                    flicker.seed = index + 1;
+                    index++;
+                }
+            }
+        }
+
+        static void Child(GameObject child, GameObject parent, Vector3 localPosition)
+        {
+            child.transform.SetParent(parent.transform, false);
+            child.transform.localPosition = localPosition;
+        }
+
+        /// <summary>A material that glows. The colour is HDR: it is converted so the glow keeps its hue (see urp-effects).</summary>
+        static Material Emissive(string name, Color color, float intensity)
+        {
+            var mat = DuelSceneBuilder.Material(name, Color.black, 0f);
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", (color.linear * intensity).gamma);
+            mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        static void BuildVolume(MedievalChessSettings s)
+        {
+            var look = s.look;
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(ProfilePath);
+            if (profile == null)
+            {
+                profile = ScriptableObject.CreateInstance<VolumeProfile>();
+                AssetDatabase.CreateAsset(profile, ProfilePath);
+            }
+
+            // Reuse the overrides already in the profile, so a rebuild keeps the same file content.
+            var bloom = GetOrAdd<Bloom>(profile);
+            bloom.threshold.Override(look.bloomThreshold);
+            bloom.intensity.Override(look.bloomIntensity);
+            bloom.scatter.Override(look.bloomScatter);
+
+            var vignette = GetOrAdd<Vignette>(profile);
+            vignette.intensity.Override(look.vignetteIntensity);
+            vignette.smoothness.Override(look.vignetteSmoothness);
+
+            var tone = GetOrAdd<Tonemapping>(profile);
+            tone.mode.Override(look.tonemapping == 1 ? TonemappingMode.ACES : TonemappingMode.Neutral);
+
+            var grade = GetOrAdd<ColorAdjustments>(profile);
+            grade.postExposure.Override(look.postExposure);
+            grade.contrast.Override(look.contrast);
+            grade.saturation.Override(look.saturation);
+            EditorUtility.SetDirty(profile);
+
+            var go = new GameObject("Global Volume");
+            var volume = go.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.sharedProfile = profile;
+        }
+
+        static T GetOrAdd<T>(VolumeProfile profile) where T : VolumeComponent
+        {
+            if (profile.TryGet(out T existing)) return existing;
+            var component = profile.Add<T>(false);
+            component.name = typeof(T).Name;
+            AssetDatabase.AddObjectToAsset(component, profile);
+            return component;
         }
 
         // --- highlight rings ---

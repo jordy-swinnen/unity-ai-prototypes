@@ -33,6 +33,9 @@ namespace Prototypes.MedievalChess
         [Header("The game")]
         public GameLayoutSettings game = new GameLayoutSettings();
 
+        [Header("Look (stage 6)")]
+        public LookSettings look = new LookSettings();
+
         [Header("Duel scene (stage 1)")]
         [Tooltip("Degrees the camera is pitched down.")]
         public float duelCameraPitch = 32f;
