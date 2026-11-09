@@ -1,6 +1,6 @@
 # Medieval Chess
 
-Status: in review
+Status: approved
 Kind: new game
 
 ## One-page design
