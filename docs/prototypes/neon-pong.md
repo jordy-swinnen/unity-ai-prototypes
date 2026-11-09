@@ -1,6 +1,6 @@
 # Neon Pong
 
-Status: in review
+Status: approved
 Kind: new game
 
 ## One-page design
