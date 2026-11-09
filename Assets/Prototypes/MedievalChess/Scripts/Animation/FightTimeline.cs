@@ -10,7 +10,7 @@ namespace Prototypes.MedievalChess
     /// </summary>
     public sealed class FightTimeline
     {
-        readonly FightPlan plan;
+        readonly IActionPlan plan;
         readonly AnimationSpeed speed;
         readonly FightSettings settings;
         readonly float strength;
@@ -25,7 +25,7 @@ namespace Prototypes.MedievalChess
         public float CameraPush { get; private set; }
         public bool HitStopActive => timeFeel.HitStopActive;
 
-        public FightTimeline(FightPlan plan, AnimationSpeed speed, FightSettings settings, float effectStrength)
+        public FightTimeline(IActionPlan plan, AnimationSpeed speed, FightSettings settings, float effectStrength)
         {
             this.plan = plan;
             this.speed = speed;
@@ -51,7 +51,8 @@ namespace Prototypes.MedievalChess
             float next = Mathf.Min(PlanTime + planDt, plan.Duration);
 
             // Stop exactly on the blow, so a long frame can't skip over it.
-            if (PlanTime < plan.BlowTime && next >= plan.BlowTime)
+            bool hasBlow = !float.IsNaN(plan.BlowTime);
+            if (hasBlow && PlanTime < plan.BlowTime && next >= plan.BlowTime)
             {
                 next = plan.BlowTime;
                 BlowThisFrame = true;

@@ -19,6 +19,8 @@ namespace Prototypes.MedievalChess
         public readonly Dictionary<string, Channel> PartEuler = new Dictionary<string, Channel>();
 
         public float StartYaw;
+        /// <summary>The actor is not on the board before this time (a piece that appears mid-step).</summary>
+        public float HiddenUntil;
         /// <summary>The actor disappears from this time on.</summary>
         public float HiddenFrom = float.PositiveInfinity;
 
@@ -38,7 +40,7 @@ namespace Prototypes.MedievalChess
             frame.Yaw = Yaw.HasKeys ? Yaw.EvaluateScalar(t) : StartYaw;
             frame.Pitch = Pitch.HasKeys ? Pitch.EvaluateScalar(t) : 0f;
             frame.Scale = Scale.HasKeys ? Scale.EvaluateScalar(t) : 1f;
-            frame.Visible = t < HiddenFrom;
+            frame.Visible = t >= HiddenUntil && t < HiddenFrom;
             frame.PartEuler.Clear();
             foreach (var kv in PartEuler) frame.PartEuler[kv.Key] = kv.Value.Evaluate(t);
         }

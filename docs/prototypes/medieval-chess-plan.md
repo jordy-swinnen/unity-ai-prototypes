@@ -130,12 +130,27 @@ What differed from the plan, and why:
 - **Colours:** bone looks tan and the red looks bright under the warm key light. The look stage will tune this.
 
 ### Stage 2: all six fights and the moves
-- [ ] Tests first: each of the six attacker types has a routine, with its own blow time and its own pose at the blow, and every routine ends in the right state.
-- [ ] Add the knight (lance charge), bishop (mace swing), queen (sword sweep) and king (overhead blow) routines.
-- [ ] Add the non-capture plans: walk, knight leap, rook slide, castling, promotion (kneel, flash, rise), check brace, checkmate finale and resign.
-- [ ] `MoveDirector` tests: a quiet move, a capture, en passant (the victim is not on the target square), castling (two pieces) and promotion each give the right plans and end state.
-- [ ] Update the Duel scene so every attacker and victim pair can be played, and freeze a frame at the blow for each of the six.
-- [ ] Deliberate-bug check, and commit: `feat(medieval-chess): add all six fights and the move animations`. Stop for review.
+Done.
+- [x] Tests first: each of the six attacker types has a routine with its own blow time and its own pose at the blow, every victim type falls the same way, and every routine ends in the right state.
+- [x] Added the knight (draws back, rears its horse's head, charges with a levelled lance), bishop (mace swing from behind the head, book held up), queen (level sword sweep with the body turning) and king (slow raise, hardest overhead blow).
+- [x] Added the non-capture plans: walk (one thud per square), knight leap (arc), rook slide, castling (the king strides and the rook hops over), promotion (the pawn kneels, the new piece rises), check brace, checkmate fall, resign.
+- [x] `MoveDirector` tests: a quiet move, a capture (travel up, then fight), a pawn and a knight capturing, en passant (the victim is not on the landing square), castling both ways, promotion to each of four pieces, promotion with a capture, check, checkmate, resign, every step starting where the last ended, finite and repeatable at every moment, the total is the sum of the steps.
+- [x] Duel scene: keys 1 to 6 pick the attacker, Q to Y the victim, M plays the next of eleven demo moves, F1 to F3 pick the speed. Every attacker and victim pair plays, and every demo ends in the same place at Full, Quick and Off.
+- [x] `check.sh all`: 401 EditMode (from 220) and 34 PlayMode (from 23).
+- [x] Deliberate-bug check: removed the en passant landing step, 1 EditMode and 1 PlayMode test failed, restored and everything passes.
+- [x] Frames at the blow for knight, bishop, queen and king, and mid-step frames for the leap, castling, promotion and checkmate, read on renders.
+- [x] Commit: `feat(medieval-chess): add all six fights and the move animations`.
+
+What differed from the plan, and why:
+- **The director takes a `MoveDescription`, not a rules `Move`.** The rules do not exist yet. Stage 5 turns a rules move into a description (world positions, ids, flags).
+- **Steps share an interface (`IActionPlan`).** A fight and a move plan both have actors, a duration, an optional blow and footfall times. `FightTimeline` takes any plan, and `SequenceTimeline` plays the steps of a move in order.
+- **Pieces turn back after a fight,** so a rook that captured sideways does not stay facing sideways.
+- **The knight stands further back and charges further** (`knightExtraStandOff`, `knightLunge`) because its lance is long.
+- **A long walk is capped at 1.4 s** (`maxWalkTime`), so a queen crossing the board does not take 2.7 s. Footfalls speed up to match.
+- **Speed keys are now F1, F2 and F3.** The letters are used for the victim.
+- **`Key` clashed with the Input System,** so the channel's key type is `ChannelKey`.
+- **The queen's sweep is hard to read from the side.** The duel camera looks along the fight's side, which hides a horizontal sweep. Judge it from the game camera in stage 5.
+- **Footfall times exist but are silent.** The thuds and the dust come in stage 6.
 
 ### Stage 3: the chess rules
 - [ ] Tests first: perft for the start position (depths 1 to 4), Kiwipete (1 to 3), positions 3 (1 to 4), 4, 5 and 6 (1 to 3), using the numbers in the spec. FEN read and write. Castling, en passant and promotion special cases. Check, checkmate, stalemate, threefold repetition, fifty-move rule, insufficient material. Make and unmake restore the position.

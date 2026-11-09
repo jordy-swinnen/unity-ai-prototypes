@@ -30,3 +30,4 @@ Each of these happened while building the first prototype in this repository.
 26. **Resolve a repository path in a Blender script with `parents[3]`** from `Tools/blender/<Name>/script.py`. `parents[2]` silently writes into `Tools/Assets/`.
 27. **A camera that moves without re-aiming loses the subject.** Push and lower the camera, then `LookRotation` at the focus point.
 28. **For a still frame of an animation, make the animation a pure function of time** and call `ShowAt(t)` from `unity cmd script eval` in Play Mode, then capture. It does not depend on frame timing or on the Editor being in front.
+29. **Don't name a type `Key` in code that uses the Input System.** `UnityEngine.InputSystem.Key` clashes with it and gives confusing errors. Use a name like `ChannelKey`.

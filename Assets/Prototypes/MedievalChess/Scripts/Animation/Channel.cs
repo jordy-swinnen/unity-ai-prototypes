@@ -12,7 +12,7 @@ namespace Prototypes.MedievalChess
         InOut,
     }
 
-    public struct Key
+    public struct ChannelKey
     {
         public float Time;
         public Vector3 Value;
@@ -26,7 +26,7 @@ namespace Prototypes.MedievalChess
     /// </summary>
     public sealed class Channel
     {
-        readonly List<Key> keys = new List<Key>();
+        readonly List<ChannelKey> keys = new List<ChannelKey>();
 
         public bool HasKeys => keys.Count > 0;
 
@@ -34,7 +34,7 @@ namespace Prototypes.MedievalChess
         {
             if (keys.Count > 0 && time < keys[keys.Count - 1].Time)
                 throw new System.ArgumentException($"Keys must be added in time order ({time} comes before {keys[keys.Count - 1].Time}).");
-            keys.Add(new Key { Time = time, Value = value, Ease = ease });
+            keys.Add(new ChannelKey { Time = time, Value = value, Ease = ease });
             return this;
         }
 

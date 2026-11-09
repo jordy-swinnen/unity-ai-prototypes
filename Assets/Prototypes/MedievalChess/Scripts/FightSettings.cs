@@ -20,7 +20,11 @@ namespace Prototypes.MedievalChess
         [UnityEngine.Header("Timing")]
         public float approachTime = 0.35f;
         public float windUpPawn = 0.3f;
+        public float windUpKnight = 0.5f;
+        public float windUpBishop = 0.4f;
         public float windUpRook = 0.45f;
+        public float windUpQueen = 0.35f;
+        public float windUpKing = 0.55f;
         public float collapseTime = 0.6f;
         public float stepInTime = 0.3f;
         public float settleTime = 0.2f;
@@ -32,6 +36,9 @@ namespace Prototypes.MedievalChess
         public float standOff = 0.8f;
         [UnityEngine.Tooltip("How far the attacker lunges forward on the blow.")]
         public float lungeDistance = 0.25f;
+        [UnityEngine.Tooltip("A knight's lance is long, so it stops this much further back and charges further.")]
+        public float knightExtraStandOff = 0.3f;
+        public float knightLunge = 0.5f;
         [UnityEngine.Tooltip("How far the blow knocks the victim back.")]
         public float pushBack = 0.3f;
 

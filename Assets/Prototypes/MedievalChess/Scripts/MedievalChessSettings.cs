@@ -11,6 +11,7 @@ namespace Prototypes.MedievalChess
     {
         [Header("Fights")]
         public FightSettings fight = new FightSettings();
+        public MoveSettings moves = new MoveSettings();
         public AnimationSpeed animationSpeed = AnimationSpeed.Full;
         [Tooltip("0 turns off the shake, the hit-stop and the camera push. 1 is full.")]
         [Range(0f, 1f)] public float effectStrength = 1f;

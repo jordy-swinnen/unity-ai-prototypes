@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Shared.Feel;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,9 +7,11 @@ using UnityEngine.UI;
 namespace Prototypes.MedievalChess
 {
     /// <summary>
-    /// The duel scene: one piece kills another on a bare board, so the fight can be judged before any
-    /// chess exists. Keys: Space replays, 1 and 2 pick who kills whom, F, Q and O pick the speed
-    /// (Full, Quick, Off). The fight is a plan, and this only plays it and moves the camera.
+    /// The duel scene: pieces fight and move on a bare board so the animations can be judged before
+    /// any chess exists. The default is a duel (one piece kills another). Keys: Space replays,
+    /// 1 to 6 pick the attacker (pawn, knight, bishop, rook, queen, king), Q W E R T Y pick the victim,
+    /// M plays the next demo (walk, leap, slide, en passant, castling, promotion, check, mate, resign),
+    /// F1, F2 and F3 pick the speed. Everything is a plan played by a timeline, and this only shows it.
     /// </summary>
     public class DuelController : MonoBehaviour
     {
@@ -31,21 +34,29 @@ namespace Prototypes.MedievalChess
         public Vector3 victimPosition = new Vector3(1f, 0f, 0f);
 
         readonly ShakeState shake = new ShakeState();
-        readonly FightFrame frame = new FightFrame();
-        PieceActor attacker;
-        PieceActor victim;
+        readonly Dictionary<string, PieceActor> actors = new Dictionary<string, PieceActor>();
+        ActorFrame[] frames = new ActorFrame[0];
         Vector3 cameraBase;
         Vector3 focus;
         float cameraPush;
         float startTimer;
         bool started;
+        int shownStep = -1;
+        int demoIndex = -1;
+        string title = string.Empty;
 
+        /// <summary>Everything that will be played.</summary>
+        public ActionSequence Sequence { get; private set; }
+        /// <summary>The duel's fight, or null while a demo is set up.</summary>
         public FightPlan Plan { get; private set; }
-        public FightTimeline Timeline { get; private set; }
-        public PieceActor Attacker => attacker;
-        public PieceActor Victim => victim;
+        public SequenceTimeline Timeline { get; private set; }
+        public PieceActor Attacker => Actor("attacker");
+        public PieceActor Victim => Actor("victim");
         public bool Playing => Timeline != null && !Timeline.Finished;
         public bool Started => started;
+        public int DemoIndex => demoIndex;
+
+        public PieceActor Actor(string id) => actors.TryGetValue(id, out var a) ? a : null;
 
         void Start()
         {
@@ -72,46 +83,97 @@ namespace Prototypes.MedievalChess
 
         // --- setting up and playing ---
 
-        /// <summary>Puts the two pieces at their squares, ready for a fight.</summary>
+        /// <summary>Sets up the duel: the two pieces at their squares, ready for a fight.</summary>
         public void SetUp()
         {
-            if (attacker != null) Destroy(attacker.gameObject);
-            if (victim != null) Destroy(victim.gameObject);
-            attacker = Spawn(attackerType, bone, attackerStart, 90f);
-            victim = Spawn(victimType, cinnabar, victimPosition, -90f);
-            Plan = null;
-            Timeline = null;
-            cameraPush = 0f;
-            UpdateLabel();
+            demoIndex = -1;
+            Plan = FightLibrary.Create(attackerType, victimType, attackerStart, victimPosition, 90f, -90f, settings.fight);
+            title = $"{attackerType} kills {victimType}";
+            Prepare(ActionSequence.Single(Plan));
         }
 
-        PieceActor Spawn(PieceType type, Material side, Vector3 position, float yaw)
+        /// <summary>Sets up a demo move (see <see cref="DuelDemos"/>), ready to play.</summary>
+        public void SetUpDemo(int index)
         {
-            var instance = Instantiate(piecePrefabs[(int)type], position, Quaternion.identity);
-            instance.name = type.ToString();
-            var actor = PieceActor.Bind(instance, type, side, iron);
-            actor.Place(position, yaw);
-            return actor;
+            demoIndex = ((index % DuelDemos.Count) + DuelDemos.Count) % DuelDemos.Count;
+            Plan = null;
+            title = DuelDemos.Names[demoIndex];
+            Prepare(DuelDemos.Create(demoIndex, settings));
         }
 
-        /// <summary>Sets up the pieces again and plays the fight from the start.</summary>
+        /// <summary>Plays a demo move from the start.</summary>
+        public void PlayDemo(int index)
+        {
+            demoIndex = index;
+            Play();
+        }
+
+        /// <summary>Plays the current duel or demo from the start.</summary>
         public void Play()
         {
             started = true;
-            SetUp();
-            Plan = FightLibrary.Create(attackerType, victimType, attackerStart, victimPosition, 90f, -90f, settings.fight);
-            Timeline = new FightTimeline(Plan, speed, settings.fight, settings.effectStrength);
-            ShowAt(0f);
-            if (speed == AnimationSpeed.Off) Step(0f); // an Off fight is over at once
+            if (demoIndex >= 0) SetUpDemo(demoIndex);
+            else SetUp();
+
+            Timeline = new SequenceTimeline(Sequence, speed, settings.fight, settings.effectStrength);
+            if (speed == AnimationSpeed.Off)
+            {
+                // Off skips the move: every step is shown at its end, in order.
+                for (int i = 0; i < Sequence.Steps.Count; i++) ShowStep(i, Sequence.Steps[i].Duration);
+                cameraPush = 0f;
+            }
+            else
+            {
+                ShowStep(0, 0f);
+            }
+            UpdateLabel();
         }
 
-        /// <summary>Moves the fight and the camera on by a real frame time.</summary>
+        void Prepare(ActionSequence sequence)
+        {
+            foreach (var a in actors.Values) if (a != null) Destroy(a.gameObject);
+            actors.Clear();
+            Sequence = sequence;
+            Timeline = null;
+            shownStep = -1;
+            cameraPush = 0f;
+
+            // A piece is created the first time it appears in a step, and is hidden if it is not there yet.
+            var frame = new ActorFrame[8];
+            for (int i = 0; i < frame.Length; i++) frame[i] = new ActorFrame();
+            foreach (var step in sequence.Steps)
+            {
+                step.Evaluate(0f, frame);
+                for (int i = 0; i < step.Actors.Count; i++)
+                {
+                    var spec = step.Actors[i];
+                    if (actors.ContainsKey(spec.Id)) continue;
+                    var actor = Spawn(spec);
+                    actors[spec.Id] = actor;
+                    actor.gameObject.SetActive(frame[i].Visible);
+                }
+            }
+            UpdateLabel();
+        }
+
+        PieceActor Spawn(ActorSpec spec)
+        {
+            var instance = Instantiate(piecePrefabs[(int)spec.Type], spec.Start, Quaternion.identity);
+            instance.name = spec.Type.ToString();
+            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron);
+            actor.Place(spec.Start, spec.StartYaw);
+            return actor;
+        }
+
+        /// <summary>Moves the plan and the camera on by a real frame time.</summary>
         public void Step(float dt)
         {
             if (Timeline != null)
             {
+                int before = Timeline.StepIndex;
                 Timeline.Advance(dt);
-                ShowAt(Timeline.PlanTime);
+                if (Timeline.StepIndex != before) ShowStep(before, Sequence.Steps[before].Duration);
+                ShowStep(Timeline.StepIndex, Timeline.PlanTime);
                 cameraPush = Timeline.CameraPush;
                 if (Timeline.BlowThisFrame && Timeline.BlowShake > 0f)
                     shake.Add(Timeline.BlowShake, Vector2.up, settings.fight.shakeDuration);
@@ -120,14 +182,30 @@ namespace Prototypes.MedievalChess
             UpdateCamera(dt);
         }
 
-        /// <summary>Shows the fight at an exact moment, without playing it. Captures use this.</summary>
+        /// <summary>Shows the first step at an exact moment, without playing. Captures use this on a duel.</summary>
         public void ShowAt(float planTime)
         {
-            if (Plan == null) return;
-            Plan.Evaluate(planTime, frame);
-            attacker.Apply(frame.Attacker);
-            victim.Apply(frame.Victim);
-            cameraPush = frame.CameraPush * (speed == AnimationSpeed.Full ? settings.effectStrength : 0f);
+            if (Sequence == null) return;
+            ShowStep(0, planTime);
+            cameraPush = Sequence.Steps[0].CameraPush(planTime) * (speed == AnimationSpeed.Full ? settings.effectStrength : 0f);
+        }
+
+        /// <summary>Shows one step of the sequence at an exact moment.</summary>
+        public void ShowStep(int index, float planTime)
+        {
+            var plan = Sequence.Steps[index];
+            if (frames.Length < plan.Actors.Count)
+            {
+                frames = new ActorFrame[plan.Actors.Count];
+                for (int i = 0; i < frames.Length; i++) frames[i] = new ActorFrame();
+            }
+            if (shownStep != index)
+            {
+                shownStep = index;
+                foreach (var spec in plan.Actors) actors[spec.Id].Place(spec.Start, spec.StartYaw);
+            }
+            plan.Evaluate(planTime, frames);
+            for (int i = 0; i < plan.Actors.Count; i++) actors[plan.Actors[i].Id].Apply(frames[i]);
         }
 
         // --- the camera ---
@@ -154,29 +232,32 @@ namespace Prototypes.MedievalChess
 
         // --- keys ---
 
+        static readonly Key[] AttackerKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6 };
+        static readonly Key[] VictimKeys = { Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y };
+
         void HandleKeys()
         {
             var kb = Keyboard.current;
             if (kb == null) return;
-            if (kb.digit1Key.wasPressedThisFrame) Choose(PieceType.Rook, PieceType.Pawn);
-            if (kb.digit2Key.wasPressedThisFrame) Choose(PieceType.Pawn, PieceType.Rook);
-            if (kb.fKey.wasPressedThisFrame) speed = AnimationSpeed.Full;
-            if (kb.qKey.wasPressedThisFrame) speed = AnimationSpeed.Quick;
-            if (kb.oKey.wasPressedThisFrame) speed = AnimationSpeed.Off;
-            if (kb.spaceKey.wasPressedThisFrame || kb.digit1Key.wasPressedThisFrame || kb.digit2Key.wasPressedThisFrame) Play();
-        }
 
-        void Choose(PieceType attackerKind, PieceType victimKind)
-        {
-            attackerType = attackerKind;
-            victimType = victimKind;
+            for (int i = 0; i < 6; i++)
+            {
+                if (kb[AttackerKeys[i]].wasPressedThisFrame) { attackerType = (PieceType)i; demoIndex = -1; Play(); }
+                if (kb[VictimKeys[i]].wasPressedThisFrame) { victimType = (PieceType)i; demoIndex = -1; Play(); }
+            }
+            if (kb.f1Key.wasPressedThisFrame) speed = AnimationSpeed.Full;
+            if (kb.f2Key.wasPressedThisFrame) speed = AnimationSpeed.Quick;
+            if (kb.f3Key.wasPressedThisFrame) speed = AnimationSpeed.Off;
+            if (kb.mKey.wasPressedThisFrame) { demoIndex = demoIndex + 1; Play(); }
+            if (kb.dKey.wasPressedThisFrame) { demoIndex = -1; Play(); }
+            if (kb.spaceKey.wasPressedThisFrame) Play();
         }
 
         void UpdateLabel()
         {
             if (label == null) return;
-            label.text = $"{attackerType} kills {victimType}    speed: {speed}\n" +
-                         "Space replay   1 rook kills pawn   2 pawn kills rook   F full   Q quick   O off";
+            label.text = $"{title}    speed: {speed}\n" +
+                         "Space replay   1-6 attacker   Q-Y victim   M next demo   D duel   F1 full   F2 quick   F3 off";
         }
     }
 }

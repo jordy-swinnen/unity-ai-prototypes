@@ -8,7 +8,8 @@ namespace Prototypes.MedievalChess.Tests
     {
         const float Tol = 0.001f;
 
-        static readonly PieceType[] Attackers = { PieceType.Pawn, PieceType.Rook };
+        static readonly PieceType[] Attackers =
+            { PieceType.Pawn, PieceType.Knight, PieceType.Bishop, PieceType.Rook, PieceType.Queen, PieceType.King };
 
         FightSettings settings;
         FightFrame frame;
@@ -178,14 +179,24 @@ namespace Prototypes.MedievalChess.Tests
         }
 
         [Test]
-        public void The_attacker_type_changes_the_timing()
+        public void Each_attacker_type_has_its_own_wind_up_and_so_its_own_blow_time()
         {
             var from = new Vector3(-1.5f, 0f, 0f);
             var to = new Vector3(1f, 0f, 0f);
-            var pawn = Plan(PieceType.Pawn, PieceType.Pawn, from, to);
-            var rook = Plan(PieceType.Rook, PieceType.Pawn, from, to);
-            Assert.AreEqual(settings.approachTime + settings.windUpPawn, pawn.BlowTime, Tol);
-            Assert.AreEqual(settings.approachTime + settings.windUpRook, rook.BlowTime, Tol);
+            var expected = new System.Collections.Generic.Dictionary<PieceType, float>
+            {
+                { PieceType.Pawn, settings.windUpPawn }, { PieceType.Knight, settings.windUpKnight },
+                { PieceType.Bishop, settings.windUpBishop }, { PieceType.Rook, settings.windUpRook },
+                { PieceType.Queen, settings.windUpQueen }, { PieceType.King, settings.windUpKing },
+            };
+            var blows = new System.Collections.Generic.HashSet<float>();
+            foreach (var kv in expected)
+            {
+                var plan = Plan(kv.Key, PieceType.Pawn, from, to);
+                Assert.AreEqual(settings.approachTime + kv.Value, plan.BlowTime, Tol, kv.Key.ToString());
+                blows.Add(plan.BlowTime);
+            }
+            Assert.AreEqual(6, blows.Count, "every attacker type should land its blow at a different moment");
         }
 
         // --- the plan is a function of time ---
@@ -233,14 +244,14 @@ namespace Prototypes.MedievalChess.Tests
         }
 
         [Test]
-        public void A_type_without_a_routine_is_refused_clearly()
+        public void Every_piece_type_has_a_routine_and_an_undefined_one_is_refused_clearly()
         {
+            foreach (PieceType type in System.Enum.GetValues(typeof(PieceType)))
+                Assert.IsTrue(FightLibrary.HasRoutine(type), type.ToString());
+            Assert.IsFalse(FightLibrary.HasRoutine((PieceType)99));
             var ex = Assert.Throws<System.ArgumentException>(() =>
-                Plan(PieceType.Queen, PieceType.Pawn, new Vector3(-1.5f, 0f, 0f), new Vector3(1f, 0f, 0f)));
-            StringAssert.Contains("Queen", ex.Message);
-            Assert.IsFalse(FightLibrary.HasRoutine(PieceType.Queen));
-            Assert.IsTrue(FightLibrary.HasRoutine(PieceType.Pawn));
-            Assert.IsTrue(FightLibrary.HasRoutine(PieceType.Rook));
+                Plan((PieceType)99, PieceType.Pawn, new Vector3(-1.5f, 0f, 0f), new Vector3(1f, 0f, 0f)));
+            StringAssert.Contains("99", ex.Message);
         }
 
         static void AssertSame(ActorFrame a, ActorFrame b)
