@@ -160,7 +160,7 @@ namespace Prototypes.MedievalChess
         {
             var instance = Instantiate(piecePrefabs[(int)spec.Type], spec.Start, Quaternion.identity);
             instance.name = spec.Type.ToString();
-            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron);
+            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron, spec.Side);
             actor.Place(spec.Start, spec.StartYaw);
             return actor;
         }

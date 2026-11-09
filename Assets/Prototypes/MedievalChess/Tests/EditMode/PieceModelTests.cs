@@ -130,5 +130,35 @@ namespace Prototypes.MedievalChess.Tests
             var neck = Part(go, "HorseHead");
             Assert.Greater(go.transform.InverseTransformPoint(neck.position).y, 0.3f, "the neck pivot is up on the horse");
         }
+
+        [TestCaseSource(nameof(Pieces))]
+        public void Every_piece_has_a_face_and_two_pairs_of_shoulders_one_round_and_one_pointed(string name, float height)
+        {
+            var go = Load(name);
+            Assert.AreEqual(Part(go, "Head"), Part(go, "Face").parent, "the face turns with the head");
+            Assert.AreEqual(Part(go, "Body"), Part(go, "ShoulderBone").parent);
+            Assert.AreEqual(Part(go, "Body"), Part(go, "ShoulderRed").parent);
+            var round = Part(go, "ShoulderBone").GetComponent<MeshFilter>().sharedMesh.bounds.size;
+            var pointed = Part(go, "ShoulderRed").GetComponent<MeshFilter>().sharedMesh.bounds.size;
+            Assert.Greater(pointed.y, round.y, "the red side's shoulders reach up in a point, the bone side's are round");
+        }
+
+        [TestCaseSource(nameof(Pieces))]
+        public void Binding_a_piece_shows_the_shoulders_of_its_side_only(string name, float height)
+        {
+            foreach (int side in new[] { 0, 1 })
+            {
+                var instance = Object.Instantiate(Load(name));
+                try
+                {
+                    var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    var actor = PieceActor.Bind(instance, System.Enum.Parse<PieceType>(name, true), mat, mat, side);
+                    Assert.AreEqual(side == 0, actor.Part("ShoulderBone").gameObject.activeSelf, $"{name} side {side}");
+                    Assert.AreEqual(side == 1, actor.Part("ShoulderRed").gameObject.activeSelf, $"{name} side {side}");
+                    Object.DestroyImmediate(mat);
+                }
+                finally { Object.DestroyImmediate(instance); }
+            }
+        }
     }
 }

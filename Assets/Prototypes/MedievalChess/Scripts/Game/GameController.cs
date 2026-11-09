@@ -209,7 +209,7 @@ namespace Prototypes.MedievalChess
         {
             var instance = Instantiate(piecePrefabs[(int)spec.Type]);
             instance.name = spec.Id;
-            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron);
+            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron, spec.Side);
             actor.Place(spec.Start, spec.StartYaw);
             actors[spec.Id] = actor;
             return actor;
@@ -331,7 +331,7 @@ namespace Prototypes.MedievalChess
             var spec = new ActorSpec { Id = $"tray:{tray.Count}", Type = victim.Type, Side = victim.Side };
             var instance = Instantiate(piecePrefabs[(int)victim.Type]);
             instance.name = $"Captured {victim.Type}";
-            var actor = PieceActor.Bind(instance, victim.Type, victim.Side == 0 ? bone : cinnabar, iron);
+            var actor = PieceActor.Bind(instance, victim.Type, victim.Side == 0 ? bone : cinnabar, iron, victim.Side);
             var slot = BoardGeometry.TraySlot(side, trayCount[victim.Side]++, settings.game.trayX);
             actor.Place(slot, BoardGeometry.RestYaw(side));
             instance.transform.localScale = Vector3.one * settings.game.trayScale;
