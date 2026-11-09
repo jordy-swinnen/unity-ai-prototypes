@@ -131,6 +131,36 @@ namespace Prototypes.MedievalChess.Tests
         }
 
         [TestCaseSource(nameof(Cases))]
+        public void The_victim_burns_away_from_the_fall_to_the_end_and_keeps_its_size(PieceType attacker, Vector3 from, Vector3 to)
+        {
+            var plan = Plan(attacker, PieceType.Pawn, from, to);
+
+            plan.Evaluate(0f, frame);
+            Assert.AreEqual(0f, frame.Victim.Dissolve, Tol);
+            plan.Evaluate(plan.BlowTime, frame);
+            Assert.AreEqual(0f, frame.Victim.Dissolve, Tol, "nothing burns before the blow");
+
+            float previous = -1f;
+            for (float t = plan.BlowTime; t <= plan.CollapseEnd; t += 0.02f)
+            {
+                plan.Evaluate(t, frame);
+                Assert.GreaterOrEqual(frame.Victim.Dissolve, previous - Tol, "the burn never runs backward");
+                Assert.AreEqual(1f, frame.Victim.Scale, Tol, "the victim burns instead of shrinking");
+                previous = frame.Victim.Dissolve;
+            }
+
+            plan.Evaluate(plan.CollapseEnd - settings.dissolveTime * 0.5f, frame);
+            Assert.That(frame.Victim.Dissolve, Is.InRange(0.3f, 0.7f), "half way through the burn");
+            plan.Evaluate(plan.CollapseEnd, frame);
+            Assert.AreEqual(1f, frame.Victim.Dissolve, Tol, "fully burnt when it is removed");
+
+            plan.Evaluate(0f, frame);
+            Assert.AreEqual(0f, frame.Attacker.Dissolve, Tol);
+            plan.Evaluate(plan.Duration, frame);
+            Assert.AreEqual(0f, frame.Attacker.Dissolve, Tol, "the attacker never burns");
+        }
+
+        [TestCaseSource(nameof(Cases))]
         public void The_victim_is_pushed_away_from_the_attacker(PieceType attacker, Vector3 from, Vector3 to)
         {
             var plan = Plan(attacker, PieceType.Pawn, from, to);

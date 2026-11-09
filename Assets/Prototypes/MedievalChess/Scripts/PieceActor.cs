@@ -19,6 +19,10 @@ namespace Prototypes.MedievalChess
         readonly Dictionary<string, PartRest> parts = new Dictionary<string, PartRest>();
         Vector3 startPosition;
         float startYaw;
+        Renderer[] renderers = new Renderer[0];
+        MaterialPropertyBlock block;
+        float appliedDissolve = -1f;
+        static readonly int DissolveId = Shader.PropertyToID("_Dissolve");
 
         public PieceType Type { get; private set; }
         public Vector3 StartPosition => startPosition;
@@ -50,7 +54,18 @@ namespace Prototypes.MedievalChess
                 }
                 r.sharedMaterials = slots;
             }
+            actor.renderers = instance.GetComponentsInChildren<Renderer>(true);
             return actor;
+        }
+
+        /// <summary>How burnt away the piece is, 0 whole to 1 gone. Set per renderer, so the side materials stay shared.</summary>
+        void SetDissolve(float amount)
+        {
+            if (Mathf.Approximately(amount, appliedDissolve)) return;
+            appliedDissolve = amount;
+            if (block == null) block = new MaterialPropertyBlock();
+            block.SetFloat(DissolveId, amount);
+            foreach (var r in renderers) r.SetPropertyBlock(block);
         }
 
         public bool HasPart(string name) => parts.ContainsKey(name);
@@ -70,6 +85,7 @@ namespace Prototypes.MedievalChess
             transform.position = startPosition + frame.RootOffset;
             transform.rotation = Quaternion.Euler(0f, frame.Yaw, 0f) * Quaternion.Euler(frame.Pitch, 0f, 0f);
             transform.localScale = Vector3.one * Mathf.Max(frame.Scale, 0.0001f);
+            SetDissolve(frame.Dissolve);
 
             foreach (var kv in parts)
             {

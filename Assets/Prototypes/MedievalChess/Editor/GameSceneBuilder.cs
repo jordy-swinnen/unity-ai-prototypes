@@ -49,10 +49,10 @@ namespace Prototypes.MedievalChess.Editor
             RenderSettings.fogColor = settings.look.fogColor;
             RenderSettings.fogDensity = settings.look.fogDensity;
 
-            var bone = DuelSceneBuilder.Material("Bone", settings.boneColor, 0.25f);
-            var cinnabar = DuelSceneBuilder.Material("Cinnabar", settings.cinnabarColor, 0.25f);
-            var iron = DuelSceneBuilder.Material("Iron", settings.ironColor, 0.45f);
-            var trim = DuelSceneBuilder.Material("Trim", settings.trimColor, 0.55f, 0.25f);
+            var bone = DuelSceneBuilder.Surface("Bone", settings.boneColor, 0.25f, 0f, settings, "grain", world: false);
+            var cinnabar = DuelSceneBuilder.Surface("Cinnabar", settings.cinnabarColor, 0.25f, 0f, settings, "grain", world: false);
+            var iron = DuelSceneBuilder.Surface("Iron", settings.ironColor, 0.45f, 0f, settings, "grain", world: false);
+            var trim = DuelSceneBuilder.Surface("Trim", settings.trimColor, 0.55f, 0.25f, settings, "grain", world: false);
 
             BuildBoard(settings);
             var cam = BuildCamera(settings);
@@ -75,10 +75,12 @@ namespace Prototypes.MedievalChess.Editor
 
         static void BuildBoard(MedievalChessSettings s)
         {
-            var light = DuelSceneBuilder.Material("Tile Light", s.lightSquareColor, 0.15f);
-            var dark = DuelSceneBuilder.Material("Tile Dark", s.darkSquareColor, 0.15f);
-            var frame = DuelSceneBuilder.Material("Frame", s.frameColor, 0.2f);
-            var floor = DuelSceneBuilder.Material("Floor", s.floorColor, 0.1f);
+            var light = DuelSceneBuilder.Surface("Tile Light", s.lightSquareColor, 0.15f, 0f, s, "limestone", world: true);
+            var dark = DuelSceneBuilder.Surface("Tile Dark", s.darkSquareColor, 0.15f, 0f, s, "slate", world: true);
+            // The frame's boards run along its length, so the east and west sides turn the wood a quarter.
+            var frame = DuelSceneBuilder.Surface("Frame", s.frameColor, 0.2f, 0f, s, "wood", world: true);
+            var frameSide = DuelSceneBuilder.Surface("Frame Side", s.frameColor, 0.2f, 0f, s, "wood", world: true, rotate: true);
+            var floor = DuelSceneBuilder.Surface("Floor", s.floorColor, 0.1f, 0f, s, "flagstone", world: true);
 
             var board = new GameObject("Board");
             for (int sq = 0; sq < 64; sq++)
@@ -91,21 +93,21 @@ namespace Prototypes.MedievalChess.Editor
 
             // a carved border round the squares
             var edge = new GameObject("Frame");
-            foreach (var (name, position, size) in new[]
+            foreach (var (name, position, size, material) in new[]
             {
-                ("Frame North", new Vector3(0f, -0.1f, 4.35f), new Vector3(9.4f, 0.3f, 0.7f)),
-                ("Frame South", new Vector3(0f, -0.1f, -4.35f), new Vector3(9.4f, 0.3f, 0.7f)),
-                ("Frame East", new Vector3(4.35f, -0.1f, 0f), new Vector3(0.7f, 0.3f, 8f)),
-                ("Frame West", new Vector3(-4.35f, -0.1f, 0f), new Vector3(0.7f, 0.3f, 8f)),
+                ("Frame North", new Vector3(0f, -0.1f, 4.35f), new Vector3(9.4f, 0.3f, 0.7f), frame),
+                ("Frame South", new Vector3(0f, -0.1f, -4.35f), new Vector3(9.4f, 0.3f, 0.7f), frame),
+                ("Frame East", new Vector3(4.35f, -0.1f, 0f), new Vector3(0.7f, 0.3f, 8f), frameSide),
+                ("Frame West", new Vector3(-4.35f, -0.1f, 0f), new Vector3(0.7f, 0.3f, 8f), frameSide),
             })
-                DuelSceneBuilder.Box(name, position, size, frame).transform.SetParent(edge.transform, true);
+                DuelSceneBuilder.Box(name, position, size, material).transform.SetParent(edge.transform, true);
 
             DuelSceneBuilder.Box("Floor", new Vector3(0f, -0.35f, 0f), new Vector3(24f, 0.2f, 24f), floor);
 
             // the trays where captured pieces stand
             float x = s.game.trayX;
-            DuelSceneBuilder.Box("Tray Left", new Vector3(-x, -0.05f, 0f), new Vector3(1.4f, 0.1f, 8f), frame);
-            DuelSceneBuilder.Box("Tray Right", new Vector3(x, -0.05f, 0f), new Vector3(1.4f, 0.1f, 8f), frame);
+            DuelSceneBuilder.Box("Tray Left", new Vector3(-x, -0.05f, 0f), new Vector3(1.4f, 0.1f, 8f), frameSide);
+            DuelSceneBuilder.Box("Tray Right", new Vector3(x, -0.05f, 0f), new Vector3(1.4f, 0.1f, 8f), frameSide);
         }
 
         static Camera BuildCamera(MedievalChessSettings s)
@@ -152,8 +154,8 @@ namespace Prototypes.MedievalChess.Editor
         {
             var flickers = new System.Collections.Generic.List<TorchFlicker>();
             var look = s.look;
-            var stone = DuelSceneBuilder.Material("Torch Stone", s.floorColor, 0.1f);
-            var iron = DuelSceneBuilder.Material("Iron", s.ironColor, 0.45f);
+            var stone = DuelSceneBuilder.Surface("Torch Stone", s.floorColor, 0.1f, 0f, s, "slate", world: true);
+            var iron = DuelSceneBuilder.Surface("Iron", s.ironColor, 0.45f, 0f, s, "grain", world: false);
             var flameMaterial = Emissive("Flame", look.torchColor, look.flameEmission);
 
             var group = new GameObject("Torches");
@@ -293,13 +295,13 @@ namespace Prototypes.MedievalChess.Editor
 
         static Material Ring(string name, Color color)
         {
-            string path = $"{DuelSceneBuilder.MaterialFolder}/MedievalChess Ring {name}.mat";
+            string path = DuelSceneBuilder.MaterialPath("Ring " + name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
                 var shader = Shader.Find("Universal Render Pipeline/Unlit");
                 if (shader == null) throw new InvalidOperationException("URP Unlit shader not found.");
-                mat = new Material(shader) { name = $"MedievalChess Ring {name}" };
+                mat = new Material(shader) { name = DuelSceneBuilder.MaterialName("Ring " + name) };
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetColor("_BaseColor", color);
@@ -541,13 +543,13 @@ namespace Prototypes.MedievalChess.Editor
         /// <summary>An unlit particle material: additive for embers and sparks (Bloom picks them up), alpha blended for dust.</summary>
         static Material ParticleMaterial(string name, bool additive)
         {
-            string path = $"{DuelSceneBuilder.MaterialFolder}/MedievalChess Particle {name}.mat";
+            string path = DuelSceneBuilder.MaterialPath("Particle " + name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
                 var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
                 if (shader == null) throw new InvalidOperationException("URP Particles/Unlit shader not found.");
-                mat = new Material(shader) { name = $"MedievalChess Particle {name}" };
+                mat = new Material(shader) { name = DuelSceneBuilder.MaterialName("Particle " + name) };
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetFloat("_Surface", 1f);

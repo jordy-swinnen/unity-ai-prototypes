@@ -16,6 +16,8 @@ namespace Prototypes.MedievalChess
         /// <summary>Forward tilt in degrees (negative falls backward).</summary>
         public readonly Channel Pitch = new Channel();
         public readonly Channel Scale = new Channel();
+        /// <summary>0 whole, 1 burnt away. Drives the dissolve shader. With no keys the piece is whole.</summary>
+        public readonly Channel Dissolve = new Channel();
         public readonly Dictionary<string, Channel> PartEuler = new Dictionary<string, Channel>();
 
         public float StartYaw;
@@ -40,6 +42,7 @@ namespace Prototypes.MedievalChess
             frame.Yaw = Yaw.HasKeys ? Yaw.EvaluateScalar(t) : StartYaw;
             frame.Pitch = Pitch.HasKeys ? Pitch.EvaluateScalar(t) : 0f;
             frame.Scale = Scale.HasKeys ? Scale.EvaluateScalar(t) : 1f;
+            frame.Dissolve = Dissolve.HasKeys ? Dissolve.EvaluateScalar(t) : 0f;
             frame.Visible = t >= HiddenUntil && t < HiddenFrom;
             frame.PartEuler.Clear();
             foreach (var kv in PartEuler) frame.PartEuler[kv.Key] = kv.Value.Evaluate(t);
@@ -53,6 +56,7 @@ namespace Prototypes.MedievalChess
         public float Yaw;
         public float Pitch;
         public float Scale = 1f;
+        public float Dissolve;
         public bool Visible = true;
         public readonly Dictionary<string, Vector3> PartEuler = new Dictionary<string, Vector3>();
     }

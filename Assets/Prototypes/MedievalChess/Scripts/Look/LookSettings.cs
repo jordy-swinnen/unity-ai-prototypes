@@ -39,9 +39,34 @@ namespace Prototypes.MedievalChess
         [Tooltip("0 Neutral, 1 ACES.")]
         public int tonemapping = 1;
 
+        [Header("Surfaces (textures, grain, baked occlusion)")]
+        public SurfaceSettings surface = new SurfaceSettings();
+
         [Header("The hall")]
         public Color ambientColor = new Color32(0x28, 0x2A, 0x32, 0xFF);
         public Color fogColor = new Color32(0x0F, 0x0C, 0x0A, 0xFF);
         [Range(0f, 0.2f)] public float fogDensity = 0.025f;
+    }
+
+    /// <summary>How strongly the generated textures, the piece grain and the baked occlusion show. 0 turns each off.</summary>
+    [Serializable]
+    public class SurfaceSettings
+    {
+        [Tooltip("How much the board, frame and floor textures change the base colour. 0 is flat colour.")]
+        [Range(0f, 1f)] public float textureStrength = 1f;
+        [Tooltip("The strength of the normal maps (the small bumps and cracks).")]
+        [Range(0f, 2f)] public float normalStrength = 1f;
+        [Tooltip("Metres of board that one repeat of a texture covers.")]
+        public float mapScale = 2.4f;
+        [Tooltip("How strongly the fine grain shows on the pieces.")]
+        [Range(0f, 1f)] public float pieceGrain = 0.5f;
+        [Tooltip("Repeats of the grain per metre on a piece.")]
+        public float pieceGrainScale = 5f;
+        [Tooltip("How dark the baked occlusion makes crevices (under a cape, inside a crown). 0 is off.")]
+        [Range(0f, 1f)] public float occlusionStrength = 0.9f;
+        [Tooltip("The glowing rim of a victim that is burning away. Above 1 so that Bloom picks it up.")]
+        [ColorUsage(false, true)] public Color dissolveEdgeColor = new Color(3.2f, 1.1f, 0.25f);
+        [Tooltip("How thick that rim is, in noise units.")]
+        [Range(0.01f, 0.3f)] public float dissolveEdgeWidth = 0.09f;
     }
 }

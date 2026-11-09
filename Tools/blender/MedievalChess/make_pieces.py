@@ -24,16 +24,22 @@ Shapes (all built here from nothing, never copied):
   lathe   a profile of (radius, height) points turned round the y axis (robes, domes, towers)
   ball    an ellipsoid
   limb    a tapered tube between two points (legs, necks, tails, arms)
+Ambient occlusion is baked into a vertex colour attribute ("AO", the red channel, 1 open and lower in crevices)
+by casting rays from every vertex against the whole piece in its rest pose. It needs no UV maps, and the
+game's shader (Shaders/MedievalLit.shader) multiplies it into the light. The two shoulder variants do not
+shade each other, because only one is shown.
 Faces are smooth-shaded, and edges sharper than SHARP_DEGREES stay crisp, so a bevelled box keeps its
 corners and a robe stays round. A shape marked flat=True keeps every edge crisp (a stone tower).
 """
 import math
+import random
 import sys
 from pathlib import Path
 
 import bmesh
 import bpy
 from mathutils import Euler, Vector
+from mathutils.bvhtree import BVHTree
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 EXPORT_DIR = REPO_ROOT / "Assets" / "Prototypes" / "MedievalChess" / "Art" / "Exports"
@@ -505,6 +511,58 @@ def build(name, spec):
     return parts
 
 
+AO_SAMPLES = 40
+AO_DISTANCE = 0.28   # metres: nothing further away than this shades a vertex
+AO_FLOOR = 0.12      # the darkest a vertex can get
+AO_CONTRAST = 1.15   # bends the result: above 1 darkens the crevices a little more
+
+
+def _tree(parts, skip):
+    """One BVH of every part in its rest pose, leaving out the parts named in skip."""
+    verts, polys = [], []
+    for pname, obj in parts.items():
+        if obj.type != "MESH" or pname in skip:
+            continue
+        base = len(verts)
+        verts.extend(obj.matrix_world @ v.co for v in obj.data.vertices)
+        polys.extend(tuple(base + i for i in poly.vertices) for poly in obj.data.polygons)
+    return BVHTree.FromPolygons(verts, polys, epsilon=0.0)
+
+
+def bake_occlusion(parts):
+    """Write the "AO" vertex colour on every mesh: the share of the hemisphere above each vertex that is open."""
+    rng = random.Random(7)
+    trees = {"bone": _tree(parts, {"ShoulderRed"}), "red": _tree(parts, {"ShoulderBone"})}
+    for pname, obj in parts.items():
+        if obj.type != "MESH":
+            continue
+        tree = trees["red" if pname == "ShoulderRed" else "bone"]
+        mesh = obj.data
+        normal_matrix = obj.matrix_world.to_3x3().inverted().transposed()
+        attr = mesh.color_attributes.new("AO", "FLOAT_COLOR", "POINT")
+        for v in mesh.vertices:
+            p = obj.matrix_world @ v.co
+            n = (normal_matrix @ v.normal).normalized()
+            t = n.orthogonal().normalized()
+            b = n.cross(t)
+            spin = rng.random() * math.tau
+            origin = p + n * 0.006
+            shade = 0.0
+            for i in range(AO_SAMPLES):
+                u = (i + 0.5) / AO_SAMPLES
+                r = math.sqrt(u)
+                a = i * 2.399963 + spin
+                d = (t * (r * math.cos(a)) + b * (r * math.sin(a)) + n * math.sqrt(1.0 - u)).normalized()
+                hit = tree.ray_cast(origin, d, AO_DISTANCE)
+                if hit[0] is not None:
+                    shade += 1.0 - hit[3] / AO_DISTANCE
+            ao = 1.0 - shade / AO_SAMPLES
+            ao = max(AO_FLOOR, min(1.0, ao)) ** AO_CONTRAST
+            attr.data[v.index].color = (ao, ao, ao, 1.0)
+        mesh.color_attributes.active_color = attr
+        mesh.color_attributes.render_color_index = mesh.color_attributes.find("AO")
+
+
 def world_top_and_size(parts):
     """Return (highest y of the body, base width x, base depth z), in Unity axes."""
     top = 0.0
@@ -565,7 +623,8 @@ def export(name, parts):
     bpy.context.view_layer.objects.active = parts["Root"]
     path = EXPORT_DIR / f"{name}.glb"
     bpy.ops.export_scene.gltf(
-        filepath=str(path), export_format="GLB", use_selection=True, export_apply=True, export_yup=True
+        filepath=str(path), export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
+        export_vertex_color="ACTIVE",
     )
     return path
 
@@ -586,6 +645,7 @@ def main():
             print(f"  PROBLEM: {p}")
             failed = True
         if not problems:
+            bake_occlusion(parts)
             export(name, parts)
     if failed:
         print("Piece check failed. Fix the problems above (nothing was exported for a piece with a problem).")

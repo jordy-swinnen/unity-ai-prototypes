@@ -52,6 +52,19 @@ You picked "Living pieces (Battle Chess style)". It is combined with the recomme
 
 The sides also differ by shape and by position, so colour is not the only cue. Red on slate is the weakest pairing for contrast and for red-green colour blindness, so it is checked on a render, and the crest shape is the backup.
 
+### Surfaces
+Decided by the agent from the look brief (rules in `.claude/skills/game-polish/references/surfaces.md`), added after the first play test said the pieces and board looked flat. Strengths are on the settings asset (`look.surface`).
+
+| Material or object | Surface | Why (pillar) |
+|---|---|---|
+| Light squares | procedural limestone texture and normal map, world-space | heavy, ceremonial stone is the first thing the eye reads (pillars 1 and 2) |
+| Dark squares | procedural slate with strata and hairline cracks, world-space | the same, and the two stones differ in texture as well as colour |
+| Frame and trays | procedural planks with grain, world-space, turned a quarter on the east and west sides | the grain runs along the board's edge |
+| Floor and torch stone | procedural flagstones with mortar, world-space | the hall reads as stone, and no stone repeats its neighbour |
+| Pieces, both sides | fine object-space grain, baked ambient occlusion in vertex colours, three material slots (side, iron, gold) | figures in a dim hall need shadow in their folds and under their crowns (pillar 1) |
+| A captured piece | burns away along a noise edge with a glowing rim, plus the embers | "every capture is a fight" ends on a visible, readable death (pillar 1) |
+| Torch flames, rings, particles | flat colour with emission, no texture, by design | glow and clarity matter more than detail (pillar 3) |
+
 ### Audio direction
 Weighty and dry: stone and wood on stone, iron on iron, a low war drum, a horn for check and mate. No music and no voices in this version. All sounds are made by a script (filtered noise bursts, decaying low sines and plucked-string tones). Whether they sound good is the person's call. (pillar 3)
 
@@ -113,6 +126,8 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 
 ## Art and audio assets
 - **Models (Blender scripts, `.glb`):** six articulated pieces (pawn, knight, bishop, rook, queen, king), each built from separate parts in one node hierarchy (body, head, weapon arm, shield arm, base, and a horse for the knight), at most 6,000 triangles per piece (raised from 2,500 for the model pass; the pieces use 1,700 to 3,900), the same mesh for both sides with three materials (the side colour, iron and gold trim). The board with its frame and 64 squares (at most 2,000 triangles), a torch with a bracket, a banner, and a ring marker. No rig or skeleton: Unity animates the parts by code.
+- **Textures (Blender-run Python script, `.png`):** `Tools/textures/MedievalChess/make_textures.py` writes tileable 512 px albedo and normal maps for slate, limestone, wood, flagstone and a fine grain from seeded noise (original, no source to license).
+- **Shader (hand-written URP, `Shaders/MedievalLit.shader`):** world-space triplanar textures for the set, object-space grain and baked occlusion for the pieces, and a dissolve with a glowing rim.
 - **Effects (Unity):** torch flames, embers, dust, sparks on weapon hits, glow rings for selection and legal moves, the check pulse.
 - **Sounds (Python script, `.wav`):** about 16 sounds, each under 2 s: footstep thud, knight leap, rook slide, six attack swings, an impact, a collapse, selection clink, illegal knock, check horn, checkmate fanfare, draw bell, promotion anvil, drum hit, UI creak.
 - **Fonts:** the built-in font for now. See Open questions.

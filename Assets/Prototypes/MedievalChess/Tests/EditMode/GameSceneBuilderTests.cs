@@ -44,6 +44,23 @@ namespace Prototypes.MedievalChess.Tests
         }
 
         [Test]
+        public void The_board_frame_and_floor_use_the_surface_shader_with_world_space_textures()
+        {
+            foreach (var name in new[] { "Tile a1", "Tile h8", "Frame North", "Frame East", "Floor", "Tray Left" })
+            {
+                var m = Find(name).GetComponent<Renderer>().sharedMaterial;
+                Assert.AreEqual(DuelSceneBuilder.SurfaceShaderName, m.shader.name, name);
+                Assert.IsNotNull(m.GetTexture("_BaseMap"), $"{name} has no texture");
+                Assert.IsNotNull(m.GetTexture("_NormalMap"), $"{name} has no normal map");
+                Assert.AreEqual(1f, m.GetFloat("_WorldMapping"), $"{name} must map in world space so squares do not repeat");
+            }
+            Assert.AreEqual(1f, Find("Frame East").GetComponent<Renderer>().sharedMaterial.GetFloat("_MapRotate"), "the east frame turns its wood a quarter");
+            Assert.AreEqual(0f, Find("Frame North").GetComponent<Renderer>().sharedMaterial.GetFloat("_MapRotate"));
+            Assert.AreNotEqual(Find("Tile a1").GetComponent<Renderer>().sharedMaterial.GetTexture("_BaseMap"),
+                Find("Tile b1").GetComponent<Renderer>().sharedMaterial.GetTexture("_BaseMap"), "light and dark squares use different stone");
+        }
+
+        [Test]
         public void There_are_sixty_four_squares_in_two_colours_on_the_squares_the_rules_use()
         {
             var tiles = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(t => t.name.StartsWith("Tile ")).ToArray();
@@ -143,7 +160,8 @@ namespace Prototypes.MedievalChess.Tests
             foreach (var m in new[] { controller.bone, controller.cinnabar, controller.iron, controller.trim })
             {
                 Assert.IsNotNull(m);
-                Assert.AreEqual("Universal Render Pipeline/Lit", m.shader.name);
+                Assert.AreEqual(DuelSceneBuilder.SurfaceShaderName, m.shader.name);
+                Assert.IsNotNull(m.GetTexture("_BaseMap"), "the pieces carry the grain texture");
             }
             Assert.IsNotNull(controller.ui);
             Assert.IsNotNull(controller.highlights);

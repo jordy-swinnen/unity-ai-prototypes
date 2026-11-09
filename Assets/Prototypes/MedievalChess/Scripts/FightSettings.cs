@@ -26,6 +26,8 @@ namespace Prototypes.MedievalChess
         public float windUpQueen = 0.35f;
         public float windUpKing = 0.55f;
         public float collapseTime = 0.6f;
+        [UnityEngine.Tooltip("The victim burns away over the last part of the collapse, this many seconds. At most the collapse time.")]
+        public float dissolveTime = 0.45f;
         public float stepInTime = 0.3f;
         public float settleTime = 0.2f;
         [UnityEngine.Tooltip("Quick plays the fight this many times faster.")]

@@ -60,7 +60,8 @@ namespace Prototypes.MedievalChess.Tests
             foreach (var m in new[] { duel.bone, duel.cinnabar, duel.iron })
             {
                 Assert.IsNotNull(m);
-                Assert.AreEqual("Universal Render Pipeline/Lit", m.shader.name);
+                Assert.AreEqual(DuelSceneBuilder.SurfaceShaderName, m.shader.name);
+                Assert.IsNotNull(m.GetTexture("_BaseMap"), "the pieces carry the grain texture");
                 Assert.IsTrue(AssetDatabase.Contains(m), "materials must be saved assets");
             }
             Assert.IsNotNull(duel.cam);

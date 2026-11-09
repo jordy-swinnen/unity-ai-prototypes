@@ -89,7 +89,9 @@ namespace Prototypes.MedievalChess
             v.Yaw.Add(0f, victimYaw).Add(approachEnd, victimFacing).Add(duration, victimFacing, Ease.Linear);
             v.Root.Add(0f, Vector3.zero).Add(blow, Vector3.zero).Add(blow + fall, dir * s.pushBack, Ease.Out);
             v.Pitch.Add(0f, 0f).Add(blow, 0f).Add(blow + fall, -85f, Ease.In);
-            v.Scale.Add(0f, 1f).Add(Mathf.Max(0f, collapseEnd - 0.2f), 1f).Add(collapseEnd, 0f, Ease.In);
+            // It burns away along a noise edge as it falls (the shader reads this) and is removed when fully burnt.
+            float burn = Mathf.Clamp(s.dissolveTime, 0.01f, s.collapseTime);
+            v.Dissolve.Add(0f, 0f).Add(collapseEnd - burn, 0f).Add(collapseEnd, 1f, Ease.Linear);
             v.HiddenFrom = collapseEnd;
             foreach (var arm in new[] { "ArmR", "ArmL" })
                 v.Part(arm).Add(0f, 0f).Add(blow, 0f).Add(blow + 0.15f, 50f, Ease.Out).Add(blow + fall, 20f);

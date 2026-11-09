@@ -242,6 +242,25 @@ Asked for after the first look at the pieces: "a bit more impressive". Rebuilt a
 - [x] Reviewed on close-up renders of both sides, not only at board distance.
 - Not done: baked ambient occlusion, textures and shader changes. These need a decision (see the chat).
 
+### Surface pass (after the model pass, approved in chat: "options 1-3")
+Asked for after the first play of the game: the pieces and board are flat colours. Three parts, no packages.
+- **Texture images (option 1).** `Tools/textures/MedievalChess/make_textures.py` (run headless in Blender, for its numpy) writes tileable 512 px albedo and normal maps for slate, limestone, wood and flagstone into `Art/Textures/` (PNGs are LFS). A hand-written URP shader `Shaders/MedievalLit.shader` maps them in world space for the board, frame and floor (so no tile repeats its neighbour), and as a fine object-space grain on the pieces (so no UV maps are needed).
+- **Baked ambient occlusion (option 2).** `make_pieces.py` bakes occlusion into vertex colours by casting rays against all the parts of a piece (its rest pose), and exports them. The shader multiplies it into the light. Baking into vertices needs no UVs and no change to how materials are replaced by name.
+- **Dissolve to embers (option 3).** The victim stops shrinking and instead burns away along a noise edge with a glowing rim, driven by a `Dissolve` channel in the fight plan and a material property block set by `PieceActor`. The embers particles from stage 6 stay.
+- Tests first: a dissolve that rises 0 to 1 over the collapse and ends hidden; the property block follows the frame; the shader compiles with no messages; the textures exist, tile and are not flat; every exported mesh carries occlusion that varies; the scene's materials use the shader and the textures.
+- Tuning values on the settings asset: `look.surface` (texture strength, grain strength, occlusion strength, normal strength) and `fight.dissolveTime`.
+- Not verified by me: whether it looks better in motion at play distance; the dissolve's timing against the sound.
+
+- [x] Tests written first (`SurfaceTests`, a dissolve test in `FightPlanTests`, board-surface and shader-name checks in the builder tests).
+- [x] Texture generator and PNGs: `Tools/textures/MedievalChess/make_textures.py`, ten 512 px files in `Art/Textures/`, imported by `SurfaceTextureImporter`.
+- [x] Shader `Shaders/MedievalLit.shader`, `DuelSceneBuilder.Surface`, strengths in `look.surface`. The east and west frame and the trays turn the wood a quarter.
+- [x] Occlusion bake in `make_pieces.py` (about 40 rays per vertex), exported as vertex colours.
+- [x] Dissolve: `Dissolve` channel in `ActorPlan`, `fight.dissolveTime` (0.45 s), set per renderer by `PieceActor`. The victim burns instead of shrinking.
+- [x] Deliberate-bug check: the dissolve's end value changed, 24 tests failed, restored.
+- [x] `check.sh all`: EditMode 729/729, PlayMode 69/69. Renders read: opening position, close-up of the bone row, four frames of a rook taking a queen.
+- Not verified by me: the look with Bloom and Vignette (the Game view does not repaint in the background, so I rendered the main camera), how the burn reads in motion at full speed, and the bake on a swinging arm.
+- Also done in this pass: the structure rules (`docs/project-structure.md`, `ProjectStructureTests`), the 20 materials renamed without spaces, and the surface decision written into the four skills.
+
 ### Stage 7: play test and tidy
 - [ ] **You play** each difficulty and fill in the "needs a person" criteria in the spec. The sheet is `medieval-chess-playtest.md`. This is the one thing left that I cannot do.
 - [ ] Turn findings into tasks or open questions. Tune values on the settings asset.

@@ -1,4 +1,5 @@
 using System.Linq;
+using Prototypes.MedievalChess.Editor;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -151,7 +152,7 @@ namespace Prototypes.MedievalChess.Tests
                 var instance = Object.Instantiate(Load(name));
                 try
                 {
-                    var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    var mat = new Material(Shader.Find(DuelSceneBuilder.SurfaceShaderName));
                     var actor = PieceActor.Bind(instance, System.Enum.Parse<PieceType>(name, true), mat, mat, side);
                     Assert.AreEqual(side == 0, actor.Part("ShoulderBone").gameObject.activeSelf, $"{name} side {side}");
                     Assert.AreEqual(side == 1, actor.Part("ShoulderRed").gameObject.activeSelf, $"{name} side {side}");

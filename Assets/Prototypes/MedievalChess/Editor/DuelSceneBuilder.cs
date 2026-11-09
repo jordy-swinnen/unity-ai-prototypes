@@ -20,6 +20,8 @@ namespace Prototypes.MedievalChess.Editor
         public const string SettingsPath = Root + "/Settings/MedievalChessSettings.asset";
         internal const string MaterialFolder = Root + "/Materials";
         internal const string ModelFolder = Root + "/Art/Exports";
+        internal const string TextureFolder = Root + "/Art/Textures";
+        public const string SurfaceShaderName = "Prototypes/MedievalChess/Lit";
 
         [MenuItem("Prototypes/MedievalChess/Build Duel Scene")]
         public static void BuildDefault()
@@ -46,12 +48,13 @@ namespace Prototypes.MedievalChess.Editor
             RenderSettings.ambientLight = new Color(0.07f, 0.065f, 0.06f);
             RenderSettings.fog = false;
 
-            var bone = Material("Bone", settings.boneColor, 0.25f);
-            var cinnabar = Material("Cinnabar", settings.cinnabarColor, 0.25f);
-            var iron = Material("Iron", settings.ironColor, 0.45f);
-            var trim = Material("Trim", settings.trimColor, 0.55f, 0.25f);
-            BuildBoard(Material("Tile Light", settings.lightSquareColor, 0.15f), Material("Tile Dark", settings.darkSquareColor, 0.15f),
-                Material("Floor", settings.floorColor, 0.1f));
+            var bone = Surface("Bone", settings.boneColor, 0.25f, 0f, settings, "grain", world: false);
+            var cinnabar = Surface("Cinnabar", settings.cinnabarColor, 0.25f, 0f, settings, "grain", world: false);
+            var iron = Surface("Iron", settings.ironColor, 0.45f, 0f, settings, "grain", world: false);
+            var trim = Surface("Trim", settings.trimColor, 0.55f, 0.25f, settings, "grain", world: false);
+            BuildBoard(Surface("Tile Light", settings.lightSquareColor, 0.15f, 0f, settings, "limestone", world: true),
+                Surface("Tile Dark", settings.darkSquareColor, 0.15f, 0f, settings, "slate", world: true),
+                Surface("Floor", settings.floorColor, 0.1f, 0f, settings, "flagstone", world: true));
             var cam = BuildCamera(settings);
             BuildLight(settings);
             var label = BuildLabel();
@@ -63,6 +66,11 @@ namespace Prototypes.MedievalChess.Editor
         }
 
         // --- assets ---
+
+        /// <summary>Asset names have no spaces (Unity's command line tools trip on them): "Tile Light" is MedievalChessTileLight.</summary>
+        internal static string MaterialName(string name) => "MedievalChess" + name.Replace(" ", "");
+
+        internal static string MaterialPath(string name) => $"{MaterialFolder}/{MaterialName(name)}.mat";
 
         internal static void EnsureFolder(string path)
         {
@@ -81,18 +89,55 @@ namespace Prototypes.MedievalChess.Editor
 
         internal static Material Material(string name, Color color, float smoothness, float metallic = 0f)
         {
-            string path = $"{MaterialFolder}/MedievalChess {name}.mat";
+            string path = MaterialPath(name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
                 var shader = Shader.Find("Universal Render Pipeline/Lit");
                 if (shader == null) throw new InvalidOperationException("URP Lit shader not found.");
-                mat = new Material(shader) { name = $"MedievalChess {name}" };
+                mat = new Material(shader) { name = MaterialName(name) };
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetColor("_BaseColor", color);
             mat.SetFloat("_Metallic", metallic);
             mat.SetFloat("_Smoothness", smoothness);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        /// <summary>
+        /// A material with the game's surface shader. A world-space one (board, frame, floor) projects its texture from
+        /// the world so no square repeats its neighbour. An object-space one (the pieces) lays the grain on the piece itself.
+        /// The strengths come from the settings (look.surface). A missing texture file just gives a flat colour.
+        /// </summary>
+        internal static Material Surface(string name, Color color, float smoothness, float metallic, MedievalChessSettings settings,
+            string texture, bool world, bool rotate = false)
+        {
+            var shader = Shader.Find(SurfaceShaderName);
+            if (shader == null) throw new InvalidOperationException($"Shader {SurfaceShaderName} not found. Is Shaders/MedievalLit.shader imported?");
+            string path = MaterialPath(name);
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = new Material(shader) { name = MaterialName(name) };
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            if (mat.shader != shader) mat.shader = shader;
+
+            var look = settings.look.surface;
+            mat.SetColor("_BaseColor", color);
+            mat.SetFloat("_Metallic", metallic);
+            mat.SetFloat("_Smoothness", smoothness);
+            mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>($"{TextureFolder}/{texture}_albedo.png"));
+            mat.SetTexture("_NormalMap", AssetDatabase.LoadAssetAtPath<Texture2D>($"{TextureFolder}/{texture}_normal.png"));
+            mat.SetFloat("_WorldMapping", world ? 1f : 0f);
+            mat.SetFloat("_MapRotate", rotate ? 1f : 0f);
+            mat.SetFloat("_TextureStrength", world ? look.textureStrength : look.pieceGrain);
+            mat.SetFloat("_NormalStrength", world ? look.normalStrength : 0f);
+            mat.SetFloat("_MapScale", world ? 1f / Mathf.Max(look.mapScale, 0.01f) : look.pieceGrainScale);
+            mat.SetFloat("_AoStrength", look.occlusionStrength);
+            mat.SetColor("_EdgeColor", look.dissolveEdgeColor);
+            mat.SetFloat("_EdgeWidth", look.dissolveEdgeWidth);
             EditorUtility.SetDirty(mat);
             return mat;
         }
