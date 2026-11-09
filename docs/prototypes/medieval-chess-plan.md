@@ -1,6 +1,6 @@
 # Medieval Chess: plan and tasks
 
-Plan for `docs/prototypes/medieval-chess.md`. Status: stage 6 done, stage 7 next (the play test)
+Plan for `docs/prototypes/medieval-chess.md`. Status: stage 7 prepared, waiting for your play test
 
 ## Decisions needed first
 1. **Share the shake and hit-stop code (needs your approval).** Neon Pong already has `ShakeState` and `TimeFeel`, and Medieval Chess needs the same two things. `AGENTS.md` says to move code to `Assets/Shared/` when a second prototype needs it, and not to edit another prototype unless the task says so.
@@ -234,11 +234,14 @@ What differed from the plan, and why:
 - **Not built (needs a decision):** the start-screen banner hover, the sway on an illegal click, the lift of a picked piece, the thinking candle, pieces lowering their weapons in a draw, the fade of pieces in a new game, a horn when a game starts is a drum and horn in one file.
 
 ### Stage 7: play test and tidy
-- [ ] You play each difficulty and fill in the "needs a person" criteria in the spec.
+- [ ] **You play** each difficulty and fill in the "needs a person" criteria in the spec. The sheet is `medieval-chess-playtest.md`. This is the one thing left that I cannot do.
 - [ ] Turn findings into tasks or open questions. Tune values on the settings asset.
-- [ ] Decide the font (needs your approval and a licence record), and the legacy Neon Pong leftovers.
-- [ ] Update the spec, tick the criteria and set this plan to complete. Update the README to list both games.
-- [ ] Update PR #2's description, and change its base to `main` if #1 has been merged.
+- [ ] Decide the font (needs your approval and a licence record).
+- [x] Removed the legacy crate placeholder, with your approval.
+- [x] Updated the spec to describe the game as built, and ticked the criteria that tests and captures cover.
+- [x] The README and `AGENTS.md` list both games.
+- [x] PR #2's title and description now describe the finished game. It stays a draft until the play test is done.
+- [ ] After the play test: set this plan to complete. When #1 merges, change PR #2's base to `main`.
 
 ## Verification
 | Criterion | How it is checked |
