@@ -13,8 +13,7 @@ namespace Shared.Tests
     /// </summary>
     public class ProjectStructureTests
     {
-        // Folders and files directly under Assets that are allowed. The last four are leftovers from the URP
-        // project template. Remove them with the person's approval, then delete them from this list.
+        // Folders and files directly under Assets that are allowed.
         static readonly string[] AssetsRoot =
         {
             "Prototypes",   // one folder per game
@@ -22,7 +21,6 @@ namespace Shared.Tests
             "ThirdParty",   // anything we did not make (Asset Store, downloads), kept apart from our own
             "Sandbox",      // personal experiments, ignored by git
             "Settings",     // the render pipeline assets (URP)
-            "Scenes", "TutorialInfo", "Readme.asset", "InputSystem_Actions.inputactions", // template leftovers
         };
 
         static string Root
