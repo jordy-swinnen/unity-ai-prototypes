@@ -35,3 +35,7 @@ Each of these happened while building the first prototype in this repository.
 31. **Test positions must be legal.** The side not to move cannot be in check, so a position with a rook giving check to the wrong king is refused by the FEN reader. Put the kings on squares nothing attacks.
 32. **A few games prove nothing about which engine is stronger.** Two games of depth 4 against depth 3 lost, while ten games won 7 to 3. Use a large sample, and keep a slow check as an `[Explicit]` test. Measure speed and depth with `unity cmd script eval` (give it a `--timeout`).
 33. **A search with a time cap is not repeatable.** For a test that must give the same answer every run, set a long cap and limit the depth.
+34. **`GameObject.Find` skips inactive objects.** A hidden panel (the promotion choice, the result screen) is not found. Use `FindObjectsByType<T>(FindObjectsInactive.Include)` or keep a reference from the builder.
+35. **Restoring a scene file under an open Editor can freeze it** behind a modal "reload" dialog. Never `git checkout` a scene that is open. Rebuild it with the menu command instead.
+36. **Test runs dirty some files.** `ProjectSettings/URPProjectSettings.asset` and another prototype's materials change after a test run. Run `git checkout` on them before you commit, and check `git status`.
+37. **`unity cmd script eval` has limits.** No local functions used as method groups (use `System.Func`). A FEN with a wrong square count throws, so count the ranks.

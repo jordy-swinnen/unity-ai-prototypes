@@ -4,6 +4,7 @@
     "references": [
         "MedievalChess",
         "Shared",
+        "Unity.InputSystem",
         "UnityEngine.UI"
     ],
     "includePlatforms": [

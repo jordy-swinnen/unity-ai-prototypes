@@ -27,7 +27,11 @@ namespace Prototypes.MedievalChess
         public Color lightSquareColor = new Color32(0x9A, 0x9C, 0x94, 0xFF);
         public Color darkSquareColor = new Color32(0x5E, 0x66, 0x60, 0xFF);
         public Color floorColor = new Color32(0x2B, 0x27, 0x24, 0xFF);
+        public Color frameColor = new Color32(0x4A, 0x33, 0x22, 0xFF);
         public Color keyLightColor = new Color32(0xFF, 0xD9, 0xA0, 0xFF);
+
+        [Header("The game")]
+        public GameLayoutSettings game = new GameLayoutSettings();
 
         [Header("Duel scene (stage 1)")]
         [Tooltip("Degrees the camera is pitched down.")]

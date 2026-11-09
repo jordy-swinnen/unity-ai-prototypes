@@ -1,6 +1,6 @@
 # Medieval Chess: plan and tasks
 
-Plan for `docs/prototypes/medieval-chess.md`. Status: draft
+Plan for `docs/prototypes/medieval-chess.md`. Status: stage 5 done, stage 6 next
 
 ## Decisions needed first
 1. **Share the shake and hit-stop code (needs your approval).** Neon Pong already has `ShakeState` and `TimeFeel`, and Medieval Chess needs the same two things. `AGENTS.md` says to move code to `Assets/Shared/` when a second prototype needs it, and not to edit another prototype unless the task says so.
@@ -199,12 +199,20 @@ What differed from the plan, and why:
 - **Not done here:** the pause for show (`minThinkSeconds`) is built into `ChooseAsync`, but the scene does not use it yet. Stage 5 wires it up.
 
 ### Stage 5: playable
-- [ ] Tests first: the controller state machine (menu to player turn to animating to computer to game over), an illegal click does nothing, a promotion needs a choice before the move, the computer replies once, Play Again resets. Builder tests (every part, building twice, committed scene matches).
-- [ ] Write `BoardView`, `PieceView`, `InputController`, `HighlightView`, `UiView` (start screen with difficulty and side, top bar, trays, promotion choice, result), `GameController` and the camera rig basics. Plain look for now.
-- [ ] `Build Scene`, then PlayMode tests: the start screen starts a game with the chosen side and difficulty, a click and a legal square moves a piece, a capture plays its fight and then the board matches the rules, a game over shows the result.
-- [ ] Play a full game against each difficulty in a test run (computer against computer with a fixed seed) to catch a crash or a stuck state.
-- [ ] Capture the start screen, the opening position, a selection with legal moves, a fight and the game over screen (`capture.sh play`).
-- [ ] Deliberate-bug check, and commit: `feat(medieval-chess): add the playable game`. Stop for review.
+- [x] Tests first: `BoardTrackerTests`, `MoveDescriberTests`, `BoardGeometryTests` and `GameSceneBuilderTests` in EditMode, and `GamePlayTests` in PlayMode (menu to player turn to animating to computer to game over, illegal clicks do nothing, promotion needs a choice, the computer replies once, Play Again resets, clicks are ignored while a fight plays).
+- [x] Wrote the game layer in `Scripts/Game/`: `BoardGeometry`, `MoveDescriber`, `BoardTracker`, `SequenceStage`, `GameLayoutSettings`, `HighlightView`, `InputController`, `GameCameraRig`, `UiView`, `GameController`. Plain look.
+- [x] `Prototypes/MedievalChess/Build Scene` writes `Scenes/MedievalChess.unity` (board, frame, trays, rings, start screen, top bar, promotion and result panels). PlayMode tests cover the menu, a move with the computer's reply, a capture's fight and tray, check, promotion, checkmate, stalemate, resign, and mouse picking for all 64 squares from both sides.
+- [x] Whole games, computer against a seeded random-ish player, against all three difficulties and both sides, finish without a crash or a stuck state.
+- [x] Captured the start screen, the opening position, a selection with legal moves, a knight fight mid-way, a queen fight, the promotion choice and the game over screen.
+- [x] Deliberate-bug check: flipped the rank direction in `BoardGeometry`. Three tests failed (square from a point, the board centre, the committed scene). Restored. Result: EditMode 601/601, PlayMode 54/54.
+- [x] Commit: `feat(medieval-chess): add the playable game`.
+
+What differed from the plan, and why:
+- **No `BoardView` or `PieceView`.** The scene builder makes the tiles, and the existing `PieceActor` from stage 1 is the piece view. `BoardTracker` keeps a piece for each starting square and checks that what is shown equals the rules' position.
+- **The computer replies after a pause for show** (`minThinkSeconds`, now wired up through `ChooseAsync`). The search runs on a worker thread, so the frame rate stays smooth while it thinks.
+- **The "human" in the whole-game tests is a depth 2 computer player**, because random moves lost to a quick mate and ended the games too early.
+- **Fonts are Unity's built-in font.** The font choice stays for stage 7 (needs a licence record).
+- **Not judged here:** how fights feel in motion, the look (still a plain, warm-lit greybox), and sound (none yet). Those are stages 6 and 7.
 
 ### Stage 6: look and feel (game-polish)
 Each step has before and after captures, tests for its logic and its own commit, as in Neon Pong.

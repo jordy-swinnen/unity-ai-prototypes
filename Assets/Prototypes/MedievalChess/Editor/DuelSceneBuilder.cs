@@ -18,8 +18,8 @@ namespace Prototypes.MedievalChess.Editor
         const string Root = "Assets/Prototypes/MedievalChess";
         public const string ScenePath = Root + "/Scenes/Duel.unity";
         public const string SettingsPath = Root + "/Settings/MedievalChessSettings.asset";
-        const string MaterialFolder = Root + "/Materials";
-        const string ModelFolder = Root + "/Art/Exports";
+        internal const string MaterialFolder = Root + "/Materials";
+        internal const string ModelFolder = Root + "/Art/Exports";
 
         [MenuItem("Prototypes/MedievalChess/Build Duel Scene")]
         public static void BuildDefault()
@@ -63,7 +63,7 @@ namespace Prototypes.MedievalChess.Editor
 
         // --- assets ---
 
-        static void EnsureFolder(string path)
+        internal static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             string parent = path.Substring(0, path.LastIndexOf('/'));
@@ -71,14 +71,14 @@ namespace Prototypes.MedievalChess.Editor
             AssetDatabase.CreateFolder(parent, path.Substring(path.LastIndexOf('/') + 1));
         }
 
-        static void CreateSettingsIfMissing()
+        internal static void CreateSettingsIfMissing()
         {
             if (AssetDatabase.LoadAssetAtPath<MedievalChessSettings>(SettingsPath) != null) return;
             AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<MedievalChessSettings>(), SettingsPath);
             AssetDatabase.SaveAssets();
         }
 
-        static Material Material(string name, Color color, float smoothness)
+        internal static Material Material(string name, Color color, float smoothness)
         {
             string path = $"{MaterialFolder}/MedievalChess {name}.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -112,7 +112,7 @@ namespace Prototypes.MedievalChess.Editor
             Box("Floor", new Vector3(0f, -0.22f, 0f), new Vector3(20f, 0.2f, 20f), floor);
         }
 
-        static GameObject Box(string name, Vector3 position, Vector3 scale, Material material)
+        internal static GameObject Box(string name, Vector3 position, Vector3 scale, Material material)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name;
