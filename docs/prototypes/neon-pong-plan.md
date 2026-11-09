@@ -1,6 +1,6 @@
 # Neon Pong: plan and tasks
 
-Plan for `docs/prototypes/neon-pong.md`. Status: draft
+Plan for `docs/prototypes/neon-pong.md`. Status: stage 1 done
 
 ## Decisions needed first
 1. **No new packages.** Everything fits the packages the project has: URP 17.6.0 (Bloom, Vignette, Tonemapping, Volume), Input System 1.20.1, glTFast 6.20.0 (imports the `.glb` files), uGUI 2.6.0 (score text). Camera shake, hit-stop and the trail are small scripts of our own, not Cinemachine (see `game-polish/references/urp-effects.md`). Nothing to approve here.
@@ -19,7 +19,7 @@ Unity units are metres. The table top is the plane y = 0. Gameplay uses x (the t
 
 | Object | Size (x, y, z) | Position | Why |
 |---|---|---|---|
-| Table | 17 x 0.4 x 11 | top face at y = 0 | slightly bigger than the play area (16 x 10), so the end lines and rails sit on it |
+| Table | 17 x 0.41 x 11 (0.4 slab plus 0.01 grid lines) | slab top face at y = 0 | slightly bigger than the play area (16 x 10), so the end lines and rails sit on it |
 | Rail (two, top and bottom) | 16.4 x 0.3 x 0.3 | z = +5.15 and z = -5.15, resting on y = 0 | the walls the ball bounces off. The play area half width is 5, so the rail inner face is at z = 5 |
 | End line (two) | 0.1 x 0.02 x 10 | x = +8 and x = -8 | where a miss is scored, dim emissive |
 | Paddle (two) | 0.4 x 0.3 x 2 | x = +7.5 and x = -7.5, resting on y = 0 | half length 1, half thickness 0.2, as in the spec |
@@ -71,13 +71,13 @@ Test assemblies `NeonPong.Tests.EditMode` and `NeonPong.Tests.PlayMode` (the lat
 Each stage ends with a stop for review.
 
 ### Stage 1: greybox
-- [ ] Run `Tools/unity/check.sh all` and note the starting result (expected: compile ok, 0 tests).
-- [ ] Create the folders and four assembly definitions from `AGENTS.md`.
-- [ ] Write `make_neon_pong_assets.py`, run it headless, and check the `.glb` and `.blend` files exist, with the sizes, pivots and triangle counts from the layout table. Check the bounds and material count again after Unity's import.
-- [ ] Write the EditMode tests for the rules from the spec (wall reflection, paddle bounce at centre and edge, speed step and cap, reset, scoring both sides, serve direction, win, restart, paddle limits, repeatability, fast ball does not tunnel through a paddle), before the code.
-- [ ] Write `NeonPongSettings`, `NeonPongState`, `NeonPongInput` and `NeonPongSimulation` to pass them. Run `Tools/unity/check.sh editmode`.
-- [ ] Deliberate-bug check: flip one rule, see the matching test fail, restore.
-- [ ] Commit: `feat(neon-pong): add Blender assets and rules with EditMode tests`.
+- [x] Run `Tools/unity/check.sh all` and note the starting result: compile ok, 0 tests in both modes.
+- [x] Create the folders and four assembly definitions from `AGENTS.md`. Only folders that hold files exist now (`Audio`, `Scenes` and `Settings` come in later stages).
+- [x] Write `make_neon_pong_assets.py`, run it headless, and check the `.glb` and `.blend` files exist, with the sizes, pivots and triangle counts from the layout table. Checked the bounds and material count again after Unity's import: all sizes match, table has 2 materials, the others 1. The script fails with no export if a size, pivot or triangle count is off (it caught the table height, which is 0.41 with the grid lines).
+- [x] Write the EditMode tests for the rules from the spec (wall reflection, paddle bounce at centre and edge, speed step and cap, reset, scoring both sides, serve direction, win, restart, paddle limits, repeatability, fast ball does not tunnel through a paddle), before the code (30 tests; they failed to compile first).
+- [x] Write `NeonPongSettings`, `NeonPongState`, `NeonPongInput` and `NeonPongSimulation` to pass them. `Tools/unity/check.sh all`: 30/30 EditMode pass. Two tests were wrong at first (a paddle clamp zeroes its speed, and a long game ends at 5 points); I fixed the tests, not the rules.
+- [x] Deliberate-bug check: flipped the sign of the bounce angle, 3 tests failed, restored and 30/30 pass.
+- [x] Commit: `feat(neon-pong): add Blender assets and rules with EditMode tests`.
 
 ### Stage 2: playable
 - [ ] Write the builder tests first (every part present, models where the rules expect them, building twice gives the same content, Volume has Bloom with intensity above 0 and Tonemapping Neutral, camera has post-processing on, Volume Mask includes the Volume layer).
