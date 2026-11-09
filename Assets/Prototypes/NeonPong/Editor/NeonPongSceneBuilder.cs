@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -112,19 +113,22 @@ namespace Prototypes.NeonPong.Editor
             };
         }
 
+        /// <summary>Materials are named NeonPong plus the name without spaces (NeonPongTableBody), as AGENTS.md asks.</summary>
+        static string MaterialPath(string name) => $"{MaterialFolder}/NeonPong{name.Replace(" ", "")}.mat";
+
         /// <summary>
         /// A URP Lit material. Emission is the colour times an intensity, worked out in linear light
         /// (so the colour stays saturated), then converted back because SetColor converts it again.
         /// </summary>
         static Material Material(string name, Color baseColor, Color emissionColor, float intensity, float smoothness)
         {
-            string path = $"{MaterialFolder}/NeonPong {name}.mat";
+            string path = MaterialPath(name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
                 var shader = Shader.Find("Universal Render Pipeline/Lit");
                 if (shader == null) throw new InvalidOperationException("URP Lit shader not found.");
-                mat = new Material(shader) { name = $"NeonPong {name}" };
+                mat = new Material(shader) { name = Path.GetFileNameWithoutExtension(path) };
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetColor("_BaseColor", baseColor);
@@ -142,13 +146,13 @@ namespace Prototypes.NeonPong.Editor
         /// <summary>An unlit, additive particle material. The colour is a brightness multiplier (HDR).</summary>
         static Material Additive(string name, Color tint)
         {
-            string path = $"{MaterialFolder}/NeonPong {name}.mat";
+            string path = MaterialPath(name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (mat == null)
             {
                 var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
                 if (shader == null) throw new InvalidOperationException("URP Particles/Unlit shader not found.");
-                mat = new Material(shader) { name = $"NeonPong {name}" };
+                mat = new Material(shader) { name = Path.GetFileNameWithoutExtension(path) };
                 AssetDatabase.CreateAsset(mat, path);
             }
             // Transparent surface, additive blend, no depth write.

@@ -43,6 +43,19 @@ Details and sources: `docs/research/neon-pong.md`. All art and sounds here are o
 
 Sides are also told apart by position (left and right) and by score placement, so colour is not the only cue. Emission strengths and bloom values are starting points to tune on renders.
 
+### Surfaces
+Decided by the agent from the look brief, following `.claude/skills/game-polish/references/surfaces.md` (added after this game was built; this table records the decision for the existing look). Materials are named `NeonPong<Thing>` (`NeonPongTableBody`).
+
+| Material or object | Surface | Why (pillar) |
+|---|---|---|
+| Ball, paddles, rails, grid | flat colour + emission, no texture, by design | a texture would muddy the glow, and only gameplay objects may glow (pillar 3) |
+| Table body | flat near-black, matte, no texture | the background has to stay quiet (pillar 3) |
+| Ball trail and bursts | unlit additive particles | they are light, not material (pillars 1, 2) |
+| Baked occlusion | none | there is almost no scene lighting and nothing sits in a crevice |
+| Shader effect | none | nothing is removed or spawned in a way that needs a dissolve; the serve cue and bursts cover events |
+
+Revisit only if a later change adds a real material (stone, wood, metal) to this game.
+
 ### Audio direction
 Short synthesised tones, like the original, but cleaner: square or triangle waves with a fast attack and a short decay. Pitch climbs with rally speed. Sounds are made by a script, so they are original. No music in this version.
 
