@@ -30,5 +30,4 @@ Source: Unity's guide [Organizing your project](https://unity.com/how-to/organiz
 - **Large files:** `.png`, `.glb`, `.wav`, `.blend` and similar are in Git LFS (`.gitattributes`).
 
 ## Known leftovers
-- **URP template leftovers at the top of `Assets/`:** `Readme.asset`, `TutorialInfo/`, `Scenes/SampleScene.unity`, `InputSystem_Actions.inputactions`. They are listed in the test's allow-list. Remove them only with the person's approval (it deletes files), then remove them from the list. `Assets/Settings` stays: it holds the render pipeline assets.
 - **Visible Meta Files:** a Unity project setting (`ProjectSettings/`). We did not change it. `.meta` files exist on disk and are committed for every asset, which `ProjectStructureTests` checks, so the setting does not need to change.
