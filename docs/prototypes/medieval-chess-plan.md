@@ -1,6 +1,6 @@
 # Medieval Chess: plan and tasks
 
-Plan for `docs/prototypes/medieval-chess.md`. Status: stage 5 done, stage 6 next
+Plan for `docs/prototypes/medieval-chess.md`. Status: stage 6 done, stage 7 next (the play test)
 
 ## Decisions needed first
 1. **Share the shake and hit-stop code (needs your approval).** Neon Pong already has `ShakeState` and `TimeFeel`, and Medieval Chess needs the same two things. `AGENTS.md` says to move code to `Assets/Shared/` when a second prototype needs it, and not to edit another prototype unless the task says so.
@@ -215,16 +215,23 @@ What differed from the plan, and why:
 - **Not judged here:** how fights feel in motion, the look (still a plain, warm-lit greybox), and sound (none yet). Those are stages 6 and 7.
 
 ### Stage 6: look and feel (game-polish)
-Each step has before and after captures, tests for its logic and its own commit, as in Neon Pong.
-- [ ] Baseline capture, then the Lewis-style piece details and crests (bevels, faces, side shapes) in `make_pieces.py`. Check the six types and both sides can be told apart.
-- [ ] Board, frame, hall floor, torches and banners. Palette, materials and emission in linear light.
-- [ ] Lighting (key light with shadows, torch lights with flicker), then Bloom, Vignette and tonemapping judged on renders. Keep or cut the torch shadows.
-- [ ] Camera: pitch, distance, the fight cut-in, push-in and slow push for checkmate.
-- [ ] Sound script and tests on the files, then wire sounds to every feel-table row.
-- [ ] Feel rows one by one: selection and legal move rings, check pulse, ember and dust bursts, hit-stop and shake on the blow, the checkmate wash and slow motion, draw and resign.
-- [ ] The animation speed setting (Full, Quick, Off) and the global effect strength. Renders and tests at strength 0.
-- [ ] Final renders (start screen, opening, selection, fight at its blow, check, checkmate, draw).
-- [ ] Commit per step: `feat(medieval-chess): <effect>`. Stop for the play test.
+Each step has its own tests and its own commit. Results below.
+- [x] Baseline capture (`b0-opening`): flat, no post-processing, no torches, orange bone pieces. Wrote down what was off against the brief.
+- [x] **Hall** (`feat: light the hall with torches and add post-processing`): four flickering torches (a pure function of time, scaled by the effect strength), a cool shadow-casting fill light, fog, a global Volume with Bloom, Vignette, ACES tonemapping and light colour grading. `LookSettings` holds every value. Tests: flicker bounds, zero amplitude steady, volume and torches from the settings.
+- [x] **Pieces** (`feat: add bevels, faces and side shapes`): bevelled boxes, stepped bases, a face with a heavy brow on every piece, veil, beard, cape, four-point crown, mitre cross, round pawn shield. The bone side has round pauldrons and the cinnabar side pointed horns (`ShoulderBone` and `ShoulderRed`, one pair shown by `PieceActor.Bind`), so the sides differ by shape too.
+- [x] **Sound** (`feat: add sounds, particles and the endings`): `Tools/audio/MedievalChess/make_sounds.py` writes 22 sounds. `SoundCues` turns each step into cues (swing, blow, drum, collapse, footfalls, leap, slide, anvil, horns). `SoundBank` plays them. File checks in EditMode.
+- [x] **Effects and endings:** dust, sparks and embers by code (`EffectsView`), a pulsing check ring and a small shake, camera moods (the walk in from the hall, checkmate, resigning, a draw), the checkmate in slow motion with a wash, torches that burn down in a draw.
+- [x] **Strength and speed:** every visual effect scales with the effect strength and turns off at 0 (tests in EditMode and PlayMode). Quick keeps the sounds, the dust and the embers but not the camera moves. Off plays one clash or one footfall.
+- [x] Final renders: start screen, opening, selection, fight at the lance thrust, collapse with sparks, check, checkmate, draw.
+- [x] Deliberate-bug check: moved the impact sound before the blow. Six tests failed. Restored.
+
+What differed from the plan, and why:
+- **The fill light is cool, not warm.** With only warm light the squares and both sides turned the same orange, which broke pillar 2. A cool fill (`#D1D9ED`) keeps the stone and slate squares readable, and the four torches stay the only warm light. Tonemapping is ACES; Neutral was not compared on a render.
+- **Torch shadows are cut.** The four torch lights cast no shadows. Only the fill light does. A render showed no gain worth the cost.
+- **The effect strength has no on-screen control.** It is a value on the settings asset (0 to 1). The spec asked only for the animation speed on the start screen. A control is a stage 7 question.
+- **Side shapes are on the shoulders, not the heads.** Crowns and mitres already top the head, and anything added on top would break the height budget.
+- **The wash is 3 percent alpha.** The UI blends in linear light, so 30 percent covered the board in yellow.
+- **Not built (needs a decision):** the start-screen banner hover, the sway on an illegal click, the lift of a picked piece, the thinking candle, pieces lowering their weapons in a draw, the fade of pieces in a new game, a horn when a game starts is a drum and horn in one file.
 
 ### Stage 7: play test and tidy
 - [ ] You play each difficulty and fill in the "needs a person" criteria in the spec.

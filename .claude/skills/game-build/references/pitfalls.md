@@ -39,3 +39,9 @@ Each of these happened while building the first prototype in this repository.
 35. **Restoring a scene file under an open Editor can freeze it** behind a modal "reload" dialog. Never `git checkout` a scene that is open. Rebuild it with the menu command instead.
 36. **Test runs dirty some files.** `ProjectSettings/URPProjectSettings.asset` and another prototype's materials change after a test run. Run `git checkout` on them before you commit, and check `git status`.
 37. **`unity cmd script eval` has limits.** No local functions used as method groups (use `System.Func`). A FEN with a wrong square count throws, so count the ranks.
+38. **`parents[3]` again, for audio too.** `Tools/audio/<Name>/make_sounds.py` is three folders below the repository root. `parents[2]` wrote into `Tools/Assets/`. Check where a script wrote before you run the tests.
+39. **A still frame of particles:** emit them, then set `Time.timeScale` to about 0.02 (not 0) and capture. At 0 a new particle is never drawn, and at normal speed it is gone before the capture command runs.
+40. **Defaults in a settings class do not change a saved asset.** After editing a default, reset the section with `unity cmd script eval` (`s.look = new LookSettings()`, then `SetDirty` and `SaveAssets`) and rebuild the scene.
+41. **`Awake` does not run in Edit Mode.** A component whose logic a builder test calls must read its base values on first use, not in `Awake`.
+42. **A full-screen UI overlay is far stronger than its alpha.** Blending is in linear light: 30 percent gold covered the board, 3 percent is a gentle tint.
+
