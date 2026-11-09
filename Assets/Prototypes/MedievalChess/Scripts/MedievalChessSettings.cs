@@ -24,6 +24,7 @@ namespace Prototypes.MedievalChess
         public Color boneColor = new Color32(0xE8, 0xDC, 0xC0, 0xFF);
         public Color cinnabarColor = new Color32(0xB8, 0x30, 0x1F, 0xFF);
         public Color ironColor = new Color32(0x5A, 0x5F, 0x63, 0xFF);
+        public Color trimColor = new Color32(0xC9, 0xA2, 0x4A, 0xFF);
         public Color lightSquareColor = new Color32(0x9A, 0x9C, 0x94, 0xFF);
         public Color darkSquareColor = new Color32(0x5E, 0x66, 0x60, 0xFF);
         public Color floorColor = new Color32(0x2B, 0x27, 0x24, 0xFF);

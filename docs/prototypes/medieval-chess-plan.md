@@ -233,6 +233,15 @@ What differed from the plan, and why:
 - **The wash is 3 percent alpha.** The UI blends in linear light, so 30 percent covered the board in yellow.
 - **Not built (needs a decision):** the start-screen banner hover, the sway on an illegal click, the lift of a picked piece, the thinking candle, pieces lowering their weapons in a draw, the fade of pieces in a new game, a horn when a game starts is a drum and horn in one file.
 
+### Model pass (after stage 6, before the play test)
+Asked for after the first look at the pieces: "a bit more impressive". Rebuilt all six models in `make_pieces.py`.
+- [x] Turned (lathe) bodies, domes and towers, tapered limbs for legs, necks and tails, ellipsoid heads with a nose and chin, real shields (round, heater), a proper pony for the knight (barrel body, chest, rump, jointed hind legs, hooves, tail, mane, ears, trimmed saddle cloth), an eight-sided stone rook with a door, arrow slits and crenellations.
+- [x] Smooth shading with crisp edges where the angle is sharp, and two-segment bevels.
+- [x] A third material, `trim` (gold), on crowns, belts, rims, bosses, sword guards, the stole and the mitre band. `PieceActor.Bind` maps it, and the settings have `trimColor`.
+- [x] The triangle budget rose from 2,500 to 6,000 per piece (spec updated). Pieces use 1,744 to 3,946.
+- [x] Reviewed on close-up renders of both sides, not only at board distance.
+- Not done: baked ambient occlusion, textures and shader changes. These need a decision (see the chat).
+
 ### Stage 7: play test and tidy
 - [ ] **You play** each difficulty and fill in the "needs a person" criteria in the spec. The sheet is `medieval-chess-playtest.md`. This is the one thing left that I cannot do.
 - [ ] Turn findings into tasks or open questions. Tune values on the settings asset.

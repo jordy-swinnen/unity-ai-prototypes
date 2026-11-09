@@ -49,12 +49,13 @@ namespace Prototypes.MedievalChess.Editor
             var bone = Material("Bone", settings.boneColor, 0.25f);
             var cinnabar = Material("Cinnabar", settings.cinnabarColor, 0.25f);
             var iron = Material("Iron", settings.ironColor, 0.45f);
+            var trim = Material("Trim", settings.trimColor, 0.55f, 0.25f);
             BuildBoard(Material("Tile Light", settings.lightSquareColor, 0.15f), Material("Tile Dark", settings.darkSquareColor, 0.15f),
                 Material("Floor", settings.floorColor, 0.1f));
             var cam = BuildCamera(settings);
             BuildLight(settings);
             var label = BuildLabel();
-            BuildController(settings, bone, cinnabar, iron, cam, label);
+            BuildController(settings, bone, cinnabar, iron, trim, cam, label);
 
             EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.SaveAssets();
@@ -78,7 +79,7 @@ namespace Prototypes.MedievalChess.Editor
             AssetDatabase.SaveAssets();
         }
 
-        internal static Material Material(string name, Color color, float smoothness)
+        internal static Material Material(string name, Color color, float smoothness, float metallic = 0f)
         {
             string path = $"{MaterialFolder}/MedievalChess {name}.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -90,7 +91,7 @@ namespace Prototypes.MedievalChess.Editor
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetColor("_BaseColor", color);
-            mat.SetFloat("_Metallic", 0f);
+            mat.SetFloat("_Metallic", metallic);
             mat.SetFloat("_Smoothness", smoothness);
             EditorUtility.SetDirty(mat);
             return mat;
@@ -180,7 +181,7 @@ namespace Prototypes.MedievalChess.Editor
             return text;
         }
 
-        static void BuildController(MedievalChessSettings settings, Material bone, Material cinnabar, Material iron, Camera cam, Text label)
+        static void BuildController(MedievalChessSettings settings, Material bone, Material cinnabar, Material iron, Material trim, Camera cam, Text label)
         {
             var go = new GameObject("Duel");
             var duel = go.AddComponent<DuelController>();
@@ -188,6 +189,7 @@ namespace Prototypes.MedievalChess.Editor
             duel.bone = bone;
             duel.cinnabar = cinnabar;
             duel.iron = iron;
+            duel.trim = trim;
             duel.cam = cam;
             duel.label = label;
             var types = (PieceType[])Enum.GetValues(typeof(PieceType));

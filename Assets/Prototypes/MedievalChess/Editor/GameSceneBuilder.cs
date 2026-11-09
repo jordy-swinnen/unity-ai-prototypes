@@ -52,6 +52,7 @@ namespace Prototypes.MedievalChess.Editor
             var bone = DuelSceneBuilder.Material("Bone", settings.boneColor, 0.25f);
             var cinnabar = DuelSceneBuilder.Material("Cinnabar", settings.cinnabarColor, 0.25f);
             var iron = DuelSceneBuilder.Material("Iron", settings.ironColor, 0.45f);
+            var trim = DuelSceneBuilder.Material("Trim", settings.trimColor, 0.55f, 0.25f);
 
             BuildBoard(settings);
             var cam = BuildCamera(settings);
@@ -63,7 +64,7 @@ namespace Prototypes.MedievalChess.Editor
             var highlights = BuildHighlights(settings);
             var ui = BuildUi(settings);
             BuildEventSystem();
-            BuildGame(settings, bone, cinnabar, iron, ui, highlights, cam, sound, effects, torches);
+            BuildGame(settings, bone, cinnabar, iron, trim, ui, highlights, cam, sound, effects, torches);
 
             EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.SaveAssets();
@@ -568,7 +569,7 @@ namespace Prototypes.MedievalChess.Editor
 
         // --- the game itself ---
 
-        static void BuildGame(MedievalChessSettings s, Material bone, Material cinnabar, Material iron, UiView ui, HighlightView highlights, Camera cam,
+        static void BuildGame(MedievalChessSettings s, Material bone, Material cinnabar, Material iron, Material trim, UiView ui, HighlightView highlights, Camera cam,
             SoundBank sound, EffectsView effects, TorchFlicker[] torches)
         {
             var go = new GameObject("Game");
@@ -577,6 +578,7 @@ namespace Prototypes.MedievalChess.Editor
             controller.bone = bone;
             controller.cinnabar = cinnabar;
             controller.iron = iron;
+            controller.trim = trim;
             controller.ui = ui;
             controller.highlights = highlights;
             controller.cameraRig = cam.GetComponent<GameCameraRig>();

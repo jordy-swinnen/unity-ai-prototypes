@@ -35,7 +35,7 @@ namespace Prototypes.MedievalChess
         public MedievalChessSettings settings;
         [Tooltip("One model per piece type, in the order of the PieceType enum.")]
         public GameObject[] piecePrefabs;
-        public Material bone, cinnabar, iron;
+        public Material bone, cinnabar, iron, trim;
         public UiView ui;
         public HighlightView highlights;
         public GameCameraRig cameraRig;
@@ -257,7 +257,7 @@ namespace Prototypes.MedievalChess
         {
             var instance = Instantiate(piecePrefabs[(int)spec.Type]);
             instance.name = spec.Id;
-            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron, spec.Side);
+            var actor = PieceActor.Bind(instance, spec.Type, spec.Side == 0 ? bone : cinnabar, iron, spec.Side, trim);
             actor.Place(spec.Start, spec.StartYaw);
             actors[spec.Id] = actor;
             return actor;
@@ -397,7 +397,7 @@ namespace Prototypes.MedievalChess
             var spec = new ActorSpec { Id = $"tray:{tray.Count}", Type = victim.Type, Side = victim.Side };
             var instance = Instantiate(piecePrefabs[(int)victim.Type]);
             instance.name = $"Captured {victim.Type}";
-            var actor = PieceActor.Bind(instance, victim.Type, victim.Side == 0 ? bone : cinnabar, iron, victim.Side);
+            var actor = PieceActor.Bind(instance, victim.Type, victim.Side == 0 ? bone : cinnabar, iron, victim.Side, trim);
             var slot = BoardGeometry.TraySlot(side, trayCount[victim.Side]++, settings.game.trayX);
             actor.Place(slot, BoardGeometry.RestYaw(side));
             instance.transform.localScale = Vector3.one * settings.game.trayScale;

@@ -140,7 +140,7 @@ namespace Prototypes.MedievalChess.Tests
             Assert.AreEqual(6, controller.piecePrefabs.Length);
             foreach (var type in System.Enum.GetValues(typeof(PieceType)).Cast<PieceType>())
                 StringAssert.AreEqualIgnoringCase(type.ToString(), controller.piecePrefabs[(int)type].name);
-            foreach (var m in new[] { controller.bone, controller.cinnabar, controller.iron })
+            foreach (var m in new[] { controller.bone, controller.cinnabar, controller.iron, controller.trim })
             {
                 Assert.IsNotNull(m);
                 Assert.AreEqual("Universal Render Pipeline/Lit", m.shader.name);

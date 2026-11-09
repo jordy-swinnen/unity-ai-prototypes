@@ -25,10 +25,10 @@ namespace Prototypes.MedievalChess
 
         /// <summary>
         /// Adds the actor to an instance of a piece model and sets its materials by the model's material names:
-        /// "body" gets the side's material and "iron" gets the iron material. The side (0 bone, 1 cinnabar) also picks
+        /// "body" gets the side's material, "iron" the iron material and "trim" the gold trim (iron if none is given). The side (0 bone, 1 cinnabar) also picks
         /// the shoulders: round for bone, pointed for cinnabar, so the sides differ by shape and not only by colour.
         /// </summary>
-        public static PieceActor Bind(GameObject instance, PieceType type, Material body, Material iron, int side = 0)
+        public static PieceActor Bind(GameObject instance, PieceType type, Material body, Material iron, int side = 0, Material trim = null)
         {
             var actor = instance.AddComponent<PieceActor>();
             actor.Type = type;
@@ -46,6 +46,7 @@ namespace Prototypes.MedievalChess
                     string name = slots[i] != null ? slots[i].name : string.Empty;
                     if (name.StartsWith("body")) slots[i] = body;
                     else if (name.StartsWith("iron")) slots[i] = iron;
+                    else if (name.StartsWith("trim")) slots[i] = trim != null ? trim : iron;
                 }
                 r.sharedMaterials = slots;
             }

@@ -109,17 +109,17 @@ namespace Prototypes.MedievalChess.Tests
         {
             var go = Load(name);
             int tris = go.GetComponentsInChildren<MeshFilter>().Sum(m => m.sharedMesh.triangles.Length / 3);
-            Assert.LessOrEqual(tris, 2500);
+            Assert.LessOrEqual(tris, 6000);
             Assert.Greater(tris, 100);
         }
 
         [TestCaseSource(nameof(Pieces))]
-        public void Materials_are_named_body_or_iron_so_the_side_colour_can_be_set(string name, float height)
+        public void Materials_are_named_body_iron_or_trim_so_the_side_colour_can_be_set(string name, float height)
         {
             var go = Load(name);
             foreach (var r in go.GetComponentsInChildren<Renderer>())
                 foreach (var m in r.sharedMaterials)
-                    Assert.IsTrue(m.name == "body" || m.name == "iron", $"{name}.{r.name}: material '{m.name}'");
+                    Assert.IsTrue(m.name == "body" || m.name == "iron" || m.name == "trim", $"{name}.{r.name}: material '{m.name}'");
         }
 
         [Test]
