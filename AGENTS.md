@@ -4,7 +4,7 @@ An AI-native starting point for Unity games. Fork it or use it as a template, th
 
 ## Project
 - Defaults (change them in your fork): mostly 3D with some 2D, the Universal 3D (URP) template, plain conventional commits (no `Refs:` trailer).
-- The repository holds no game of its own. Games and features live in their own folders under `Assets/Prototypes/`.
+- The repository holds two example prototypes, Neon Pong and Medieval Chess. Games and features live in their own folders under `Assets/Prototypes/`.
 
 ## Workflow: use the skills
 Games and features go through four skills in `.claude/skills/`. Each ends with a stop for the user's review, and the next one starts only after approval.
@@ -28,24 +28,38 @@ Many people add prototypes here. Each prototype is self-contained, named in Pasc
   - `Editor/`: editor code, assembly `<Name>.Editor`. Holds the menu command `Prototypes/<Name>/Build Scene`.
   - `Tests/EditMode/` and `Tests/PlayMode/`: assemblies `<Name>.Tests.EditMode` and `<Name>.Tests.PlayMode`.
   - `Art/Exports/`: `.glb` files written by Blender scripts. Never edit by hand.
+  - `Art/Textures/`: `.png` textures written by a script (`<name>_albedo.png`, `<name>_normal.png`). Never edit by hand.
   - `Audio/`: sounds written by scripts.
+  - `Materials/`: materials written by the scene builder. Never edit by hand.
+  - `Shaders/`: hand-written URP shaders.
   - `Scenes/`: scenes written by the build command. Never edit by hand.
   - `Settings/`: ScriptableObjects with tuning values.
-- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
+- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Today it holds `Feel/ShakeState` and `Feel/TimeFeel` (camera shake and hit-stop), used by Neon Pong and Medieval Chess. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
 - `Art/source/<Name>/`: `.blend` source files (Git LFS). Unity doesn't import these.
 - `Tools/blender/<Name>/`: Python scripts for Blender, run headless with `blender -b -P <script>`. They write into `Assets/Prototypes/<Name>/Art/Exports/`.
 - `Tools/audio/<Name>/`: Python scripts that write sounds.
+- `Tools/textures/<Name>/`: Python scripts that write textures, run headless in Blender (it ships numpy).
 - `Tools/unity/`: `check.sh` (compile and tests) and `capture.sh` (renders).
 - `docs/prototypes/<kebab-name>.md`: one spec per game or feature, from `TEMPLATE.md`. Read the spec before writing code.
 - `docs/research/`: background and sourced research notes.
-- Legacy placeholder: `Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`. Remove them once a prototype has real assets.
+
+## Project structure
+From Unity's guide ([organizing your project](https://unity.com/how-to/organizing-your-project)) and this repository's needs. The details, and what we did not adopt, are in `docs/project-structure.md`. `Assets/Shared/Tests/EditMode/ProjectStructureTests.cs` checks most of these, so `check.sh` fails when one is broken.
+- Names are PascalCase with no spaces, for every file and folder under `Assets/`. Materials are `<Name><Thing>` (`MedievalChessTileLight`).
+- Only `Prototypes/`, `Shared/`, `ThirdParty/`, `Sandbox/` and `Settings/` (the render pipeline) sit at the top of `Assets/`. Anything we did not make (Asset Store, downloads) goes in `Assets/ThirdParty/<Vendor>/`, never mixed into our own folders. Personal experiments go in `Assets/Sandbox/<user>/`, which git ignores.
+- Folders are split by asset type inside each prototype (the list above). No empty folders. Commit every `.meta` file.
+- Move or rename an asset through Unity (`AssetDatabase.MoveAsset` or `RenameAsset`, run with `unity cmd script eval`), so its `.meta` and GUID move with it. Never `mv` an asset in the shell.
+- The namespace matches the folder: `Prototypes.<Name>` (and `Prototypes.<Name>.Tests`), `Shared`. One assembly per folder part, named like the folder. Prototypes never reference each other, and Shared never references a prototype.
+- A scene holds one game or one level. If a game needs several levels, build one scene each and load them additively. Reusable objects become prefabs (nested where it helps), built by code like scenes.
+- Document a new structure decision in `docs/project-structure.md` and keep this list short.
 
 ## Rules
 - Logic lives in C#. Tuning values live in ScriptableObjects.
 - Never hand-edit `.unity` or `.prefab` files. Build scenes in code through the prototype's menu command under `Assets/Prototypes/<Name>/Editor/`.
 - Never hand-edit files under `Assets/Prototypes/<Name>/Art/Exports/`. Change the Blender script and re-run it.
 - Work only inside the folder of the prototype you were asked about. Don't edit another prototype or `Assets/Shared/` unless the task says so.
-- All art, models and sounds are original or clearly licensed, with the source recorded in the spec. Never copy another game's assets.
+- All art, models, textures and sounds are original or clearly licensed, with the source recorded in the spec. Never copy another game's assets.
+- Surfaces are your decision, not a question for the person: for every material in the look brief, decide flat colour, texture, baked occlusion or a shader effect, write why in the spec's Surfaces table, and build it. Follow `.claude/skills/game-polish/references/surfaces.md`, and ask only for the cases under "When to ask" there (a package, a download, a large result, a real style choice, a real performance cost).
 - After every C# change, run the compile check and fix errors before continuing.
 - Every mechanic gets an EditMode test for its logic. Write the test first.
 - For multi-file changes, plan first (files and tests), then wait for approval.
@@ -61,11 +75,11 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 - Permissions, hooks and model choices differ between the tools. Write each in its own file (`.claude/settings.json`, `opencode.json`) and don't try to translate one into the other.
 - OpenCode models (Go plan): `plan` uses `opencode-go/glm-5.3`, `build` and the default use `opencode-go/deepseek-v4.1-flash`. Change them in `opencode.json` only.
 - MCP servers need an entry in both `.mcp.json` and `opencode.json`. Translate them with the skill's `sync_mcp.py`. The `unity-cli` skill replaces a Unity MCP server, so none is configured.
-- After any change, check that both tools load `AGENTS.md`.
+- After any change, run `python3 Tools/agents/check_config.py` (one rules file, portable skill frontmatter, MCP parity). It checks files only. To see that each tool loads the rules, start a session in each and ask for the first heading of the rules and the skill names. Last verified with OpenCode: it loads `AGENTS.md` (including `Project structure`) and the four game skills.
 
 ## Checks
 The Unity Editor must be open on this project. `unity status` should show `ready`.
-- Everything: `Tools/unity/check.sh all` (compile, then EditMode and PlayMode tests). Also `compile`, `editmode` and `playmode`. It exits non-zero on a compile error or a failing test.
+- Everything: `Tools/unity/check.sh all` (compile, then EditMode and PlayMode tests, including the project structure tests). Also `compile`, `editmode` and `playmode`. It exits non-zero on a compile error or a failing test.
 - Render: `Tools/unity/capture.sh camera <out.png>`, `screen` or `play`. Write captures outside the repository. Only `screen` and `play` include post-processing (Bloom, Vignette), so judge a look on those.
 - The raw `unity` commands behind these, and the traps found while building the first prototype, are in `.claude/skills/game-build/references/unity-loop.md` and `pitfalls.md`.
 - Packages: `com.unity.cloud.gltfast` 6.20.0 imports the `.glb` files. Unity 6 can't import `.glb` without it.

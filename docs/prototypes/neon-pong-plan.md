@@ -105,7 +105,7 @@ Each step has before and after captures, tests for its logic, a keep or cut deci
 - [ ] The person plays and fills in the "needs a person" criteria.
 - [ ] Findings become tasks or open questions. Tune values on the settings asset.
 - [ ] Update the spec, tick the criteria and set the plan status to complete.
-- [ ] Ask about removing the legacy crate placeholder (needs approval). Remove leftovers only with approval.
+- [x] Ask about removing the legacy crate placeholder (needs approval). Removed with approval in the Medieval Chess pull request (#2), once a second prototype had real assets.
 - [ ] Ask about pushing. Say what becomes public first.
 
 ## Verification

@@ -2,6 +2,7 @@
     "name": "NeonPong",
     "rootNamespace": "Prototypes.NeonPong",
     "references": [
+        "Shared",
         "Unity.InputSystem",
         "UnityEngine.UI"
     ],

@@ -2,7 +2,14 @@
 
 An AI-native starting point for building Unity games with coding agents. Fork it or use it as a template, then go from a game idea to a playable, tested, good-looking prototype with Claude Code or OpenCode. Models are made with headless Blender scripts, scenes are built by code, and every stage is checked by tests and renders before a person reviews it.
 
-It is generic. It contains no game of its own. Games and features you add live in their own folders and follow the same process.
+It is generic. The process and the tools do not depend on any game. Two example prototypes show what it produces, and each lives in its own folder under `Assets/Prototypes/` (yours will too):
+
+| Prototype | What it is | Spec |
+|---|---|---|
+| **Neon Pong** | A two-player pong on a neon table: every hit flashes, shakes the screen and rings, and the rally speeds up. The first game made with the skills. | `docs/prototypes/neon-pong.md` |
+| **Medieval Chess** | Chess against a computer with three difficulties, in a torch-lit hall. Every capture is an animated fight where the attacker kills the victim. Full rules, models from Blender scripts, 22 generated sounds. The second game, and the bigger test of the process. | `docs/prototypes/medieval-chess.md` and `medieval-chess-plan.md` |
+
+To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by both (camera shake and hit-stop) lives in `Assets/Shared/`.
 
 ## What you get
 - **Four skills** in `.claude/skills/` (both Claude Code and OpenCode read that folder). Together they are the process from idea to polished game:
@@ -24,7 +31,7 @@ It is generic. It contains no game of its own. Games and features you add live i
 2. Open the folder in Unity Hub with the pinned Unity version (see `AGENTS.md`). Install Blender and Git LFS (see below).
 3. Edit `AGENTS.md`: the pinned versions, and your own rules. Edit this README. Change the license if you want a different one.
 4. Ask your agent to use `game-spec` for your idea, then `game-plan`, `game-build` and `game-polish`. Each ends with a stop for your review. For example: "Use game-spec to write a spec for a small 3D arcade game where..."
-5. Delete what you don't need, such as the placeholder crate (`Assets/Art/Exports/crate.glb` and `Tools/blender/make_crate.py`).
+5. Delete what you don't need, such as the two example prototypes under `Assets/Prototypes/` and their specs, plans and tools.
 
 ## What you need
 - Unity **6000.6.8f1** through Unity Hub. This is not an LTS release. It's the version Unity Hub recommended when the project was created. You must be signed in to Unity Hub to add packages.
@@ -49,13 +56,19 @@ Assets/Prototypes/<Name>/     one folder per game or prototype (PascalCase)
   Tests/EditMode/             logic tests
   Tests/PlayMode/             scene and behaviour tests
   Art/Exports/                .glb files written by Blender scripts
+  Art/Textures/               .png textures written by a script
   Audio/                      sounds written by scripts
+  Materials/                  materials written by the scene builder
+  Shaders/                    hand-written URP shaders
   Scenes/                     scenes written by the build command
   Settings/                   ScriptableObjects with tuning values
 Assets/Shared/                code and assets used by two or more prototypes
+Assets/ThirdParty/            anything we did not make, kept apart (created when needed)
+Assets/Sandbox/<user>/        personal experiments, ignored by git (created when needed)
 Art/source/<Name>/            .blend source files (Git LFS)
 Tools/blender/<Name>/         Blender Python scripts
 Tools/audio/<Name>/           sound scripts
+Tools/textures/<Name>/        texture scripts (run in Blender for numpy)
 Tools/unity/                  check.sh and capture.sh
 docs/prototypes/              one spec and one plan per game or feature (start from TEMPLATE.md)
 docs/research/                background and sourced research notes

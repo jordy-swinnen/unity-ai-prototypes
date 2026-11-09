@@ -19,7 +19,7 @@ Output: `docs/prototypes/<kebab-name>-plan.md`, written from `references/plan-te
 2. **Units and layout.** A table of every object with its size, position and the reason. State the axes, units and which way is up on screen.
 3. **Tuning values.** The starting values from the spec, grouped, as fields of the settings asset.
 4. **Code design.** The small set of types: settings, state, rules (plain C# with no engine physics where possible, so tests run them step by step), input, view, scene builder. Say what each owns.
-5. **Art and audio pipeline.** Which scripts make which assets, where they write, and how to run them. Feasibility for each look item from the spec.
+5. **Art and audio pipeline.** Which scripts make which assets, where they write, and how to run them. Feasibility for each look item from the spec. Add the texture script (`Tools/textures/<Name>/`), the shader (`Assets/Prototypes/<Name>/Shaders/`), the occlusion bake and any dissolve that the spec's Surfaces table calls for, with their tests (see `.claude/skills/game-polish/references/surfaces.md`). These are decided, not asked about. The decisions list holds only the cases under "When to ask" in that file.
 6. **Stages.** Use this order. After each stage the work stops for review.
    - **Stage 1, greybox:** folders, assembly definitions, plain-shape assets, the rules with tests written first.
    - **Stage 2, playable:** input, view, a scene built by an editor command, PlayMode tests. Plain shapes are fine.

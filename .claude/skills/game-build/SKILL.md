@@ -20,7 +20,7 @@ Build one stage of an approved plan at a time. Every stage ends compiled, tested
 4. **Compile and test:** `Tools/unity/check.sh editmode` (or `playmode`, or `all`). Fix errors and re-run. Don't continue on a red result.
 5. **Deliberate-bug check.** Break one rule on purpose (flip a sign, swap a side), see the matching test fail, and restore it. This shows the tests can fail. Do it once per stage and report it.
 6. **Look at it.** For anything visible, capture a render with `Tools/unity/capture.sh` and read the image. Compare it to the spec's layout table and look brief. Fix what you see before you report.
-7. **Scenes, models and other generated files** come from scripts and editor commands, never by hand. Don't edit `.unity` or `.prefab` files.
+7. **Scenes, models and other generated files** come from scripts and editor commands, never by hand. Don't edit `.unity` or `.prefab` files. Textures come from `Tools/textures/<Name>/`, occlusion from the Blender script, and materials from the scene builder, never by hand. After you write or change a shader, check its messages (`ShaderUtil.GetShaderMessages`) and render it, since a shader can compile in the Editor and still be pink in a pass you did not look at. See `.claude/skills/game-polish/references/surfaces.md`.
 8. **Commit** with a conventional message, staging files explicitly. Include `.meta` files that Unity generated. Check `git status` first.
 9. **Record** in the plan: tick the tasks, note anything that differed and why.
 10. **Stop for review.** Report what was built, how it was verified, what could not be verified, and what a person should check by hand. Wait before the next stage.

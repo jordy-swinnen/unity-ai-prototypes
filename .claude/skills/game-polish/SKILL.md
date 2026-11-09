@@ -10,7 +10,7 @@ Make a working game look and feel the way its spec says. Polish is not decoratio
 ## Before you start
 - The game must compile and its tests must pass. Run `Tools/unity/check.sh all` and note the result. Polish never goes on top of a red build.
 - Read the spec's pillars, look-and-feel brief (palette, visual pillars, camera, audio direction) and **feel table**. If any of these is missing, run `game-spec` first. Don't invent a style.
-- Read `references/urp-effects.md` (what is verified and what is not) and `references/audio.md`. Read `references/polish-order.md`.
+- Read `references/surfaces.md`. Textures, baked occlusion and shader effects are your decision, not a question for the person. Read `references/urp-effects.md` (what is verified and what is not) and `references/audio.md`. Read `references/polish-order.md`.
 - Read `Tools/unity/capture.sh` usage, and `game-build/references/pitfalls.md`.
 
 ## The loop for one step
