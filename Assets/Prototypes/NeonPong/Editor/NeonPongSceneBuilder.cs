@@ -255,10 +255,10 @@ namespace Prototypes.NeonPong.Editor
 
             return new Ui
             {
-                left = MakeText(canvasGo.transform, "Score Left", s.player1Color, 140, TextAnchor.MiddleCenter,
-                    new Vector2(0.5f, 1f), new Vector2(-260f, -110f), new Vector2(300f, 200f)),
-                right = MakeText(canvasGo.transform, "Score Right", s.player2Color, 140, TextAnchor.MiddleCenter,
-                    new Vector2(0.5f, 1f), new Vector2(260f, -110f), new Vector2(300f, 200f)),
+                left = MakeText(canvasGo.transform, "Score Left", s.player1Color, s.scoreFontSize, TextAnchor.MiddleCenter,
+                    new Vector2(0.5f, 1f), new Vector2(-s.scoreOffsetX, s.scoreOffsetY), new Vector2(300f, 200f)),
+                right = MakeText(canvasGo.transform, "Score Right", s.player2Color, s.scoreFontSize, TextAnchor.MiddleCenter,
+                    new Vector2(0.5f, 1f), new Vector2(s.scoreOffsetX, s.scoreOffsetY), new Vector2(300f, 200f)),
                 message = MakeText(canvasGo.transform, "Message", s.textColor, 90, TextAnchor.MiddleCenter,
                     new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400f, 360f)),
             };
