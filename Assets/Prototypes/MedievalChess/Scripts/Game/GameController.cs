@@ -39,6 +39,10 @@ namespace Prototypes.MedievalChess
         public UiView ui;
         public HighlightView highlights;
         public GameCameraRig cameraRig;
+        public SoundBank sound;
+        public EffectsView effects;
+        [Tooltip("The torches, so a draw can dim them.")]
+        public TorchFlicker[] torches;
         [Tooltip("Turn off to drive the game by hand with Step (tests and captures do this).")]
         public bool autoStep = true;
         [Tooltip("0 picks a new random seed each run.")]
@@ -59,6 +63,12 @@ namespace Prototypes.MedievalChess
         int selected = -1;
         int computerMoves;
         System.Random rng;
+        readonly SlowMotion slowMotion = new SlowMotion();
+        readonly Ease1D torchLevel = new Ease1D(1f);
+        readonly Ease1D washLevel = new Ease1D(0f);
+        Color washColour = Color.clear;
+        bool mateFeelStarted;
+        int lastHover = -1;
 
         public GamePhase Phase { get; private set; } = GamePhase.Menu;
         public ChessGame Game { get; private set; }
@@ -71,6 +81,10 @@ namespace Prototypes.MedievalChess
         public int SelectedSquare => selected;
         public IReadOnlyList<PieceActor> Tray => tray;
         public IReadOnlyDictionary<string, PieceActor> Actors => actors;
+        /// <summary>1 while the torches burn normally, lower in a draw.</summary>
+        public float TorchLevel => torchLevel.Value;
+        public bool SlowMotionActive => slowMotion.Active;
+        public float StrengthNow => Mathf.Clamp01(settings.effectStrength);
         public string DifficultyName => settings.difficulties[DifficultyIndex].name;
 
         public PieceActor ActorAt(int square)
@@ -111,6 +125,30 @@ namespace Prototypes.MedievalChess
             ui.menuButton.onClick.AddListener(ChangeDifficulty);
             ui.playAgainButton.onClick.AddListener(PlayAgain);
             ui.changeDifficultyButton.onClick.AddListener(ChangeDifficulty);
+
+            // every button creaks a little when pressed
+            foreach (var button in ui.GetComponentsInChildren<UnityEngine.UI.Button>(true))
+                button.onClick.AddListener(() => Play(SoundId.UiCreak, 0.6f));
+        }
+
+        void Play(SoundId id, float volume = 1f)
+        {
+            if (sound != null) sound.Play(id, volume, 1f + UnityEngine.Random.Range(-0.04f, 0.04f));
+        }
+
+        void ResetFeel()
+        {
+            slowMotion.Cancel();
+            torchLevel.Snap(1f);
+            washLevel.Snap(0f);
+            mateFeelStarted = false;
+            ApplyFeel();
+        }
+
+        void ApplyFeel()
+        {
+            if (torches != null) foreach (var t in torches) if (t != null) t.Dim = torchLevel.Value;
+            if (ui != null) ui.SetWash(washColour, washLevel.Value);
         }
 
         void OnDestroy()
@@ -160,6 +198,8 @@ namespace Prototypes.MedievalChess
             RefreshMenu();
             highlights.ClearAll();
             cameraRig.SetPlayerSide(ChessSide.White);
+            cameraRig.SnapMood(0f);
+            ResetFeel();
         }
 
         public void StartFromMenu() => StartGame(MenuDifficulty, MenuSide);
@@ -192,6 +232,14 @@ namespace Prototypes.MedievalChess
             selected = -1;
             ui.ShowHud();
             cameraRig.SetPlayerSide(PlayerSide);
+
+            // the camera starts back in the hall and walks in to the board
+            ResetFeel();
+            cameraRig.SnapMood(settings.feel.startMood);
+            cameraRig.SetMood(0f, settings.feel.moodSeconds);
+            cameraRig.Tick(0f, 0f, null); // the very first frame already shows the pulled-back view
+            Play(SoundId.GameStart);
+            lastHover = -1;
 
             if (Game.IsOver) EndGame();
             else NextTurn();
@@ -231,6 +279,8 @@ namespace Prototypes.MedievalChess
         public void Hover(int square)
         {
             highlights.ShowHover(Phase == GamePhase.PlayerTurn ? square : -1);
+            if (Phase == GamePhase.PlayerTurn && square >= 0 && square != lastHover) Play(SoundId.HoverTick, 0.35f);
+            lastHover = Phase == GamePhase.PlayerTurn ? square : -1;
         }
 
         public void Click(int square)
@@ -255,12 +305,18 @@ namespace Prototypes.MedievalChess
 
             int piece = Game.Position[square];
             if (piece != Pieces.Empty && Pieces.SideOf(piece) == PlayerSide && Game.LegalMovesFrom(square).Any()) Select(square);
-            else Deselect();
+            else
+            {
+                // a click on a piece that cannot be picked or taken gets a dull knock; a click on an empty square just cancels
+                if (piece != Pieces.Empty) Play(SoundId.IllegalKnock);
+                Deselect();
+            }
         }
 
         void Select(int square)
         {
             selected = square;
+            Play(SoundId.SelectClink);
             selectedMoves.Clear();
             selectedMoves.AddRange(Game.LegalMovesFrom(square));
             highlights.ShowSelection(square);
@@ -303,8 +359,10 @@ namespace Prototypes.MedievalChess
             highlights.ShowLastMove(move.From, move.To);
             ui.SetStatus(string.Empty);
             ui.SetResignAvailable(false);
-            stage.Begin(sequence, speed, settings.fight, settings.effectStrength);
+            mateFeelStarted = false;
+            stage.Begin(sequence, speed, settings.fight, settings.effectStrength, settings.feel);
             Phase = GamePhase.Animating;
+            PlayCues();
         }
 
         void FinishAnimation()
@@ -317,9 +375,17 @@ namespace Prototypes.MedievalChess
             }
 
             if (Game.Status != GameStatus.Resignation && Game.Position.InCheck() && !Game.IsOver)
+            {
                 highlights.ShowCheck(Game.Position.KingSquare(Game.Position.SideToMove));
+                Play(SoundId.CheckHorn);
+                if (speed == AnimationSpeed.Full) cameraRig.AddShake(settings.feel.checkShake * StrengthNow);
+            }
             else if (Game.IsOver && Game.Status == GameStatus.Checkmate)
+            {
                 highlights.ShowCheck(Game.Position.KingSquare(Game.Position.SideToMove));
+                if (!mateFeelStarted) BeginMateFeel();
+            }
+            else if (Game.IsOver && Game.Status != GameStatus.Resignation) BeginDrawFeel();
 
             if (Game.IsOver) EndGame();
             else NextTurn();
@@ -397,8 +463,46 @@ namespace Prototypes.MedievalChess
             Deselect();
             highlights.ClearAll();
             ui.SetResignAvailable(false);
-            stage.Begin(MoveDirector.Resign(spec, settings.moves), speed, settings.fight, settings.effectStrength);
+            stage.Begin(MoveDirector.Resign(spec, settings.moves), speed, settings.fight, settings.effectStrength, settings.feel);
             Phase = GamePhase.Animating;
+            if (speed == AnimationSpeed.Full) cameraRig.SetMood(settings.feel.resignMood, settings.feel.moodSeconds, king.Position + Vector3.up * 0.4f);
+            PlayCues();
+        }
+
+        // --- the endings: checkmate, draw ---
+
+        // The mated king falls in slow motion, the camera walks toward him, a fanfare plays and a wash fades in.
+        void BeginMateFeel()
+        {
+            mateFeelStarted = true;
+            var f = settings.feel;
+            var kingSquare = Game.Position.KingSquare(Game.Position.SideToMove);
+            Play(SoundId.MateFanfare);
+            if (speed == AnimationSpeed.Full)
+            {
+                slowMotion.Begin(f.slowMotionScale, f.slowMotionSeconds, StrengthNow);
+                cameraRig.SetMood(f.mateMood, f.moodSeconds, BoardGeometry.Centre(kingSquare) + Vector3.up * 0.4f);
+            }
+            washColour = Game.Winner == PlayerSide ? f.washWin : f.washLose;
+            washLevel.MoveTo(f.washAlpha * StrengthNow, speed == AnimationSpeed.Off ? 0.01f : f.washSeconds);
+        }
+
+        // A draw: a low bell, the torches burn down a little and the camera draws back.
+        void BeginDrawFeel()
+        {
+            var f = settings.feel;
+            Play(SoundId.DrawBell);
+            torchLevel.MoveTo(Mathf.Lerp(1f, f.drawTorchLevel, StrengthNow), f.dimSeconds);
+            if (speed == AnimationSpeed.Full) cameraRig.SetMood(f.drawMood, f.moodSeconds);
+        }
+
+        void PlayCues()
+        {
+            foreach (var c in stage.CuesThisFrame)
+            {
+                if (c.Cue.HasSound) Play(c.Cue.Sound);
+                if (effects != null && c.Cue.Effect != EffectKind.None) effects.Burst(c.Cue.Effect, c.Position, StrengthNow);
+            }
         }
 
         public void PlayAgain() => StartGame(DifficultyIndex, LastSideChoice);
@@ -429,7 +533,9 @@ namespace Prototypes.MedievalChess
             Vector3? focus = null;
             if (Phase == GamePhase.Animating)
             {
-                stage.Step(dt);
+                if (Game.Status == GameStatus.Checkmate && !mateFeelStarted && stage.CurrentStepName == "King falls") BeginMateFeel();
+                stage.Step(slowMotion.Apply(dt));
+                PlayCues();
                 if (stage.BlowThisFrame && stage.BlowShake > 0f) cameraRig.AddShake(stage.BlowShake);
                 push = stage.CameraPush;
                 focus = stage.FightFocus;
@@ -442,6 +548,9 @@ namespace Prototypes.MedievalChess
                 OnComputerDone(task);
             }
             cameraRig.Tick(dt, push, focus);
+            torchLevel.Update(dt);
+            washLevel.Update(dt);
+            ApplyFeel();
         }
     }
 }

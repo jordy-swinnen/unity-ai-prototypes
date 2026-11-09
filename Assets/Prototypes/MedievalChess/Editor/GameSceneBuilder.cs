@@ -56,12 +56,14 @@ namespace Prototypes.MedievalChess.Editor
             BuildBoard(settings);
             var cam = BuildCamera(settings);
             BuildLight(settings);
-            BuildTorches(settings);
+            var torches = BuildTorches(settings);
             BuildVolume(settings);
+            var sound = BuildAudio(settings);
+            var effects = BuildEffects(settings);
             var highlights = BuildHighlights(settings);
             var ui = BuildUi(settings);
             BuildEventSystem();
-            BuildGame(settings, bone, cinnabar, iron, ui, highlights, cam);
+            BuildGame(settings, bone, cinnabar, iron, ui, highlights, cam, sound, effects, torches);
 
             EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.SaveAssets();
@@ -145,8 +147,9 @@ namespace Prototypes.MedievalChess.Editor
 
         // --- torches and post-processing ---
 
-        static void BuildTorches(MedievalChessSettings s)
+        static TorchFlicker[] BuildTorches(MedievalChessSettings s)
         {
+            var flickers = new System.Collections.Generic.List<TorchFlicker>();
             var look = s.look;
             var stone = DuelSceneBuilder.Material("Torch Stone", s.floorColor, 0.1f);
             var iron = DuelSceneBuilder.Material("Iron", s.ironColor, 0.45f);
@@ -194,9 +197,11 @@ namespace Prototypes.MedievalChess.Editor
                     flicker.flame = flame.transform;
                     flicker.settings = s;
                     flicker.seed = index + 1;
+                    flickers.Add(flicker);
                     index++;
                 }
             }
+            return flickers.ToArray();
         }
 
         static void Child(GameObject child, GameObject parent, Vector3 localPosition)
@@ -318,6 +323,15 @@ namespace Prototypes.MedievalChess.Editor
             view.normalColor = g.buttonColor;
             view.selectedColor = g.buttonSelectedColor;
             var parent = canvasGo.transform;
+
+            // the wash that fades in at the end of a game. It comes first, so every panel and button draws on top of it.
+            var washGo = new GameObject("Wash", typeof(RectTransform), typeof(Image));
+            washGo.transform.SetParent(parent, false);
+            Stretch(washGo.GetComponent<RectTransform>());
+            var washImage = washGo.GetComponent<Image>();
+            washImage.color = Color.clear;
+            washImage.raycastTarget = false;
+            view.wash = washImage;
 
             // start screen
             var start = Panel(parent, "Start Panel", Vector2.zero, Vector2.one, g.panelColor);
@@ -447,9 +461,115 @@ namespace Prototypes.MedievalChess.Editor
             module.AssignDefaultActions();
         }
 
+        // --- sound and particles ---
+
+        static SoundBank BuildAudio(MedievalChessSettings s)
+        {
+            var go = new GameObject("Audio");
+            var bank = go.AddComponent<SoundBank>();
+            bank.settings = s;
+            var ids = (SoundId[])Enum.GetValues(typeof(SoundId));
+            bank.clips = new AudioClip[ids.Length];
+            foreach (var id in ids)
+            {
+                string path = $"{Root}/Audio/{SoundIds.FileName(id)}.wav";
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+                if (clip == null) throw new InvalidOperationException($"Sound not imported: {path}. Run Tools/audio/MedievalChess/make_sounds.py");
+                bank.clips[(int)id] = clip;
+            }
+            bank.sources = new AudioSource[6];
+            for (int i = 0; i < bank.sources.Length; i++)
+            {
+                var child = new GameObject($"Source {i + 1}");
+                child.transform.SetParent(go.transform, false);
+                var source = child.AddComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.spatialBlend = 0f;
+                bank.sources[i] = source;
+            }
+            return bank;
+        }
+
+        static EffectsView BuildEffects(MedievalChessSettings s)
+        {
+            var go = new GameObject("Effects");
+            var view = go.AddComponent<EffectsView>();
+            view.settings = s;
+            view.dust = BuildParticles(go.transform, "Dust", ParticleMaterial("Dust", additive: false), 0.25f, 0.4f);
+            view.embers = BuildParticles(go.transform, "Embers", ParticleMaterial("Ember", additive: true), -0.05f, 0.3f);
+            view.sparks = BuildParticles(go.transform, "Sparks", ParticleMaterial("Spark", additive: true), 0.6f, 0f);
+            return view;
+        }
+
+        static ParticleSystem BuildParticles(Transform parent, string name, Material material, float gravity, float growth)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.gravityModifier = gravity;
+            main.maxParticles = 300;
+            var emission = ps.emission;
+            emission.enabled = false;
+            var shape = ps.shape;
+            shape.enabled = false;
+
+            var size = ps.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f - growth * 0.5f), new Keyframe(1f, growth > 0f ? 1f + growth * 2f : 0f)));
+            var colour = ps.colorOverLifetime;
+            colour.enabled = true;
+            var fade = new Gradient();
+            fade.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.7f, 0.4f), new GradientAlphaKey(0f, 1f) });
+            colour.color = fade;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            return ps;
+        }
+
+        /// <summary>An unlit particle material: additive for embers and sparks (Bloom picks them up), alpha blended for dust.</summary>
+        static Material ParticleMaterial(string name, bool additive)
+        {
+            string path = $"{DuelSceneBuilder.MaterialFolder}/MedievalChess Particle {name}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+                if (shader == null) throw new InvalidOperationException("URP Particles/Unlit shader not found.");
+                mat = new Material(shader) { name = $"MedievalChess Particle {name}" };
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", additive ? 2f : 0f);
+            mat.SetFloat("_SrcBlend", additive ? (float)BlendMode.One : (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
+            mat.SetFloat("_DstBlendAlpha", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            mat.SetColor("_BaseColor", Color.white);
+            var soft = AssetDatabase.GetBuiltinExtraResource<Texture2D>("Default-Particle.psd");
+            if (soft != null) mat.SetTexture("_BaseMap", soft);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
         // --- the game itself ---
 
-        static void BuildGame(MedievalChessSettings s, Material bone, Material cinnabar, Material iron, UiView ui, HighlightView highlights, Camera cam)
+        static void BuildGame(MedievalChessSettings s, Material bone, Material cinnabar, Material iron, UiView ui, HighlightView highlights, Camera cam,
+            SoundBank sound, EffectsView effects, TorchFlicker[] torches)
         {
             var go = new GameObject("Game");
             var controller = go.AddComponent<GameController>();
@@ -460,6 +580,9 @@ namespace Prototypes.MedievalChess.Editor
             controller.ui = ui;
             controller.highlights = highlights;
             controller.cameraRig = cam.GetComponent<GameCameraRig>();
+            controller.sound = sound;
+            controller.effects = effects;
+            controller.torches = torches;
 
             var types = (PieceType[])Enum.GetValues(typeof(PieceType));
             controller.piecePrefabs = new GameObject[types.Length];

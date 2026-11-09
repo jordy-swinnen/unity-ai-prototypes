@@ -24,6 +24,21 @@ namespace Prototypes.MedievalChess
         /// <summary>The middle of the fight being played, or null when the step is not a fight.</summary>
         public Vector3? FightFocus { get; private set; }
         public ActionSequence Sequence => sequence;
+        /// <summary>Sounds and effects whose moment passed in the last frame, with where they happen.</summary>
+        public IReadOnlyList<PositionedCue> CuesThisFrame => cuesThisFrame;
+        /// <summary>The name of the step being played, or an empty string.</summary>
+        public string CurrentStepName => Timeline != null && sequence != null && sequence.Steps.Count > 0 ? sequence.Steps[Timeline.StepIndex].Name : string.Empty;
+
+        public struct PositionedCue
+        {
+            public FeelCue Cue;
+            public Vector3 Position;
+        }
+
+        readonly List<PositionedCue> cuesThisFrame = new List<PositionedCue>();
+        readonly List<FeelCue> scratch = new List<FeelCue>();
+        readonly Dictionary<int, List<FeelCue>> cueCache = new Dictionary<int, List<FeelCue>>();
+        FeelSettings feel = new FeelSettings();
 
         public SequenceStage(Func<string, PieceActor> findActor)
         {
@@ -31,9 +46,12 @@ namespace Prototypes.MedievalChess
         }
 
         /// <summary>Starts a sequence. With Off speed every step is shown at its end, in order, at once.</summary>
-        public void Begin(ActionSequence seq, AnimationSpeed speed, FightSettings fight, float effectStrength)
+        public void Begin(ActionSequence seq, AnimationSpeed speed, FightSettings fight, float effectStrength, FeelSettings feelSettings = null)
         {
             sequence = seq;
+            if (feelSettings != null) feel = feelSettings;
+            cueCache.Clear();
+            cuesThisFrame.Clear();
             shownStep = -1;
             CameraPush = 0f;
             BlowShake = 0f;
@@ -43,10 +61,37 @@ namespace Prototypes.MedievalChess
             if (speed == AnimationSpeed.Off)
             {
                 for (int i = 0; i < seq.Steps.Count; i++) Show(i, seq.Steps[i].Duration);
+                OffCue();
             }
             else if (seq.Steps.Count > 0)
             {
                 Show(0, 0f);
+                Collect(0, -1f, 0f);
+            }
+        }
+
+        // With Off the move is only shown, so it gets one sound: the clash of a capture, or a footfall.
+        void OffCue()
+        {
+            if (sequence.Steps.Count == 0) return;
+            bool capture = false;
+            foreach (var step in sequence.Steps) if (step is FightPlan) capture = true;
+            var plan = sequence.Steps[sequence.Steps.Count - 1];
+            var cue = new FeelCue { Sound = capture ? SoundId.Impact : SoundId.Footstep, HasSound = true, Effect = EffectKind.None };
+            cuesThisFrame.Add(new PositionedCue { Cue = cue, Position = findActor(plan.Actors[0].Id).transform.position });
+        }
+
+        void Collect(int step, float from, float to)
+        {
+            if (!cueCache.TryGetValue(step, out var cues))
+                cueCache[step] = cues = SoundCues.For(sequence.Steps[step], feel);
+            scratch.Clear();
+            SoundCues.Between(cues, from, to, scratch);
+            var plan = sequence.Steps[step];
+            foreach (var cue in scratch)
+            {
+                int actor = Mathf.Clamp(cue.Actor, 0, plan.Actors.Count - 1);
+                cuesThisFrame.Add(new PositionedCue { Cue = cue, Position = findActor(plan.Actors[actor].Id).transform.position });
             }
         }
 
@@ -55,12 +100,20 @@ namespace Prototypes.MedievalChess
         {
             BlowThisFrame = false;
             BlowShake = 0f;
+            cuesThisFrame.Clear();
             if (Timeline == null || Timeline.Finished) return;
 
             int before = Timeline.StepIndex;
+            float beforeTime = Timeline.PlanTime;
             Timeline.Advance(dt);
             if (Timeline.StepIndex != before) Show(before, sequence.Steps[before].Duration);
             Show(Timeline.StepIndex, Timeline.PlanTime);
+            if (Timeline.StepIndex != before)
+            {
+                Collect(before, beforeTime, sequence.Steps[before].Duration);
+                Collect(Timeline.StepIndex, -1f, Timeline.PlanTime);
+            }
+            else Collect(before, beforeTime, Timeline.PlanTime);
             CameraPush = Timeline.CameraPush;
             BlowThisFrame = Timeline.BlowThisFrame;
             BlowShake = Timeline.BlowShake;

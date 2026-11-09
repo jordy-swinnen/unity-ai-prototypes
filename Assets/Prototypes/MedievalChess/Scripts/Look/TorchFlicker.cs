@@ -14,6 +14,10 @@ namespace Prototypes.MedievalChess
         public MedievalChessSettings settings;
         public float seed;
 
+        /// <summary>1 is normal. A draw lowers it, so the torches burn down a little.</summary>
+        public float Dim { get; set; } = 1f;
+        public float CurrentIntensity => torchLight ? torchLight.intensity : 0f;
+
         float baseIntensity;
         Vector3 baseScale;
         bool captured;
@@ -60,8 +64,8 @@ namespace Prototypes.MedievalChess
             var look = settings.look;
             float amplitude = look.flickerAmplitude * settings.effectStrength;
             float f = Factor(time, seed, amplitude, look.flickerSpeed);
-            if (torchLight) torchLight.intensity = baseIntensity * f;
-            if (flame) flame.localScale = new Vector3(baseScale.x * (1f + (f - 1f) * 0.5f), baseScale.y * f, baseScale.z * (1f + (f - 1f) * 0.5f));
+            if (torchLight) torchLight.intensity = baseIntensity * f * Dim;
+            if (flame) flame.localScale = new Vector3(baseScale.x * (1f + (f - 1f) * 0.5f), baseScale.y * f * Mathf.Lerp(0.6f, 1f, Dim), baseScale.z * (1f + (f - 1f) * 0.5f));
         }
     }
 }

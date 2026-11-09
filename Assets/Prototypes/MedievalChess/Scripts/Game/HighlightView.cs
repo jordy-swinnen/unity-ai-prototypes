@@ -21,6 +21,12 @@ namespace Prototypes.MedievalChess
     {
         public GameObject ringTemplate;
         public MedievalChessSettings settings;
+        /// <summary>
+        /// How big a pulsing ring is at a moment, as a factor of its normal size: a smooth swing of plus and minus the amount,
+        /// the given number of times a second. An amount of 0 gives a steady ring.
+        /// </summary>
+        public static float PulseFactor(float time, float speed, float amount) => 1f + Mathf.Sin(time * speed * 2f * Mathf.PI) * amount;
+
         public Material selectionMaterial, moveMaterial, captureMaterial, lastMoveMaterial, checkMaterial, hoverMaterial;
 
         readonly Dictionary<RingKind, List<GameObject>> active = new Dictionary<RingKind, List<GameObject>>();
@@ -34,6 +40,14 @@ namespace Prototypes.MedievalChess
                 active[kind] = new List<GameObject>();
                 squares[kind] = new List<int>();
             }
+        }
+
+        void Update()
+        {
+            var f = settings.feel;
+            float factor = PulseFactor(Time.unscaledTime, f.checkPulseSpeed, f.checkPulseAmount * settings.effectStrength);
+            foreach (var ring in active[RingKind.Check])
+                ring.transform.localScale = new Vector3(settings.game.ringSize * factor, 0.01f, settings.game.ringSize * factor);
         }
 
         public IReadOnlyList<int> Squares(RingKind kind) => squares[kind];

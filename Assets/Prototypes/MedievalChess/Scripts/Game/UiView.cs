@@ -8,6 +8,8 @@ namespace Prototypes.MedievalChess
     {
         public GameObject startPanel, hud, promotionPanel, resultPanel;
         public Text statusText, resultText, difficultyDescription;
+        /// <summary>A full-screen colour that fades in over the board at the end of a game.</summary>
+        public Image wash;
         /// <summary>Squire, Knight, Marshal.</summary>
         public Button[] difficultyButtons;
         /// <summary>White, Black, Random.</summary>
@@ -50,6 +52,15 @@ namespace Prototypes.MedievalChess
             resultText.text = text;
             resultPanel.SetActive(true);
             promotionPanel.SetActive(false);
+        }
+
+        public float WashAlpha => wash != null ? wash.color.a : 0f;
+
+        public void SetWash(Color colour, float alpha)
+        {
+            if (wash == null) return;
+            colour.a = alpha;
+            wash.color = colour;
         }
 
         public void SetStatus(string text) => statusText.text = text;

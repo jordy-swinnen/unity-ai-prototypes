@@ -35,6 +35,7 @@ namespace Prototypes.MedievalChess
 
         [Header("Look (stage 6)")]
         public LookSettings look = new LookSettings();
+        public FeelSettings feel = new FeelSettings();
 
         [Header("Duel scene (stage 1)")]
         [Tooltip("Degrees the camera is pitched down.")]
