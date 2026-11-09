@@ -25,12 +25,6 @@ namespace Shared.Tests
             "Scenes", "TutorialInfo", "Readme.asset", "InputSystem_Actions.inputactions", // template leftovers
         };
 
-        // Names that already break the no-spaces rule and are waiting to be renamed on their own branch.
-        static readonly string[] SpacesAllowedUnder =
-        {
-            "Assets/Prototypes/NeonPong/Materials/", // renamed on feat/neon-pong (PR 1), not here
-        };
-
         static string Root
         {
             get
@@ -64,7 +58,7 @@ namespace Shared.Tests
         {
             var bad = Directory.GetFileSystemEntries(Path.Combine(Root, "Assets"), "*", SearchOption.AllDirectories)
                 .Select(Rel)
-                .Where(p => Path.GetFileName(p).Contains(' ') && !SpacesAllowedUnder.Any(p.StartsWith))
+                .Where(p => Path.GetFileName(p).Contains(' '))
                 .ToArray();
             Assert.IsEmpty(bad, "Unity's command line tools trip on spaces. Use PascalCase (MedievalChessTileLight, not 'MedievalChess Tile Light'):\n  " + Show(bad));
         }

@@ -10,7 +10,7 @@ Source: Unity's guide [Organizing your project](https://unity.com/how-to/organiz
 |---|---|---|
 | Document naming conventions and folder structure | `AGENTS.md` (short) and this page (reasons) | review |
 | Be consistent with naming | PascalCase everywhere; materials are `<Name><Thing>` | test |
-| No spaces in file and folder names (command line tools trip on them) | Renamed the 20 Medieval Chess materials from `MedievalChess Tile Light` to `MedievalChessTileLight`. The 8 Neon Pong materials still have spaces: see "Known leftovers". | test, with an allow-list |
+| No spaces in file and folder names (command line tools trip on them) | Renamed the 20 Medieval Chess materials from `MedievalChess Tile Light` to `MedievalChessTileLight`, and the 8 Neon Pong materials the same way. | test |
 | Separate sandbox areas | `Assets/Sandbox/<user>/`, ignored by git, created when needed | `.gitignore` |
 | Avoid extra folders at the root of `Assets` | Only `Prototypes`, `Shared`, `ThirdParty`, `Sandbox` and `Settings` | test |
 | Keep internal assets apart from third-party ones | Anything we did not make goes in `Assets/ThirdParty/<Vendor>/` | test (root rule), review |
@@ -30,6 +30,5 @@ Source: Unity's guide [Organizing your project](https://unity.com/how-to/organiz
 - **Large files:** `.png`, `.glb`, `.wav`, `.blend` and similar are in Git LFS (`.gitattributes`).
 
 ## Known leftovers
-- **Neon Pong's material names have spaces** (8 files in `Assets/Prototypes/NeonPong/Materials/`). They belong to the first pull request. The fix is to rename them with `AssetDatabase.RenameAsset` and change the name strings in its scene builder, on `feat/neon-pong`. Then remove the allow-list entry in `ProjectStructureTests`.
 - **URP template leftovers at the top of `Assets/`:** `Readme.asset`, `TutorialInfo/`, `Scenes/SampleScene.unity`, `InputSystem_Actions.inputactions`. They are listed in the test's allow-list. Remove them only with the person's approval (it deletes files), then remove them from the list. `Assets/Settings` stays: it holds the render pipeline assets.
 - **Visible Meta Files:** a Unity project setting (`ProjectSettings/`). We did not change it. `.meta` files exist on disk and are committed for every asset, which `ProjectStructureTests` checks, so the setting does not need to change.
