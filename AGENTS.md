@@ -66,7 +66,7 @@ Follow the `dual-agent-config` skill whenever you touch agent config.
 ## Checks
 The Unity Editor must be open on this project. `unity status` should show `ready`.
 - Everything: `Tools/unity/check.sh all` (compile, then EditMode and PlayMode tests). Also `compile`, `editmode` and `playmode`. It exits non-zero on a compile error or a failing test.
-- Render: `Tools/unity/capture.sh camera <out.png>`, `screen` or `play`. Write captures outside the repository.
+- Render: `Tools/unity/capture.sh camera <out.png>`, `screen` or `play`. Write captures outside the repository. Only `screen` and `play` include post-processing (Bloom, Vignette), so judge a look on those.
 - The raw `unity` commands behind these, and the traps found while building the first prototype, are in `.claude/skills/game-build/references/unity-loop.md` and `pitfalls.md`.
 - Packages: `com.unity.cloud.gltfast` 6.20.0 imports the `.glb` files. Unity 6 can't import `.glb` without it.
 - Tests with the Editor closed: `unity test . --mode EditMode --output Logs/test-results.xml`. With the Editor open it refuses and exits 6. Not run in this repository.

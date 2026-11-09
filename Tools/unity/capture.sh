@@ -2,9 +2,11 @@
 # Save a picture of what the game looks like, so a change can be judged on a render.
 #
 #   Tools/unity/capture.sh camera <out.png> [width height]
-#       Render the scene's main camera. Scene only, no screen-space UI. Works in Edit Mode.
+#       Render the scene's main camera. Works in Edit Mode. It does NOT apply post-processing
+#       (no Bloom, no Vignette), so it is not the way to judge a look.
 #   Tools/unity/capture.sh screen <out.png>
-#       Capture the Game window, including UI. Open the scene you want first.
+#       Capture the Game window, including UI and post-processing. Open the scene you want
+#       first. Use this one to judge the look.
 #   Tools/unity/capture.sh play <out.png> [seconds]
 #       Enter Play Mode, wait, capture the Game window, leave Play Mode (default 5 seconds).
 #
@@ -21,7 +23,7 @@ command -v unity >/dev/null 2>&1 || { echo "Missing tool: unity" >&2; exit 2; }
 mode="${1:-}"
 out="${2:-}"
 if [ -z "$mode" ] || [ -z "$out" ]; then
-  sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
   exit 2
 fi
 mkdir -p "$(dirname "$out")"

@@ -18,3 +18,7 @@ Each of these happened while building the first prototype in this repository.
 14. **The Editor must be open.** If `unity status` doesn't show a ready Editor for this project, the loop can't run.
 15. **The first test run after new test files compile can report zero results**, even though `test list` shows the tests. Wait a few seconds and run again. `Tools/unity/check.sh` retries.
 16. **A rules test that plays for many seconds can end the game.** With the win score reached, the paddles freeze. Raise the win score in the test, or set up the state directly.
+17. **`capture.sh camera` has no post-processing.** A scene with Bloom and Vignette looks flat in that capture. Use `capture.sh screen` (the Game window) to judge a look. Open the scene first.
+18. **Creating URP materials or a Volume profile can make Unity add a line to `ProjectSettings/URPProjectSettings.asset`** (`m_ProjectSettingFolderPath`). Nobody asked for that, so check `git status` and restore the file before committing.
+19. **`wasPressedThisFrame` only works in Play Mode.** Test key mapping with `isPressed` in EditMode, and a "pressed this frame" key in a PlayMode test with a test keyboard device (`InputSystem.AddDevice<Keyboard>()`, then `QueueStateEvent` and `yield return null`).
+20. **A settings asset created just before `NewScene` is unloaded by it** and the scene saves an empty reference. Create the asset first, then load it again after `NewScene`.

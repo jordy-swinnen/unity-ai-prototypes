@@ -9,8 +9,8 @@ All of these were run in this repository with Unity 6000.6.8f1 and Unity CLI 1.0
 | `Tools/unity/check.sh editmode` | Compile, then run EditMode tests and print `tests: passed/total`. |
 | `Tools/unity/check.sh playmode` | Compile, then run PlayMode tests (started in the background and polled). |
 | `Tools/unity/check.sh all` | Compile, then both test modes. |
-| `Tools/unity/capture.sh camera <out.png> [w h]` | Render the main camera. Scene only, no screen-space UI. |
-| `Tools/unity/capture.sh screen <out.png>` | Capture the Game window, including UI. |
+| `Tools/unity/capture.sh camera <out.png> [w h]` | Render the main camera. No post-processing (no Bloom or Vignette). |
+| `Tools/unity/capture.sh screen <out.png>` | Capture the Game window, including UI and post-processing. Use this to judge a look. |
 | `Tools/unity/capture.sh play <out.png> [seconds]` | Enter Play Mode, wait, capture, leave Play Mode. |
 
 Write captures outside the repository, for example into a temp folder, then open the image to look at it.
