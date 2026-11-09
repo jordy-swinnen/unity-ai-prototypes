@@ -2,6 +2,7 @@
     "name": "NeonPong.Tests.PlayMode",
     "rootNamespace": "Prototypes.NeonPong.Tests",
     "references": [
+        "Shared",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "NeonPong",
