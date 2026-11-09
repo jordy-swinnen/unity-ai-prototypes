@@ -4,7 +4,7 @@ An AI-native starting point for Unity games. Fork it or use it as a template, th
 
 ## Project
 - Defaults (change them in your fork): mostly 3D with some 2D, the Universal 3D (URP) template, plain conventional commits (no `Refs:` trailer).
-- The repository holds no game of its own. Games and features live in their own folders under `Assets/Prototypes/`.
+- The repository holds two example prototypes, Neon Pong and Medieval Chess. Games and features live in their own folders under `Assets/Prototypes/`.
 
 ## Workflow: use the skills
 Games and features go through four skills in `.claude/skills/`. Each ends with a stop for the user's review, and the next one starts only after approval.

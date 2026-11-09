@@ -2,7 +2,14 @@
 
 An AI-native starting point for building Unity games with coding agents. Fork it or use it as a template, then go from a game idea to a playable, tested, good-looking prototype with Claude Code or OpenCode. Models are made with headless Blender scripts, scenes are built by code, and every stage is checked by tests and renders before a person reviews it.
 
-It is generic. It contains no game of its own. Games and features you add live in their own folders and follow the same process.
+It is generic. The process and the tools do not depend on any game. Two example prototypes show what it produces, and each lives in its own folder under `Assets/Prototypes/` (yours will too):
+
+| Prototype | What it is | Spec |
+|---|---|---|
+| **Neon Pong** | A two-player pong on a neon table: every hit flashes, shakes the screen and rings, and the rally speeds up. The first game made with the skills. | `docs/prototypes/neon-pong.md` |
+| **Medieval Chess** | Chess against a computer with three difficulties, in a torch-lit hall. Every capture is an animated fight where the attacker kills the victim. Full rules, models from Blender scripts, 22 generated sounds. The second game, and the bigger test of the process. | `docs/prototypes/medieval-chess.md` and `medieval-chess-plan.md` |
+
+To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by both (camera shake and hit-stop) lives in `Assets/Shared/`.
 
 ## What you get
 - **Four skills** in `.claude/skills/` (both Claude Code and OpenCode read that folder). Together they are the process from idea to polished game:

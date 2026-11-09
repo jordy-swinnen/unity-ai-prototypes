@@ -1,6 +1,6 @@
 # Medieval Chess
 
-Status: approved
+Status: built, waiting for the play test (stage 7)
 Kind: new game
 
 ## One-page design
@@ -28,9 +28,9 @@ You picked "Living pieces (Battle Chess style)". It is combined with the recomme
 ### Visual pillars
 - **Shape language:** chunky, rounded-bevelled forms with a big head, a wide body and a short, heavy weapon. Each piece has a different silhouette and a different height: pawn (footman with round shield and short spear, smallest), knight (a stout pony and rider with a lance), bishop (a cleric with a mitre and a heavy mace), rook (a crenellated stone tower warden with fists), queen (a crowned warrior with a long sword), king (tallest, crowned, with a great sword). (pillar 2, 3)
 - **Colour philosophy:** two sides, **bone** and **cinnabar red**, after the colour evidence on the Lewis pieces. A non-colour backup: the bone side has rounded caps and crowns, the red side has pointed crests, and the sides start at the bottom and top of the board. Gold is reserved for the player's own highlights (selection and legal moves). (pillar 2)
-- **Lighting:** a dark hall lit mostly by four flickering torches around the board, warm and low, with soft shadows, so the pieces have weight and form. Fights get a brief extra warm flash. (pillar 3)
+- **Lighting:** a dark hall lit mostly by four flickering torches around the board, warm and low, so the pieces have weight and form. **As built:** a dim cool fill light casts the soft shadows, because with warm light only the squares and both sides turned the same orange. The torches cast no shadows (a render showed no gain). The extra warm flash on a fight became sparks on the blow. (pillar 3)
 - **Materials:** matte stone and carved wood for the board, matte painted bone and waxed red for the pieces, dull iron for weapons. Only the torch flames and the gold highlights are emissive. The brightest things on screen are the selected piece's highlight and the flames. (pillar 2, 3)
-- **Rendering and post-processing:** mild Bloom (flames and gold only), a stronger Vignette to pull the eye to the board, warm colour grading, Tonemapping chosen on a render (ACES or Neutral). Shadows on. (pillar 3)
+- **Rendering and post-processing:** mild Bloom (flames and gold only), a stronger Vignette to pull the eye to the board, warm colour grading, Tonemapping chosen on a render (ACES or Neutral). Shadows on. **As built:** ACES, Bloom threshold 1, Vignette 0.38. (pillar 3)
 - **Camera:** perspective, pitched down about 50 degrees behind the player's side, narrow field of view (about 35), the whole board always visible. On a capture the camera pushes in and lowers toward the fight, then returns. The player does not move the camera in the first version. (pillar 1, 2)
 - **UI and text:** a start screen with three difficulty banners and three side choices, a thin top bar (whose turn, "Thinking...", the result), trays of captured pieces at the board's sides, a promotion choice of four pieces, and a menu. Text in a neutral parchment colour. (pillar 2, 4)
 
@@ -77,6 +77,8 @@ Weighty and dry: stone and wood on stone, iron on iron, a low war drum, a horn f
 | Resign | the player's king kneels and drops its sword | a low horn | slow push in | none | 3 |
 | New game | the pieces fade out and in, the board resets | a drum beat | pull back to the start view | none | 3 |
 
+**Built, and not built.** Built: every row with a sound, a camera move or a particle effect except those below. Not built (stage 7 decides which are worth it): the start-screen banner hover, the sway on an illegal click (a knock plays), the lift and raised weapon of a picked piece (the rings show it), the thinking candle (the top bar says "thinking"), pieces lowering their weapons in a draw (the torches dim and a bell tolls), and the fade of pieces in a new game (the camera walks in from the hall). A promotion's forge flash is a burst of sparks.
+
 ### Six-area feel review
 - **Input:** one mouse click picks a piece, a second click picks a square, a click on an empty square or the same piece cancels. Risk: a click on a square that is hidden behind a tall piece. The click uses the board plane, not the models.
 - **Response:** the highlights and the piece's lift start on the same frame as the click, and the computer's move starts within about a second. Risk: a long fight makes the game feel slow. The speed setting is the answer.
@@ -104,7 +106,7 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 - **Board:** square size 1 m, frame width 0.6 m, piece heights from 0.5 (pawn) to 1.1 (king).
 - **Moves:** step time per square 0.35 s (stone thud each step), knight leap 0.55 s, rook slide 0.5 s, selection lift 0.12 m over 0.12 s.
 - **Fight:** approach 0.35 s, wind-up and blow per attacker (about 0.6 s total), the blow's hit-stop 0.07 s, collapse 0.6 s, camera push 35 percent closer, lowered 25 percent, shake strength 0.12 m, fight total about 1.8 s at Full. Quick speed factor 3.
-- **Difficulty:** Squire depth 1, slack 120 centipawns, blunder chance 1 in 7, delay 0.8 s. Knight depth 3, quiescence on, slack 10, time cap 1.5 s. Marshal depth up to 5, time cap 3 s, table size 2^18 entries.
+- **Difficulty:** Squire depth 1, slack 120 centipawns, blunder chance 1 in 7, delay 0.8 s. Knight depth 3, quiescence on, slack 10, time cap 1.5 s. Marshal depth up to 8, time cap 3 s, table size 2^18 entries.
 - **Evaluation:** piece values above, game-phase threshold (both queens off, or a queen with at most one minor piece per side), mate score 100000.
 - **Look:** emission for the torch flames, gold ring and check pulse, Bloom intensity and threshold, Vignette intensity, torch light intensity and range, flicker amplitude and speed, camera pitch, field of view and distance.
 - **Feel:** global effect strength 0 to 1, shake duration and decay, wash alpha, slow-motion scale and duration for checkmate, dust and ember counts, master volume.
@@ -117,20 +119,23 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 
 ## Acceptance criteria
 ### Checked by tests or captures
-- [ ] The Blender script runs headless and writes every model with the planned sizes, pivots and part names, within the triangle budget.
-- [ ] Move generation matches the known perft counts for the start position (depths 1 to 4) and for the test positions listed under Tests.
-- [ ] Castling, en passant and promotion work and have their special cases covered (through check, the rook or king moved, the pawn's one-move window, promoting to each piece).
-- [ ] Checkmate, stalemate, threefold repetition, the fifty-move rule and insufficient material are all detected, and a move that leaves your own king in check is never legal.
-- [ ] The three difficulties exist and show on the start screen. Choosing one and a side starts a game with the right side to move.
-- [ ] The computer only ever plays legal moves, finds a mate in one at Knight and Marshal, and does not leave its queen to be taken for nothing at Knight and Marshal. Squire is beatable: over a fixed set of seeded positions it sometimes plays worse than the best move.
-- [ ] In a fixed seeded set of games, Knight scores at least as much as Squire and Marshal at least as much as Knight.
-- [ ] The computer never goes over its time cap by more than a small margin, and the game stays responsive while it thinks.
-- [ ] Every capture plays one fight: the right routine for the attacker, the victim collapses, the final positions match the rules' state, and the animation never changes the game state. En passant, castling and promotion also end in the right state.
-- [ ] With the animation setting on Quick or Off, or the effect strength at 0, the game state is the same and the fight is faster or absent, with the shake offset at zero.
-- [ ] A render shows the board, all pieces, the torches and the highlights, with the two sides and all six piece types told apart, and the legal squares readable.
-- [ ] Every sound exists, is not silent, does not clip and ends near zero.
-- [ ] `Tools/unity/check.sh all` passes.
+- [x] The Blender script runs headless and writes every model with the planned sizes, pivots and part names, within the triangle budget.
+- [x] Move generation matches the known perft counts for the start position (depths 1 to 4) and for the test positions listed under Tests.
+- [x] Castling, en passant and promotion work and have their special cases covered (through check, the rook or king moved, the pawn's one-move window, promoting to each piece).
+- [x] Checkmate, stalemate, threefold repetition, the fifty-move rule and insufficient material are all detected, and a move that leaves your own king in check is never legal.
+- [x] The three difficulties exist and show on the start screen. Choosing one and a side starts a game with the right side to move.
+- [x] The computer only ever plays legal moves, finds a mate in one at Knight and Marshal, and does not leave its queen to be taken for nothing at Knight and Marshal. Squire is beatable: over a fixed set of seeded positions it sometimes plays worse than the best move.
+- [x] In a fixed seeded set of games, Knight scores at least as much as Squire and Marshal at least as much as Knight. (The default test plays Knight against Squire. Marshal against Knight is an `[Explicit]` test of about six minutes, which I ran by hand: Marshal at 4 plies won 7 to 3 in 10 games.)
+- [x] The computer never goes over its time cap by more than a small margin, and the game stays responsive while it thinks.
+- [x] Every capture plays one fight: the right routine for the attacker, the victim collapses, the final positions match the rules' state, and the animation never changes the game state. En passant, castling and promotion also end in the right state.
+- [x] With the animation setting on Quick or Off, or the effect strength at 0, the game state is the same and the fight is faster or absent, with the shake offset at zero.
+- [x] A render shows the board, all pieces, the torches and the highlights, with the two sides and all six piece types told apart, and the legal squares readable.
+- [x] Every sound exists, is not silent, does not clip and ends near zero.
+- [x] `Tools/unity/check.sh all` passes.
+Checked on 9 November 2026 with `Tools/unity/check.sh all`: EditMode 667/667 and PlayMode 69/69, and renders of every screen.
+
 ### Needs a person
+How to check each one is in `docs/prototypes/medieval-chess-playtest.md`.
 - [ ] The look matches the brief: it reads as medieval and heavy, not as plain blocks, and the pieces look like warriors.
 - [ ] All six piece types and both sides can be told apart at a glance, including red on the dark squares.
 - [ ] A capture feels like a fight with weight: the blow lands, the victim falls convincingly, and it is not too long or too silly. Quick and Off are fast enough for a long game.
@@ -158,9 +163,9 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 - **Fight length:** about 1.8 s at Full is a guess. Judge it in play, and cut it if it wears out.
 - **Readability:** red pieces on the dark slate squares, the knight's silhouette (pony and rider) and the pawn against the rook. Judged on renders.
 - **Search time:** measured in stage 4. Marshal reaches 5 to 9 plies in 3 s on a development machine. A slower machine reaches less, and the time cap protects the player either way.
-- **Shadows and torches:** realtime shadows from four lights may cost more than they earn. Cut them if a render shows no gain.
+- **Shadows and torches:** decided in stage 6. The torches cast no shadows, and the cool fill light does.
 - **How good simple generated sounds are:** the person decides after listening.
-- **Tonemapping:** ACES or Neutral, chosen on a render.
+- **Tonemapping:** ACES is used. Neutral was not compared on a render, so judge the colours in play.
 
 ## Sources
 See `docs/research/medieval-chess.md`. Lewis chessmen: Wikipedia [read]. Battle Chess: Wikipedia [read]. Heraldic tinctures: Wikipedia [read], no colour values given. Perft counts: Chess Programming Wiki [read]. Evaluation ideas and piece values: Chess Programming Wiki, Simplified Evaluation Function [read]. Search techniques: [secondary]. Search strength and timing: [unverified].
