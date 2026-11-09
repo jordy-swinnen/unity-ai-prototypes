@@ -21,10 +21,16 @@ namespace Prototypes.NeonPong
         public Func<NeonPongInput> InputSource;
 
         public NeonPongSimulation Simulation { get; private set; }
+        /// <summary>Shake, hit-stop, flashes and the win effects, driven by the rules' events.</summary>
+        public FeelState Feel { get; private set; }
+
+        /// <summary>Raised for every rules event, after the feel state has seen it.</summary>
+        public event Action<GameEvent> EventRaised;
 
         void Awake()
         {
             Simulation = new NeonPongSimulation(settings, seed != 0 ? seed : Environment.TickCount);
+            Feel = new FeelState(settings);
             InputSource ??= () => NeonPongKeyboard.Read(Keyboard.current);
         }
 
@@ -33,9 +39,20 @@ namespace Prototypes.NeonPong
             if (autoStep) Tick(Mathf.Min(Time.unscaledDeltaTime, 0.05f));
         }
 
+        /// <summary>
+        /// Advances the game by a real frame time. A hit-stop gives the rules no time, and the
+        /// feel state and everything else keep running.
+        /// </summary>
         public void Tick(float dt)
         {
-            Simulation.Step(dt, InputSource());
+            float rulesDt = Feel.Time.Advance(dt);
+            Simulation.Step(rulesDt, InputSource());
+            foreach (var e in Simulation.Events)
+            {
+                Feel.OnEvent(e);
+                EventRaised?.Invoke(e);
+            }
+            Feel.Update(dt);
         }
     }
 }

@@ -53,7 +53,8 @@ namespace Prototypes.NeonPong.Tests
             {
                 "Table", "Rail Top", "Rail Bottom", "End Line Left", "End Line Right",
                 "Paddle Left", "Paddle Right", "Ball", "Main Camera", "Global Volume",
-                "Game", "Score Left", "Score Right", "Message",
+                "Game", "Score Left", "Score Right", "Message", "Wash",
+                "Ball Trail", "Ball Light", "Bursts", "Audio",
             })
             {
                 Find(name);
@@ -172,6 +173,43 @@ namespace Prototypes.NeonPong.Tests
             Assert.IsNotNull(view.scoreLeft);
             Assert.IsNotNull(view.scoreRight);
             Assert.IsNotNull(view.message);
+        }
+
+        [Test]
+        public void The_ball_has_a_trail_and_a_light_driven_by_the_settings()
+        {
+            var ball = Find("Ball");
+            var trail = ball.GetComponentInChildren<TrailRenderer>();
+            Assert.IsNotNull(trail);
+            Assert.IsTrue(AssetDatabase.Contains(trail.sharedMaterial));
+            var light = ball.GetComponentInChildren<Light>();
+            Assert.AreEqual(LightType.Point, light.type);
+            Assert.AreEqual(settings.lightRange, light.range, Tol);
+
+            var view = Find("Game").GetComponent<NeonPongView>();
+            Assert.AreEqual(trail, view.trail);
+            Assert.AreEqual(light, view.ballLight);
+            Assert.AreEqual(2, view.rails.Length);
+            Assert.IsNotNull(view.wash);
+        }
+
+        [Test]
+        public void The_camera_rig_the_bursts_and_the_audio_are_wired_to_the_game()
+        {
+            var game = Find("Game").GetComponent<NeonPongGame>();
+            Assert.AreEqual(game, Find("Main Camera").GetComponent<NeonPongCameraRig>().game);
+
+            var bursts = Find("Bursts").GetComponent<NeonPongBursts>();
+            Assert.AreEqual(game, bursts.game);
+            Assert.IsNotNull(bursts.system);
+            Assert.IsTrue(AssetDatabase.Contains(bursts.GetComponent<ParticleSystemRenderer>().sharedMaterial));
+
+            var audio = Find("Audio").GetComponent<NeonPongAudio>();
+            Assert.AreEqual(game, audio.game);
+            Assert.IsNotNull(audio.sfx);
+            Assert.IsNotNull(audio.paddleSfx);
+            foreach (var clip in new[] { audio.wall, audio.paddle, audio.serve, audio.point, audio.win, audio.restart })
+                Assert.IsNotNull(clip);
         }
 
         [Test]

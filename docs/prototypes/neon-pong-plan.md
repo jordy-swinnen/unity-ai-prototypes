@@ -1,6 +1,6 @@
 # Neon Pong: plan and tasks
 
-Plan for `docs/prototypes/neon-pong.md`. Status: stage 2 done
+Plan for `docs/prototypes/neon-pong.md`. Status: stage 3 done, waiting for the play test
 
 ## Decisions needed first
 1. **No new packages.** Everything fits the packages the project has: URP 17.6.0 (Bloom, Vignette, Tonemapping, Volume), Input System 1.20.1, glTFast 6.20.0 (imports the `.glb` files), uGUI 2.6.0 (score text). Camera shake, hit-stop and the trail are small scripts of our own, not Cinemachine (see `game-polish/references/urp-effects.md`). Nothing to approve here.
@@ -88,17 +88,18 @@ Each stage ends with a stop for review.
 - [x] Commit: `feat(neon-pong): add playable scene and PlayMode tests`.
 
 ### Stage 3: look and feel (game-polish)
-Each step has a before and after capture, tests for its logic, a keep or cut decision and its own commit. The order follows `game-polish/references/polish-order.md`.
-- [ ] Baseline capture with `capture.sh screen` (not `camera`).
-- [ ] Materials and emission from the palette (ball brightest, then paddles, then rails, then grid).
-- [ ] Volume: Bloom, Vignette, Tonemapping Neutral. Tune intensity and threshold on renders. Settle the HDR question on a render.
-- [ ] Camera pitch, field of view and distance, judged on a render for the far side.
-- [ ] Ball trail that grows with speed, and the point light (keep or cut).
-- [ ] Sound generation script and the tests on the files. Wire `NeonAudio` to events with pitch from speed.
-- [ ] Feel table rows one by one: wall hit, paddle hit (flash, burst, scale pop, shake, hit-stop), speed step, paddle lean, point scored, win, restart. Tests: shake decays to zero, shake follows the global strength, hit-stop ends, strength 0 disables feedback, events trigger on the right actions.
-- [ ] Global effect strength: capture at 0 and at 1 and check the difference.
-- [ ] Final before and after renders and the play-test list for the person.
-- [ ] Commit per step: `feat(neon-pong): <effect>`.
+Each step has before and after captures, tests for its logic, a keep or cut decision and its own commit. Captures use `capture.sh play` or a frozen Play Mode scene (see pitfalls 21 and 22), because `camera` captures have no post-processing and Edit Mode UI text can be garbled.
+- [x] Baseline capture (flat colours, bloom too weak, ball white, scores touching the rail).
+- [x] Materials, emission, Bloom, camera distance and score layout tuned on renders (`96a3ba4`). Ball is the brightest, then paddles, grid, rails. Bloom on versus off compared: bloom is what makes it neon.
+- [x] Emission worked out in linear light. Found that HDR colours are converted twice if set naively. Fixed in the builder and the view.
+- [x] Ball trail (grows with speed) and a point light on the ball. **Kept both**: the light puts a warm pool on the table, so the ball visibly lights its surroundings (spec pillar 2). Trail is a short wedge, which reads as speed.
+- [x] Sound script (`Tools/audio/NeonPong/make_sounds.py`): six sounds, each under 1 s, peak 0.8, ending at zero. The script checks its own output, and EditMode tests check the files. **Deviation:** the paddle pitch comes from the AudioSource pitch (rising with speed), not separate pitch variant files.
+- [x] Feel logic with tests first: shake (decays to zero, scaled by strength, directional), hit-stop (pauses only the rules), slow motion, flashes, pops, win wash and push-in, `effectStrength` 0 turns everything off.
+- [x] Effects on the scene: rail and paddle flashes, ball pop, paddle stretch and lean, score pop, bursts for wall, paddle, point and win, win wash, message fade-in, camera shake and push-in, sound on every event.
+- [x] Global effect strength: renders and tests at 0 and 1. A deliberate bug (ignore the strength) failed 2 tests.
+- [x] Final renders (start, hit, trail, point, win, strength 0).
+- [ ] Hand to the person for the play test (stage 4).
+- Commits: `feat(neon-pong): ...` per step (see the log).
 
 ### Stage 4: play test and tidy
 - [ ] The person plays and fills in the "needs a person" criteria.

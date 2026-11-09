@@ -22,3 +22,6 @@ Each of these happened while building the first prototype in this repository.
 18. **Creating URP materials or a Volume profile can make Unity add a line to `ProjectSettings/URPProjectSettings.asset`** (`m_ProjectSettingFolderPath`). Nobody asked for that, so check `git status` and restore the file before committing.
 19. **`wasPressedThisFrame` only works in Play Mode.** Test key mapping with `isPressed` in EditMode, and a "pressed this frame" key in a PlayMode test with a test keyboard device (`InputSystem.AddDevice<Keyboard>()`, then `QueueStateEvent` and `yield return null`).
 20. **A settings asset created just before `NewScene` is unloaded by it** and the scene saves an empty reference. Create the asset first, then load it again after `NewScene`.
+21. **Edit Mode captures can show garbled or missing UI text** (the dynamic font atlas goes stale after a rebuild or a test run). Judge UI on `capture.sh play`, which enters Play Mode.
+22. **To get a still frame of a moving moment**, enter Play Mode, set up the state with `unity cmd script eval`, then set `autoStep` off and `Time.timeScale = 0` before `capture.sh screen`. Particles and trails freeze in place.
+23. **A test that changes a settings asset must restore it** (use a teardown). A ScriptableObject changed in a PlayMode test can stay changed in the Editor.

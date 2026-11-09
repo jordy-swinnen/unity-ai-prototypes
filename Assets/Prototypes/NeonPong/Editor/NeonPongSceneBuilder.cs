@@ -53,14 +53,20 @@ namespace Prototypes.NeonPong.Editor
             RenderSettings.ambientLight = new Color(0.02f, 0.025f, 0.05f);
             RenderSettings.fog = false;
 
-            BuildTable(mats, settings);
+            var rails = BuildTable(mats, settings);
             var leftPaddle = Place("paddle", "Paddle Left", new Vector3(-settings.paddleX, 0f, 0f), PaddleMap(mats.paddleLeft, mats));
             var rightPaddle = Place("paddle", "Paddle Right", new Vector3(settings.paddleX, 0f, 0f), PaddleMap(mats.paddleRight, mats));
             var ball = Place("ball", "Ball", new Vector3(0f, settings.ballRadius, 0f), PaddleMap(mats.ball, mats));
-            BuildCamera(settings);
+            var trail = BuildTrail(ball, mats, settings);
+            var ballLight = BuildBallLight(ball, settings);
+            var camera = BuildCamera(settings);
             BuildVolume(profile);
             var ui = BuildUi(settings);
-            BuildGame(settings, leftPaddle, rightPaddle, ball, ui);
+            var game = BuildGame(settings, leftPaddle, rightPaddle, ball, rails, trail, ballLight, ui);
+
+            camera.AddComponent<NeonPongCameraRig>().game = game;
+            BuildBursts(game, mats, settings);
+            BuildAudio(game);
 
             EditorSceneManager.SaveScene(scene, scenePath);
             AssetDatabase.SaveAssets();
@@ -86,23 +92,29 @@ namespace Prototypes.NeonPong.Editor
 
         class Materials
         {
-            public Material body, grid, rail, paddleLeft, paddleRight, ball;
+            public Material body, grid, rail, paddleLeft, paddleRight, ball, spark, trail;
         }
 
         static Materials BuildMaterials(NeonPongSettings s)
         {
             return new Materials
             {
-                body = Material("Table Body", s.baseColor, Color.black, 0.15f),
-                grid = Material("Table Grid", s.gridColor, s.gridColor * s.gridEmission, 0.1f),
-                rail = Material("Rail", s.gridColor, s.gridColor * s.railEmission, 0.1f),
-                paddleLeft = Material("Paddle Left", s.player1Color, s.player1Color * s.paddleEmission, 0.2f),
-                paddleRight = Material("Paddle Right", s.player2Color, s.player2Color * s.paddleEmission, 0.2f),
-                ball = Material("Ball", s.ballColor, s.ballColor * s.ballEmission, 0.3f),
+                body = Material("Table Body", s.baseColor, Color.black, 0f, 0.15f),
+                grid = Material("Table Grid", s.gridColor, s.gridColor, s.gridEmission, 0.1f),
+                rail = Material("Rail", s.gridColor, s.gridColor, s.railEmission, 0.1f),
+                paddleLeft = Material("Paddle Left", s.player1Color, s.player1Color, s.paddleEmission, 0.2f),
+                paddleRight = Material("Paddle Right", s.player2Color, s.player2Color, s.paddleEmission, 0.2f),
+                ball = Material("Ball", s.ballColor, s.ballColor, s.ballEmission, 0.3f),
+                spark = Additive("Spark", Color.white * s.burstEmission),
+                trail = Additive("Trail", Color.white * s.trailEmission),
             };
         }
 
-        static Material Material(string name, Color baseColor, Color emission, float smoothness)
+        /// <summary>
+        /// A URP Lit material. Emission is the colour times an intensity, worked out in linear light
+        /// (so the colour stays saturated), then converted back because SetColor converts it again.
+        /// </summary>
+        static Material Material(string name, Color baseColor, Color emissionColor, float intensity, float smoothness)
         {
             string path = $"{MaterialFolder}/NeonPong {name}.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -116,10 +128,39 @@ namespace Prototypes.NeonPong.Editor
             mat.SetColor("_BaseColor", baseColor);
             mat.SetFloat("_Metallic", 0f);
             mat.SetFloat("_Smoothness", smoothness);
+            var emission = (emissionColor.linear * intensity).gamma;
             mat.SetColor("_EmissionColor", emission);
-            if (emission.maxColorComponent > 0f) mat.EnableKeyword("_EMISSION");
+            if (intensity > 0f && emission.maxColorComponent > 0f) mat.EnableKeyword("_EMISSION");
             else mat.DisableKeyword("_EMISSION");
             mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        /// <summary>An unlit, additive particle material. The colour is a brightness multiplier (HDR).</summary>
+        static Material Additive(string name, Color tint)
+        {
+            string path = $"{MaterialFolder}/NeonPong {name}.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+                if (shader == null) throw new InvalidOperationException("URP Particles/Unlit shader not found.");
+                mat = new Material(shader) { name = $"NeonPong {name}" };
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            // Transparent surface, additive blend, no depth write.
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 2f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.One);
+            mat.SetFloat("_DstBlend", (float)BlendMode.One);
+            mat.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
+            mat.SetFloat("_DstBlendAlpha", (float)BlendMode.One);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.SetColor("_BaseColor", tint);
             EditorUtility.SetDirty(mat);
             return mat;
         }
@@ -199,17 +240,130 @@ namespace Prototypes.NeonPong.Editor
             };
         }
 
-        static void BuildTable(Materials mats, NeonPongSettings s)
+        static Transform[] BuildTable(Materials mats, NeonPongSettings s)
         {
             var map = PaddleMap(mats.body, mats);
             Place("table", "Table", Vector3.zero, map);
-            Place("rail", "Rail Top", new Vector3(0f, 0f, s.halfWidth + RailHalf), map);
-            Place("rail", "Rail Bottom", new Vector3(0f, 0f, -(s.halfWidth + RailHalf)), map);
+            var top = Place("rail", "Rail Top", new Vector3(0f, 0f, s.halfWidth + RailHalf), map);
+            var bottom = Place("rail", "Rail Bottom", new Vector3(0f, 0f, -(s.halfWidth + RailHalf)), map);
             Place("endline", "End Line Right", new Vector3(s.halfLength, 0f, 0f), map);
             Place("endline", "End Line Left", new Vector3(-s.halfLength, 0f, 0f), map);
+            return new[] { top.transform, bottom.transform };
         }
 
-        static void BuildCamera(NeonPongSettings s)
+        static TrailRenderer BuildTrail(GameObject ball, Materials mats, NeonPongSettings s)
+        {
+            var go = new GameObject("Ball Trail");
+            go.transform.SetParent(ball.transform, false);
+            var trail = go.AddComponent<TrailRenderer>();
+            trail.sharedMaterial = mats.trail;
+            trail.time = s.trailTimeMin;
+            trail.widthMultiplier = s.trailWidth;
+            trail.minVertexDistance = 0.05f;
+            trail.alignment = LineAlignment.TransformZ; // faces up, so it reads from the camera above
+            trail.numCapVertices = 4;
+            trail.shadowCastingMode = ShadowCastingMode.Off;
+            trail.receiveShadows = false;
+            trail.emitting = false;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f));
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(s.ballColor, 0f), new GradientColorKey(s.ballColor, 1f) },
+                new[] { new GradientAlphaKey(0.9f, 0f), new GradientAlphaKey(0f, 1f) });
+            trail.colorGradient = gradient;
+            // Lie flat: the trail's facing axis is the transform's z, so point it up.
+            go.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            return trail;
+        }
+
+        static Light BuildBallLight(GameObject ball, NeonPongSettings s)
+        {
+            var go = new GameObject("Ball Light");
+            go.transform.SetParent(ball.transform, false);
+            go.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+            var light = go.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = s.ballColor;
+            light.intensity = s.lightIntensity;
+            light.range = s.lightRange;
+            light.shadows = LightShadows.None;
+            return light;
+        }
+
+        static void BuildBursts(NeonPongGame game, Materials mats, NeonPongSettings s)
+        {
+            var go = new GameObject("Bursts");
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.playOnAwake = false;
+            main.loop = false;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startLifetime = s.burstLifetime;
+            main.startSize = s.burstSize;
+            main.gravityModifier = 0f;
+            main.maxParticles = 400;
+            var emission = ps.emission;
+            emission.enabled = false;
+            var shape = ps.shape;
+            shape.enabled = false;
+
+            var sizeOverLife = ps.sizeOverLifetime;
+            sizeOverLife.enabled = true;
+            sizeOverLife.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f)));
+            var colorOverLife = ps.colorOverLifetime;
+            colorOverLife.enabled = true;
+            var fade = new Gradient();
+            fade.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
+            colorOverLife.color = fade;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.sharedMaterial = mats.spark;
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+
+            var bursts = go.AddComponent<NeonPongBursts>();
+            bursts.game = game;
+            bursts.system = ps;
+        }
+
+        static void BuildAudio(NeonPongGame game)
+        {
+            var go = new GameObject("Audio");
+            var audio = go.AddComponent<NeonPongAudio>();
+            audio.game = game;
+            audio.sfx = NewSource(go, "Sfx");
+            audio.paddleSfx = NewSource(go, "Paddle Sfx");
+            audio.wall = Clip("wall");
+            audio.paddle = Clip("paddle");
+            audio.serve = Clip("serve");
+            audio.point = Clip("point");
+            audio.win = Clip("win");
+            audio.restart = Clip("restart");
+        }
+
+        static AudioSource NewSource(GameObject parent, string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent.transform, false);
+            var source = go.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            return source;
+        }
+
+        static AudioClip Clip(string name)
+        {
+            string path = $"{Root}/Audio/{name}.wav";
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            if (clip == null)
+                throw new InvalidOperationException($"Missing sound: {path}. Run Tools/audio/NeonPong/make_sounds.py first.");
+            return clip;
+        }
+
+        static GameObject BuildCamera(NeonPongSettings s)
         {
             var go = new GameObject("Main Camera") { tag = "MainCamera" };
             var cam = go.AddComponent<Camera>();
@@ -228,6 +382,7 @@ namespace Prototypes.NeonPong.Editor
             var rotation = Quaternion.Euler(s.cameraPitch, 0f, 0f);
             go.transform.rotation = rotation;
             go.transform.position = -(rotation * Vector3.forward) * s.cameraDistance;
+            return go;
         }
 
         static void BuildVolume(VolumeProfile profile)
@@ -241,6 +396,7 @@ namespace Prototypes.NeonPong.Editor
         class Ui
         {
             public Text left, right, message;
+            public Image wash;
         }
 
         static Ui BuildUi(NeonPongSettings s)
@@ -253,8 +409,20 @@ namespace Prototypes.NeonPong.Editor
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
 
+            // The wash goes first so the text draws on top of it.
+            var washGo = new GameObject("Wash");
+            washGo.transform.SetParent(canvasGo.transform, false);
+            var washRect = washGo.AddComponent<RectTransform>();
+            washRect.anchorMin = Vector2.zero;
+            washRect.anchorMax = Vector2.one;
+            washRect.offsetMin = washRect.offsetMax = Vector2.zero;
+            var wash = washGo.AddComponent<Image>();
+            wash.color = new Color(1f, 1f, 1f, 0f);
+            wash.raycastTarget = false;
+
             return new Ui
             {
+                wash = wash,
                 left = MakeText(canvasGo.transform, "Score Left", s.player1Color, s.scoreFontSize, TextAnchor.MiddleCenter,
                     new Vector2(0.5f, 1f), new Vector2(-s.scoreOffsetX, s.scoreOffsetY), new Vector2(300f, 200f)),
                 right = MakeText(canvasGo.transform, "Score Right", s.player2Color, s.scoreFontSize, TextAnchor.MiddleCenter,
@@ -284,8 +452,8 @@ namespace Prototypes.NeonPong.Editor
             return text;
         }
 
-        static void BuildGame(NeonPongSettings s, GameObject leftPaddle, GameObject rightPaddle,
-            GameObject ball, Ui ui)
+        static NeonPongGame BuildGame(NeonPongSettings s, GameObject leftPaddle, GameObject rightPaddle,
+            GameObject ball, Transform[] rails, TrailRenderer trail, Light ballLight, Ui ui)
         {
             var go = new GameObject("Game");
             var game = go.AddComponent<NeonPongGame>();
@@ -295,9 +463,14 @@ namespace Prototypes.NeonPong.Editor
             view.leftPaddle = leftPaddle.transform;
             view.rightPaddle = rightPaddle.transform;
             view.ball = ball.transform;
+            view.rails = rails;
+            view.trail = trail;
+            view.ballLight = ballLight;
             view.scoreLeft = ui.left;
             view.scoreRight = ui.right;
             view.message = ui.message;
+            view.wash = ui.wash;
+            return game;
         }
     }
 }

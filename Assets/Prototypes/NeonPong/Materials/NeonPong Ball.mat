@@ -121,7 +121,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 0.8862745, b: 0.47843137, a: 1}
     - _Color: {r: 1, g: 0.8862745, b: 0.47843128, a: 1}
-    - _EmissionColor: {r: 2, g: 1.772549, b: 0.95686275, a: 2}
+    - _EmissionColor: {r: 1.2381744, g: 1.0933077, b: 0.59382635, a: 1.6}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

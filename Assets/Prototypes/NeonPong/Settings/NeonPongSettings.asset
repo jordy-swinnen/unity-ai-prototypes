@@ -34,9 +34,9 @@ MonoBehaviour:
   player2Color: {r: 1, g: 0.18039216, b: 0.5764706, a: 1}
   ballColor: {r: 1, g: 0.8862745, b: 0.47843137, a: 1}
   textColor: {r: 0.9019608, g: 0.9411765, b: 1, a: 1}
-  ballEmission: 2
-  paddleEmission: 1.6
-  railEmission: 0.15
+  ballEmission: 1.6
+  paddleEmission: 1.1
+  railEmission: 0.06
   gridEmission: 0.4
   bloomThreshold: 0.6
   bloomIntensity: 2.4
@@ -48,3 +48,39 @@ MonoBehaviour:
   scoreFontSize: 120
   scoreOffsetY: -80
   scoreOffsetX: 260
+  effectStrength: 1
+  wallShake: 0.04
+  paddleShake: 0.12
+  scoreShake: 0.3
+  shakeDuration: 0.3
+  hitStopPaddle: 0.04
+  hitStopScore: 0.08
+  flashDecay: 0.2
+  flashBoost: 3
+  ballPop: 0.35
+  popDecay: 0.15
+  scorePop: 0.5
+  paddleStretch: 0.1
+  paddleLean: 5
+  winSlowScale: 0.3
+  winSlowDuration: 1.2
+  winWashAlpha: 0.04
+  winPushIn: 0.12
+  winTime: 1.5
+  wallBurst: 6
+  paddleBurst: 14
+  pointBurst: 40
+  winBurst: 90
+  burstSize: 0.14
+  burstLifetime: 0.5
+  burstSpeed: 4
+  burstEmission: 3
+  trailTimeMin: 0.06
+  trailTimeMax: 0.3
+  trailWidth: 0.4
+  trailEmission: 1.5
+  lightIntensity: 3
+  lightRange: 5
+  masterVolume: 0.6
+  pitchMin: 0.85
+  pitchMax: 1.6
