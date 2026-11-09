@@ -1,0 +1,104 @@
+# Runs the Unity EditMode and PlayMode tests on every pull request.
+#
+# Needs three repository secrets, because Unity will not start without a licence:
+#   UNITY_LICENSE   the contents of a Unity licence file
+#   UNITY_EMAIL     the Unity account email
+#   UNITY_PASSWORD  the Unity account password
+# How to get them: https://game.ci/docs/github/activation
+# Also needs GitHub Actions to be enabled for the repository (Settings > Actions).
+#
+# Pull requests from forks do not get secrets, so the tests are skipped there with a warning.
+# On this repository's own pull requests a missing licence fails the job, so a green check
+# always means the tests ran.
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write   # lets the test runner publish a check with the results
+
+jobs:
+  unity:
+    name: Unity ${{ matrix.testMode }} tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode: [EditMode, PlayMode]
+    env:
+      # Keep in step with ProjectSettings/ProjectVersion.txt and AGENTS.md.
+      UNITY_VERSION: 6000.6.8f1
+    steps:
+      - name: Check for the Unity licence
+        id: licence
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+        run: |
+          if [ -n "$UNITY_LICENSE" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          elif [ "$IS_FORK" = "true" ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Pull requests from forks get no secrets, so the Unity tests were skipped."
+          else
+            echo "::error::The UNITY_LICENSE secret is not set, so the Unity tests cannot run. See the comments at the top of this workflow."
+            exit 1
+          fi
+
+      - name: Check out the repository
+        if: steps.licence.outputs.available == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          lfs: true   # the models and sounds are stored with Git LFS
+
+      - name: Confirm the Unity version
+        if: steps.licence.outputs.available == 'true'
+        run: |
+          project="$(sed -n 's/^m_EditorVersion: //p' ProjectSettings/ProjectVersion.txt)"
+          if [ "$project" != "$UNITY_VERSION" ]; then
+            echo "::error::ProjectVersion.txt says $project but this workflow runs $UNITY_VERSION."
+            exit 1
+          fi
+
+      - name: Cache the Library folder
+        if: steps.licence.outputs.available == 'true'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Library
+          key: Library-${{ matrix.testMode }}-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            Library-${{ matrix.testMode }}-
+
+      - name: Run the ${{ matrix.testMode }} tests
+        if: steps.licence.outputs.available == 'true'
+        id: tests
+        uses: game-ci/unity-test-runner@fa6ced25861c16ef56187828c43f76d00df43a23 # v4.3.2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: .
+          testMode: ${{ matrix.testMode }}
+          checkName: ${{ matrix.testMode }} test results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload the test results
+        if: always() && steps.licence.outputs.available == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.testMode }}-results
+          path: ${{ steps.tests.outputs.artifactsPath }}
+          if-no-files-found: ignore
