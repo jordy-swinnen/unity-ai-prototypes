@@ -115,3 +115,7 @@ InitTestScene*.unity*
 
 # JetBrains Rider (added for this repo)
 .idea/
+
+# Personal experiments (see docs/project-structure.md)
+/[Aa]ssets/[Ss]andbox/
+/[Aa]ssets/[Ss]andbox.meta

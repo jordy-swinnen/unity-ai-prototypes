@@ -56,13 +56,19 @@ Assets/Prototypes/<Name>/     one folder per game or prototype (PascalCase)
   Tests/EditMode/             logic tests
   Tests/PlayMode/             scene and behaviour tests
   Art/Exports/                .glb files written by Blender scripts
+  Art/Textures/               .png textures written by a script
   Audio/                      sounds written by scripts
+  Materials/                  materials written by the scene builder
+  Shaders/                    hand-written URP shaders
   Scenes/                     scenes written by the build command
   Settings/                   ScriptableObjects with tuning values
 Assets/Shared/                code and assets used by two or more prototypes
+Assets/ThirdParty/            anything we did not make, kept apart (created when needed)
+Assets/Sandbox/<user>/        personal experiments, ignored by git (created when needed)
 Art/source/<Name>/            .blend source files (Git LFS)
 Tools/blender/<Name>/         Blender Python scripts
 Tools/audio/<Name>/           sound scripts
+Tools/textures/<Name>/        texture scripts (run in Blender for numpy)
 Tools/unity/                  check.sh and capture.sh
 docs/prototypes/              one spec and one plan per game or feature (start from TEMPLATE.md)
 docs/research/                background and sourced research notes

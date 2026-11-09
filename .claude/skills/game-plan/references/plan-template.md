@@ -25,6 +25,8 @@ Assembly `<Name>`, namespace `Prototypes.<Name>`.
 ## Art and audio pipeline
 Scripts, outputs, how to run them. Look items that need outside art, if any.
 
+Surfaces (from the spec's Surfaces table): the texture script and its PNGs, the shader, the occlusion bake, the dissolve or other shader effect, their strengths on the settings asset and the tests that come first. Say "none, by design" for a flat look. See `.claude/skills/game-polish/references/surfaces.md`.
+
 ## Tasks
 Each stage ends with a stop for review.
 
@@ -43,6 +45,7 @@ Each stage ends with a stop for review.
 
 ### Stage 3: look (game-polish)
 - [ ] Baseline capture.
+- [ ] Surfaces: textures, then occlusion, then shader effects, as the plan's pipeline says. Look at each on a render.
 - [ ] One task per feel-table row or visual pillar, each with a before and after capture.
 - [ ] Settings for every strength and duration. Tests for the logic (decays, timers).
 - [ ] Commit per step: `feat(<name>): <effect>`.

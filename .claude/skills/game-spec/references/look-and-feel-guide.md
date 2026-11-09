@@ -28,6 +28,7 @@ Keep each to one or two lines and tie it to a design pillar.
 - **Colour philosophy:** a primary palette and a complementary secondary one, with a role for each colour. A separate palette for the UI if it differs. A non-colour backup for any colour that carries meaning.
 - **Lighting:** the key light direction and mood, and whether the game is lit, emissive or both.
 - **Materials:** glossy or matte, flat or textured, emissive or not. Say which objects are the brightest, since brightness decides what draws the eye.
+- **Surfaces:** for each material, one of flat, emission only, procedural texture, baked occlusion, shader effect. Decide it yourself with `../../game-polish/references/surfaces.md` and write the reason in the spec. Real materials (stone, wood, metal, cloth, bone) get textures and occlusion. Neon and flat-stylised looks get none, on purpose.
 - **Rendering and post-processing:** which effects (bloom, vignette, colour grading) and how strong. Post-processing is a mood tool, not a fix for weak shapes.
 - **Camera:** angle, field of view, how it moves.
 

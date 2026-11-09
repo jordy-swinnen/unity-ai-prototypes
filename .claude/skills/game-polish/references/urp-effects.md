@@ -32,3 +32,11 @@ Confidence tags: **[read]** read on Unity's own documentation page, **[unverifie
 
 ## Time feedback
 - Hit-stop and slow motion can be done by setting `Time.timeScale` briefly, or better by pausing only the simulation step so the camera and UI keep running. Either way, test that it ends.
+
+## Custom shaders and surfaces
+See `surfaces.md` for when to add them and how. Verified in Medieval Chess on URP 17.6 (Unity 6000.6):
+- A hand-written `.shader` that includes `Lighting.hlsl` and calls `UniversalFragmentPBR` gets the main light and its shadows, the additional lights (Forward+ too, with `#pragma multi_compile _ _CLUSTER_LIGHT_LOOP`), fog and ambient, like the Lit shader. Give it a `ShadowCaster` and a `DepthOnly` pass, or it casts no shadow.
+- Put every per-material property in one `CBUFFER_START(UnityPerMaterial)` shared by all passes. A property block (`Renderer.SetPropertyBlock`) can override a float in it, and costs that renderer the SRP Batcher.
+- A mesh with no vertex colours gives the shader white, so baked occlusion in `COLOR` is safe on meshes that have none.
+- Emission above 1 (an `[HDR]` colour) on the burn edge glows through Bloom.
+- Without a DepthNormals pass an object is missing from the normals texture, so SSAO and similar effects ignore it. Add the pass if the game uses them.
