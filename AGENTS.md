@@ -10,8 +10,8 @@ An AI-native starting point for Unity games. Fork it or use it as a template, th
 Games and features go through four skills in `.claude/skills/`. Each ends with a stop for the user's review, and the next one starts only after approval.
 1. `game-spec`: idea or feature to a spec in `docs/prototypes/<kebab-name>.md` (pillars, researched look-and-feel brief, feel table, mechanics, criteria, tests).
 2. `game-plan`: approved spec to a staged plan in `docs/prototypes/<kebab-name>-plan.md`.
-3. `game-build`: build the plan one stage at a time, tests first, with compile, test and render checks.
-4. `game-polish`: apply the look brief and feel table to a working game, in small steps judged on renders.
+3. `game-build`: build the plan one stage at a time, tests first, with compile, test and render checks. Stage stops inside `game-build` are not hard stops: run the stages back to back and commit per stage, and stop only for a blocking question (a package, a deletion, an approval the rules require) or when a stage's own check needs a person.
+4. `game-polish`: apply the look brief and feel table to a working game, in small steps judged on renders. Same rule: work the steps back to back with a commit per step, and stop when the play-test list is ready, not between steps.
 - Don't write code for a game that has no approved spec and plan. Small fixes to existing code don't need them.
 - You can check numbers, tests and renders. You can't judge how a game feels. Say what you could not check, and leave the play test to the user.
 
