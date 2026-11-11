@@ -42,6 +42,7 @@ These are stills. The board and piece images are camera renders without Bloom or
   | `game-build` | Build the plan one stage at a time with compile and test loops, render captures and a check that the tests can fail. |
   | `game-polish` | Apply the look brief and feel table to a working game in small steps, each judged on a render. |
 
+- **A pixel-art skill** (`aseprite-art`) and `Tools/aseprite/run.sh`: sprites are drawn as character maps in Lua scripts, run headless in Aseprite, and imported by Unity as sharp, Point-filtered Sprites. Like Blender, it is scripts only, with no MCP server.
 - **A Unity CLI skill** (`unity-cli`, made by Unity) for driving the Editor from the command line.
 - **Scripts** in `Tools/unity/`: `check.sh` compiles and runs EditMode and PlayMode tests, and `capture.sh` saves renders of the game so an agent can look at it.
 - **Conventions** in `AGENTS.md`: one folder per prototype, tests beside the code, tuning values in settings assets, scenes and models built by scripts, never by hand.
@@ -57,6 +58,7 @@ These are stills. The board and piece images are camera renders without Bloom or
 ## What you need
 - Unity **6000.6.8f1** through Unity Hub. This is not an LTS release. It's the version Unity Hub recommended when the project was created. You must be signed in to Unity Hub to add packages.
 - Blender **5.2.3 LTS**, run headless to export models.
+- [Aseprite](https://www.aseprite.org) **1.3 or newer** (tested with 1.3.18.6), run headless to make pixel art. Buy it or compile it yourself: the trial cannot save or export. Agents never install it. Point the `ASEPRITE_PATH` environment variable at the `aseprite` executable itself, for example in your shell profile (macOS Steam copy: `.../Aseprite.app/Contents/MacOS/aseprite`). Only needed for projects that use pixel art.
 - Git and [Git LFS](https://git-lfs.com). Run `git lfs install` once on your machine.
 - The Unity CLI (`unity`), Python 3, and Claude Code or OpenCode.
 
@@ -78,16 +80,19 @@ Assets/Prototypes/<Name>/     one folder per game or prototype (PascalCase)
   Tests/PlayMode/             scene and behaviour tests
   Art/Exports/                .glb files written by Blender scripts
   Art/Textures/               .png textures written by a script
+  Art/Sprites/                pixel-art .png and sprite sheets written by Aseprite scripts (imported as Point-filtered Sprites)
   Audio/                      sounds written by scripts
   Materials/                  materials written by the scene builder
   Shaders/                    hand-written URP shaders
   Scenes/                     scenes written by the build command
   Settings/                   ScriptableObjects with tuning values
 Assets/Shared/                code and assets used by two or more prototypes
+  Editor/                     editor-only code, assembly Shared.Editor (the pixel-art import rule)
 Assets/ThirdParty/            anything we did not make, kept apart (created when needed)
 Assets/Sandbox/<user>/        personal experiments, ignored by git (created when needed)
-Art/source/<Name>/            .blend source files (Git LFS)
+Art/source/<Name>/            .blend and .aseprite source files (Git LFS)
 Tools/blender/<Name>/         Blender Python scripts
+Tools/aseprite/<Name>/        Aseprite Lua scripts, run with Tools/aseprite/run.sh <Name> <script.lua>
 Tools/audio/<Name>/           sound scripts
 Tools/textures/<Name>/        texture scripts (run in Blender for numpy)
 Tools/unity/                  check.sh and capture.sh

@@ -19,6 +19,7 @@ Games and features go through four skills in `.claude/skills/`. Each ends with a
 - Unity Editor: 6000.6.8f1 (not an LTS release; the version Unity Hub recommended; from `unity editors -i`)
 - Blender: 5.2.3 LTS (from `blender --version`)
 - Blender binary on macOS: `/Applications/Blender.app/Contents/MacOS/Blender` (`blender` is not on PATH)
+- Aseprite: 1.3.18.6 (from `"$ASEPRITE_PATH" --version`). The person installs it, you never do. It is found through the `ASEPRITE_PATH` environment variable, set to the `aseprite` executable itself (on macOS inside the app: `.../Aseprite.app/Contents/MacOS/aseprite`; on Linux for example `~/aseprite/build/bin/aseprite`). `Tools/aseprite/run.sh` falls back to `aseprite` on PATH.
 
 ## Layout
 Many people add prototypes here. Each prototype is self-contained, named in PascalCase (`<Name>`) and lives in its own folder.
@@ -29,14 +30,16 @@ Many people add prototypes here. Each prototype is self-contained, named in Pasc
   - `Tests/EditMode/` and `Tests/PlayMode/`: assemblies `<Name>.Tests.EditMode` and `<Name>.Tests.PlayMode`.
   - `Art/Exports/`: `.glb` files written by Blender scripts. Never edit by hand.
   - `Art/Textures/`: `.png` textures written by a script (`<name>_albedo.png`, `<name>_normal.png`). Never edit by hand.
+  - `Art/Sprites/`: `.png` pixel art and sprite sheets (with their `.json`) written by an Aseprite script. Never edit by hand. Unity imports everything here as a Point-filtered Sprite.
   - `Audio/`: sounds written by scripts.
   - `Materials/`: materials written by the scene builder. Never edit by hand.
   - `Shaders/`: hand-written URP shaders.
   - `Scenes/`: scenes written by the build command. Never edit by hand.
   - `Settings/`: ScriptableObjects with tuning values.
-- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Today it holds `Feel/ShakeState` and `Feel/TimeFeel` (camera shake and hit-stop), used by Neon Pong and Medieval Chess. Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
-- `Art/source/<Name>/`: `.blend` source files (Git LFS). Unity doesn't import these.
+- `Assets/Shared/`: code and assets used by two or more prototypes, in its own assembly. Prototypes may reference Shared. Today it holds `Feel/ShakeState` and `Feel/TimeFeel` (camera shake and hit-stop), used by Neon Pong and Medieval Chess, and `Editor/PixelArtTextureImporter` (the import rule for `Art/Sprites/`, in the editor-only assembly `Shared.Editor`). Shared never references a prototype, and prototypes never reference each other. Move something to Shared only when a second prototype needs it.
+- `Art/source/<Name>/`: `.blend` and `.aseprite` source files (Git LFS). Unity doesn't import these.
 - `Tools/blender/<Name>/`: Python scripts for Blender, run headless with `blender -b -P <script>`. They write into `Assets/Prototypes/<Name>/Art/Exports/`.
+- `Tools/aseprite/<Name>/`: Lua scripts for Aseprite, run headless with `Tools/aseprite/run.sh <Name> <script.lua>`. They write into `Assets/Prototypes/<Name>/Art/Sprites/` and `Art/source/<Name>/`.
 - `Tools/audio/<Name>/`: Python scripts that write sounds.
 - `Tools/textures/<Name>/`: Python scripts that write textures, run headless in Blender (it ships numpy).
 - `Tools/unity/`: `check.sh` (compile and tests) and `capture.sh` (renders).
@@ -56,7 +59,7 @@ From Unity's guide ([organizing your project](https://unity.com/how-to/organizin
 ## Rules
 - Logic lives in C#. Tuning values live in ScriptableObjects.
 - Never hand-edit `.unity` or `.prefab` files. Build scenes in code through the prototype's menu command under `Assets/Prototypes/<Name>/Editor/`.
-- Never hand-edit files under `Assets/Prototypes/<Name>/Art/Exports/`. Change the Blender script and re-run it.
+- Never hand-edit files under `Assets/Prototypes/<Name>/Art/Exports/`. Change the Blender script and re-run it. The same goes for `Art/Sprites/` and its Aseprite scripts.
 - Work only inside the folder of the prototype you were asked about. Don't edit another prototype or `Assets/Shared/` unless the task says so.
 - All art, models, textures and sounds are original or clearly licensed, with the source recorded in the spec. Never copy another game's assets.
 - Surfaces are your decision, not a question for the person: for every material in the look brief, decide flat colour, texture, baked occlusion or a shader effect, write why in the spec's Surfaces table, and build it. Follow `.claude/skills/game-polish/references/surfaces.md`, and ask only for the cases under "When to ask" there (a package, a download, a large result, a real style choice, a real performance cost).
@@ -66,6 +69,17 @@ From Unity's guide ([organizing your project](https://unity.com/how-to/organizin
 - Ask before deleting files, changing `ProjectSettings/`, adding packages, pushing, adding or changing a license, or changing GitHub settings. Say what becomes public before you ask.
 - Never change global git config, and never rewrite history that is already pushed. Set `user.name` and `user.email` in this repository's local config only.
 - Commit only when the compile check and tests pass. Use conventional commit subjects.
+
+## Pixel art (Aseprite)
+Pixel art is made by scripts, like models (Blender) and textures. Follow the `aseprite-art` skill (`.claude/skills/aseprite-art/`), which has the process and two template scripts.
+- **Scripts only.** Never draw pixel art by hand or in the Aseprite GUI, and never edit a file in `Art/Sprites/`. Change the Lua script and run it again.
+- **Run:** `Tools/aseprite/run.sh <Prototype> <script.lua>` runs `Tools/aseprite/<Prototype>/<script.lua>` with `aseprite --batch`. Exit 0 is good, 1 is a failed script or a missing file, 2 is bad usage or no usable Aseprite.
+- **`ASEPRITE_PATH` is required** (see Pinned versions). If it is unset or Aseprite does not run, stop and ask the person. Never install Aseprite, and never pick a binary yourself.
+- **Params:** the wrapper passes `out_dir` (`Assets/Prototypes/<Prototype>/Art/Sprites`) and `src_dir` (`Art/source/<Prototype>`). The script reads them with `app.params["out_dir"]` and `app.params["src_dir"]`, saves the `.aseprite` source to `src_dir`, and exports PNGs and sheets to `out_dir`. Every script prints `wrote <path>` for each file; `run.sh` fails if one is missing, empty, stale or outside those two folders.
+- **Drawings are character maps plus a named palette table,** one string per row and a legend from character to colour name, so a diff shows what changed. Assert on row length and unknown characters: Aseprite silently ignores a bad one.
+- **Sprite sheets** are exported with the `--sheet <png> --data <json> --format json-array` settings. From a script that is `app.command.ExportSpriteSheet{..., dataFormat = SpriteSheetDataFormat.JSON_ARRAY}`. The same from a saved file on the command line: `"$ASEPRITE_PATH" --batch <src>.aseprite --sheet <png> --data <json> --format json-array`.
+- **Always look at the exported PNG** (scale it up first, outside the repository). Say if your model cannot read images.
+- **Unity import:** every texture under a `/Art/Sprites/` path is imported as a Sprite with Point filter, no compression and no mipmaps (`Assets/Shared/Editor/PixelArtTextureImporter.cs`, tested). A sprite sheet comes in as one Single sprite, so slicing it from the JSON is the prototype's own editor code.
 
 ## Agent harness config (Claude Code + OpenCode)
 Follow the `dual-agent-config` skill whenever you touch agent config.
