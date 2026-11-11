@@ -25,7 +25,6 @@ permissions:
 
 env:
   UPSTREAM: https://github.com/jordy-swinnen/agent-skills.git
-  SKILLS: 'agent-handoff dual-agent-config opencode-go-plus-build-plan-recommender'
 
 jobs:
   sync:
@@ -65,7 +64,9 @@ jobs:
           set -eu
           test ! -e .opencode/skills || { echo "::error::.opencode/skills appeared"; exit 1; }
           test ! -e .agents/skills   || { echo "::error::.agents/skills appeared"; exit 1; }
-          for skill in $SKILLS; do
+          skills=$(sed -n 's#^  - \.claude/skills/\([^/]*\)$#\1#p' apm.lock.yaml)
+          test -n "$skills" || { echo "::error::apm.lock.yaml records no deployed skills"; exit 1; }
+          for skill in $skills; do
             test -f ".claude/skills/$skill/SKILL.md" || { echo "::error::.claude/skills/$skill/SKILL.md is missing"; exit 1; }
           done
           python3 .claude/skills/dual-agent-config/scripts/check_config.py
