@@ -42,6 +42,7 @@ MonoBehaviour:
   bloomIntensity: 2.4
   bloomScatter: 0.7
   vignetteIntensity: 0.25
+  vignetteSmoothness: 0.4
   cameraPitch: 62
   cameraFieldOfView: 35
   cameraDistance: 18.3
@@ -53,6 +54,11 @@ MonoBehaviour:
   paddleShake: 0.12
   scoreShake: 0.3
   shakeDuration: 0.3
+  wallShakeDuration: 0.18
+  scoreShakeDuration: 0.39
+  shakeFrequency: 90
+  shakeAtBaseSpeed: 0.6
+  shakeAtMaxSpeed: 1.4
   hitStopPaddle: 0.04
   hitStopScore: 0.08
   flashDecay: 0.2
@@ -60,6 +66,7 @@ MonoBehaviour:
   ballPop: 0.35
   popDecay: 0.15
   scorePop: 0.5
+  scorePopDecay: 0.25
   paddleStretch: 0.1
   paddleLean: 5
   winSlowScale: 0.3
@@ -78,9 +85,13 @@ MonoBehaviour:
   trailTimeMin: 0.06
   trailTimeMax: 0.3
   trailWidth: 0.4
+  trailWidthAtBaseSpeed: 0.6
   trailEmission: 1.5
   lightIntensity: 3
   lightRange: 5
+  lightAtBaseSpeed: 0.7
+  lightAtMaxSpeed: 1.2
   masterVolume: 0.6
+  musicVolume: 0.35
   pitchMin: 0.85
   pitchMax: 1.6

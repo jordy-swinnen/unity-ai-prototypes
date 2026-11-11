@@ -21,6 +21,7 @@ MonoBehaviour:
     windUpQueen: 0.35
     windUpKing: 0.55
     collapseTime: 0.6
+    dissolveTime: 0.45
     stepInTime: 0.3
     settleTime: 0.2
     quickFactor: 3
@@ -150,11 +151,21 @@ MonoBehaviour:
     contrast: 10
     saturation: -6
     tonemapping: 1
+    surface:
+      textureStrength: 1
+      normalStrength: 1
+      mapScale: 2.4
+      pieceGrain: 0.5
+      pieceGrainScale: 5
+      occlusionStrength: 0.9
+      dissolveEdgeColor: {r: 3.2, g: 1.1, b: 0.25, a: 1}
+      dissolveEdgeWidth: 0.09
     ambientColor: {r: 0.15686275, g: 0.16470589, b: 0.19607843, a: 1}
     fogColor: {r: 0.05882353, g: 0.047058824, b: 0.039215688, a: 1}
     fogDensity: 0.025
   feel:
     masterVolume: 0.8
+    musicVolume: 0.35
     swingLead: 0.22
     collapseDelay: 0.08
     checkShake: 0.06

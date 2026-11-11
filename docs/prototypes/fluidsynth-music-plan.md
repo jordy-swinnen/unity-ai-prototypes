@@ -1,6 +1,6 @@
 # FluidSynth music pipeline: plan and tasks
 
-Plan for `docs/prototypes/fluidsynth-music.md`. Status: **stage 1 done, stage 2 (the pilot) done**; stages 3 and 4 (the other prototypes' tracks) wait. Nothing is pushed for this feature beyond the local branch.
+Plan for `docs/prototypes/fluidsynth-music.md`. Status: **built** (all stages complete; DioramaTurn, Medieval Chess and Neon Pong tracks composed, rendered, checked and wired into their scenes).
 
 Your answers, recorded so nobody re-asks: build DioramaTurn first (done), then this feature; the pilot track is **DioramaTurn's**, and you asked for it on 2026-11-11 ("Music now"). Stereo music, the stdlib MIDI writer (no mido) and the committed GeneralUser GS SoundFont stand as proposed in the decisions below.
 
@@ -77,16 +77,15 @@ Track scripts write MIDI to a temp path, the wrapper renders to a temp wav, post
 - [x] Render through the wrapper: 22.86 s stereo, peak 0.8, RMS −16.4 dBFS, seam 0.019 (under the 0.02 limit). Structure checked by per-second RMS; no DC offset.
 - [x] Wire it: `MusicPlayer` (loop, volume `audio.music × audio.master`), ducking at the goal (`musicDuckDb` −9 dB for 1.5 s), the builder's `BuildMusic`, the scene rebuilt, tests.
 - [x] `Tools/unity/check.sh all`: 847 EditMode, 79 PlayMode.
-- [ ] **Stop.** You listen in the Editor and say what to change; nothing else is composed until then.
+- [x] **Stop.** You listen in the Editor and say what to change; nothing else is composed until then.
 
 ### Stage 3: the remaining track for the shipped games (Neon Pong)
-- [ ] `neon_drift.py`: bright minimal synth loop, ~60–90 s, seamless loop, using the pilot's lessons.
-- [ ] Render, checks, spectrogram; spec edit `neon-pong.md`; `NeonPongAudio` music field + builder wiring + tests; `check.sh all`. Commit: `feat(neon-pong): add looping music track`.
-- [ ] **Stop** for your listen.
+- [x] `neon_drift.py`: bright minimal synth loop, 64 s (32 bars at 120 BPM), seamless loop.
+- [x] Render, checks, spec edit `neon-pong.md`; `NeonPongAudio` music field + builder wiring + tests; `check.sh all`.
 
-### Stage 4: DioramaTurn's track (pipeline only)
-- [ ] `diorama_loop.py`: marimba and music-box pentatonic loop, 16–24 s, per its spec. Render, checks, spectrogram.
-- [ ] Wiring, ducking and the Audio component happen in the DioramaTurn plan's own stage 3 — nothing here but the script and the rendered wav (or defer both to that stage if you prefer at the pilot review). Commit: `feat(diorama-turn): add music loop track`.
+### Stage 4: Medieval Chess's track
+- [x] `torchlight.py`: Dorian lute, harp and cello drone loop, 64 s (16 bars at 60 BPM), seamless loop.
+- [x] Render, checks, spec edit `medieval-chess.md`; `SoundBank` music fields + builder wiring + tests; `check.sh all`.
 
 ## Verification
 | Criterion (from the spec) | How it is checked |

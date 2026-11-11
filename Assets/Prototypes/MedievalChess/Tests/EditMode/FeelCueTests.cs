@@ -215,6 +215,17 @@ namespace Prototypes.MedievalChess.Tests
             float tail = data.Skip(data.Length - 20).Max(Mathf.Abs);
             Assert.Less(tail, 0.01f, "ends near zero, so it does not click");
         }
+
+        [Test]
+        public void The_music_clip_exists_and_is_a_loop_length_stereo_clip()
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{Folder}/music.wav");
+            Assert.IsNotNull(clip, "music.wav is missing. Run Tools/audio/render_music.sh MedievalChess torchlight");
+            Assert.AreEqual(2, clip.channels);
+            Assert.AreEqual(44100, clip.frequency);
+            Assert.Greater(clip.length, 8f);
+            Assert.Less(clip.length, 130f);
+        }
     }
 
     public class FeelBuilderTests
@@ -244,6 +255,10 @@ namespace Prototypes.MedievalChess.Tests
             foreach (SoundId id in System.Enum.GetValues(typeof(SoundId))) Assert.IsNotNull(bank.Clip(id), id.ToString());
             Assert.GreaterOrEqual(bank.sources.Length, 4, "sounds can overlap");
             foreach (var s in bank.sources) Assert.IsFalse(s.playOnAwake);
+            Assert.IsNotNull(bank.musicSource);
+            Assert.IsTrue(bank.musicSource.loop);
+            Assert.IsNotNull(bank.musicClip);
+            Assert.AreEqual(settings.feel.masterVolume * settings.feel.musicVolume, bank.musicSource.volume, 0.001f);
         }
 
         [Test]

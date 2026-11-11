@@ -57,7 +57,7 @@ Decided by the agent from the look brief, following `.claude/skills/game-polish/
 Revisit only if a later change adds a real material (stone, wood, metal) to this game.
 
 ### Audio direction
-Short synthesised tones, like the original, but cleaner: square or triangle waves with a fast attack and a short decay. Pitch climbs with rally speed. Sounds are made by a script, so they are original. No music in this version.
+Short synthesised tones, like the original, but cleaner: square or triangle waves with a fast attack and a short decay. Pitch climbs with rally speed. Sounds are made by a script, so they are original. One 64-second looping synth track (`Tools/audio/NeonPong/music/neon_drift.py`, rendered by `Tools/audio/render_music.sh` with FluidSynth and GeneralUser GS) plays underneath at `musicVolume` 0.35.
 
 ### Feel table
 | Event or action | Visual | Audio | Camera | Time | Pillar |
@@ -101,6 +101,7 @@ All on one settings asset. Feel values are starting points for tuning on renders
 - **Models (Blender script, `.glb`):** table slab (with grid lines), rail, paddle, ball. Each under 1,500 triangles. Emission and colours are set on materials in Unity from the palette.
 - **Effects (Unity):** trail on the ball, particle bursts, point light, one Volume profile.
 - **Sounds (Python script, `.wav`):** wall, paddle (with pitch variants), serve, point, win, restart. Each under 1.5 s.
+- **Music (FluidSynth track script, `.wav`):** `Tools/audio/NeonPong/music/neon_drift.py` -> `Audio/music.wav`, 64 s stereo loop.
 
 ## Acceptance criteria
 ### Checked by tests or captures

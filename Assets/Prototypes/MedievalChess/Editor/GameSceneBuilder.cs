@@ -490,6 +490,16 @@ namespace Prototypes.MedievalChess.Editor
                 source.spatialBlend = 0f;
                 bank.sources[i] = source;
             }
+            var musicGo = new GameObject("Music");
+            musicGo.transform.SetParent(go.transform, false);
+            var musicSource = musicGo.AddComponent<AudioSource>();
+            musicSource.playOnAwake = false;
+            musicSource.loop = true;
+            musicSource.spatialBlend = 0f;
+            musicSource.clip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{Root}/Audio/music.wav");
+            musicSource.volume = Mathf.Clamp01(s.feel.masterVolume * s.feel.musicVolume);
+            bank.musicSource = musicSource;
+            bank.musicClip = musicSource.clip;
             return bank;
         }
 

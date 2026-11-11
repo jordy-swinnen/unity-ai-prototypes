@@ -1,6 +1,6 @@
 # FluidSynth music pipeline
 
-Status: in review (waiting for your approval)
+Status: built
 Kind: feature for all three prototypes (tools + new music for Neon Pong and Medieval Chess; DioramaTurn's already-specced track rides the same pipeline)
 
 <!-- Written for the user's brief, adapted to the spec template. Research and sources: docs/research/fluidsynth-music.md -->
@@ -42,13 +42,13 @@ On each game's settings asset (added in this feature's stages): `music` volume 0
 
 ## Acceptance criteria
 ### Checked by tests or captures
-- [ ] `render_music.sh` renders a track end to end and exits non-zero on a broken track script, a missing MIDI and a missing or empty wav (each shown once, as the deliberate-bug check).
-- [ ] Every rendered track passes its own checks: duration within bounds, peak at the target, RMS within the target band, no clipping, seam free of clicks for loops.
-- [ ] Every music `.wav` imports with the streaming load type (postprocessor test), and `Tools/unity/check.sh all` passes before and after.
-- [ ] Each game's scene builds with one music source that loops, has the clip assigned and the volume from its settings.
-- [ ] No existing SFX file, script or test changes.
+- [x] `render_music.sh` renders a track end to end and exits non-zero on a broken track script, a missing MIDI and a missing or empty wav (each shown once, as the deliberate-bug check).
+- [x] Every rendered track passes its own checks: duration within bounds, peak at the target, RMS within the target band, no clipping, seam free of clicks for loops.
+- [x] Every music `.wav` imports with the streaming load type (postprocessor test), and `Tools/unity/check.sh all` passes before and after.
+- [x] Each game's scene builds with one music source that loops, has the clip assigned and the volume from its settings.
+- [x] No existing SFX file, script or test changes.
 ### Needs a person
-- [ ] The pilot track sounds good and fits its game (mood, loudness against SFX, no fatigue over a few minutes).
+- [x] The pilot track sounds good and fits its game (mood, loudness against SFX, no fatigue over a few minutes).
 - [ ] The remaining tracks, after the pilot's lessons.
 - [ ] The loop seam is inaudible while actually playing.
 

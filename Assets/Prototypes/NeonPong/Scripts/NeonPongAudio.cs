@@ -11,11 +11,23 @@ namespace Prototypes.NeonPong
         public NeonPongGame game;
         public AudioSource sfx;
         public AudioSource paddleSfx;
-        public AudioClip wall, paddle, serve, point, win, restart;
+        public AudioSource musicSource;
+        public AudioClip wall, paddle, serve, point, win, restart, music;
 
         public int PlayCount { get; private set; }
         public EventKind LastPlayed { get; private set; }
         public float LastPitch { get; private set; } = 1f;
+
+        void Start()
+        {
+            if (musicSource == null || music == null) return;
+            musicSource.clip = music;
+            musicSource.loop = true;
+            musicSource.volume = game != null && game.settings != null
+                ? Mathf.Clamp01(game.settings.masterVolume * game.settings.musicVolume)
+                : 0.21f;
+            if (!musicSource.isPlaying) musicSource.Play();
+        }
 
         void OnEnable()
         {
