@@ -208,10 +208,28 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.IsNotNull(game.input);
             Assert.IsNotNull(game.audio);
             Assert.IsNotNull(game.audio.source);
+            Assert.IsNotNull(game.music);
             Assert.AreEqual(game, game.input.game);
             Assert.AreSame(game.rig, game.pip.rig);
             Assert.AreSame(game.room, game.pip.room);
             Assert.AreSame(game.room, game.ribbons.room);
+        }
+
+        [Test]
+        public void The_music_source_loops_at_the_settings_volume()
+        {
+            var go = Find("Music");
+            var source = go.GetComponent<AudioSource>();
+            Assert.IsNotNull(source);
+            Assert.IsTrue(source.loop, "the music loops");
+            Assert.IsNotNull(source.clip);
+            Assert.AreEqual("music", source.clip.name);
+
+            var player = go.GetComponent<MusicPlayer>();
+            Assert.IsNotNull(player);
+            Assert.AreEqual(settings, player.settings);
+            Assert.AreSame(source, player.source);
+            Assert.AreEqual(settings.audio.music * settings.audio.master, source.volume, Tol);
         }
 
         [Test]

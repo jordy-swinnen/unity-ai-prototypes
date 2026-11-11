@@ -93,8 +93,10 @@ namespace Prototypes.DioramaTurn
     {
         [Range(0f, 1f)] public float master = 0.8f;
         [Range(0f, 1f)] public float sfx = 0.8f;
-        [Tooltip("Music is rendered later by the FluidSynth pipeline; the value is kept here for it.")]
+        [Tooltip("Music volume under the effects.")]
         [Range(0f, 1f)] public float music = 0.35f;
+        [Tooltip("How far the music dips under the star moment.")] public float musicDuckDb = -9f;
+        public float musicDuckSeconds = 1.5f;
     }
 
     /// <summary>Every tuning value of DioramaTurn. A value is never written into code.</summary>
@@ -156,6 +158,8 @@ namespace Prototypes.DioramaTurn
             audio.master = Mathf.Clamp01(audio.master);
             audio.sfx = Mathf.Clamp01(audio.sfx);
             audio.music = Mathf.Clamp01(audio.music);
+            audio.musicDuckDb = Mathf.Clamp(audio.musicDuckDb, -40f, 0f);
+            audio.musicDuckSeconds = Mathf.Clamp(audio.musicDuckSeconds, 0f, 5f);
         }
 
         public SimulationTiming ToTiming() => new SimulationTiming(turn.duration, walk.stepTime, walk.hopTime, turn.queueMax);

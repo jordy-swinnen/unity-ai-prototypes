@@ -15,6 +15,17 @@ namespace Prototypes.DioramaTurn.Tests
         };
 
         [Test]
+        public void The_music_clip_exists_and_is_a_loop_length_stereo_clip()
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Prototypes/DioramaTurn/Audio/music.wav");
+            Assert.IsNotNull(clip, "music.wav is missing. Run Tools/audio/render_music.sh DioramaTurn diorama_loop");
+            Assert.AreEqual(2, clip.channels, "music is stereo");
+            Assert.AreEqual(44100, clip.frequency);
+            Assert.Greater(clip.length, 8f);
+            Assert.Less(clip.length, 130f);
+        }
+
+        [Test]
         public void Every_sound_exists_and_imports_as_short_mono_44k_audio()
         {
             foreach (var name in Sounds)

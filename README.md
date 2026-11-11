@@ -43,6 +43,7 @@ These are stills. The board and piece images are camera renders without Bloom or
   | `game-polish` | Apply the look brief and feel table to a working game in small steps, each judged on a render. |
 
 - **A pixel-art skill** (`aseprite-art`) and `Tools/aseprite/run.sh`: sprites are drawn as character maps in Lua scripts, run headless in Aseprite, and imported by Unity as sharp, Point-filtered Sprites. Like Blender, it is scripts only, with no MCP server.
+- **A music skill** (`music-composition`) and `Tools/audio/render_music.sh`: tracks are note-level Python scripts rendered by FluidSynth with a SoundFont, then checked for length, loudness and a clean loop seam. Scripts only, one track at a time, and the person listens.
 - **A Unity CLI skill** (`unity-cli`, made by Unity) for driving the Editor from the command line.
 - **Scripts** in `Tools/unity/`: `check.sh` compiles and runs EditMode and PlayMode tests, and `capture.sh` saves renders of the game so an agent can look at it.
 - **Conventions** in `AGENTS.md`: one folder per prototype, tests beside the code, tuning values in settings assets, scenes and models built by scripts, never by hand.
@@ -59,6 +60,7 @@ These are stills. The board and piece images are camera renders without Bloom or
 - Unity **6000.6.8f1** through Unity Hub. This is not an LTS release. It's the version Unity Hub recommended when the project was created. You must be signed in to Unity Hub to add packages.
 - Blender **5.2.3 LTS**, run headless to export models.
 - [Aseprite](https://www.aseprite.org) **1.3 or newer** (tested with 1.3.18.6), run headless to make pixel art. Buy it or compile it yourself: the trial cannot save or export. Agents never install it. Point the `ASEPRITE_PATH` environment variable at the `aseprite` executable itself, for example in your shell profile (macOS Steam copy: `.../Aseprite.app/Contents/MacOS/aseprite`). Only needed for projects that use pixel art.
+- [FluidSynth](https://www.fluidsynth.org) **2.6 or newer**, run headless to render music. Install it yourself (`brew install fluidsynth`, `sudo pacman -S fluidsynth`). The SoundFont (GeneralUser GS) is committed under Git LFS at `Tools/audio/soundfonts/`; point `SOUNDFONT_PATH` at another one to override it. Only needed to render music.
 - Git and [Git LFS](https://git-lfs.com). Run `git lfs install` once on your machine.
 - The Unity CLI (`unity`), Python 3, and Claude Code or OpenCode.
 
@@ -94,6 +96,8 @@ Art/source/<Name>/            .blend and .aseprite source files (Git LFS)
 Tools/blender/<Name>/         Blender Python scripts
 Tools/aseprite/<Name>/        Aseprite Lua scripts, run with Tools/aseprite/run.sh <Name> <script.lua>
 Tools/audio/<Name>/           sound scripts
+Tools/audio/<Name>/music/     music track scripts, run with Tools/audio/render_music.sh <Name> <track>
+Tools/audio/soundfonts/       the committed SoundFont for the music renderer (Git LFS)
 Tools/textures/<Name>/        texture scripts (run in Blender for numpy)
 Tools/unity/                  check.sh and capture.sh
 docs/prototypes/              one spec and one plan per game or feature (start from TEMPLATE.md)

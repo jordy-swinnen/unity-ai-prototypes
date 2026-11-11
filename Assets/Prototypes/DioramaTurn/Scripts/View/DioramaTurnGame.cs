@@ -20,6 +20,7 @@ namespace Prototypes.DioramaTurn
         public Hud hud;
         public DioramaInput input;
         public DioramaAudio audio;
+        public MusicPlayer music;
 
         [System.NonSerialized] public bool autoStep = true;
 
@@ -208,6 +209,7 @@ namespace Prototypes.DioramaTurn
                         break;
                     case GameEventKind.GoalReached:
                         if (pip != null) pip.Cheer();
+                        if (music != null) music.Duck();
                         CompleteRoom();
                         break;
                     case GameEventKind.Unreachable:

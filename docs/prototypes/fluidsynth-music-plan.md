@@ -1,8 +1,8 @@
 # FluidSynth music pipeline: plan and tasks
 
-Plan for `docs/prototypes/fluidsynth-music.md`. Status: waiting for your approval. Nothing is built yet; the SoundFont spike ran outside the repository.
+Plan for `docs/prototypes/fluidsynth-music.md`. Status: **stage 1 done, stage 2 (the pilot) done**; stages 3 and 4 (the other prototypes' tracks) wait. Nothing is pushed for this feature beyond the local branch.
 
-Your answers on 2026-11-11, recorded so nobody re-asks: **build DioramaTurn first, this feature comes after it**; the pilot track is **DioramaTurn's** loop (not Medieval Chess as proposed below); the track is composed in this feature's final stage, after the pipeline works. Stereo music and the stdlib MIDI writer (no mido) were not objected to and stand as proposed. Nothing here is approved for building yet.
+Your answers, recorded so nobody re-asks: build DioramaTurn first (done), then this feature; the pilot track is **DioramaTurn's**, and you asked for it on 2026-11-11 ("Music now"). Stereo music, the stdlib MIDI writer (no mido) and the committed GeneralUser GS SoundFont stand as proposed in the decisions below.
 
 Verified before this plan (see `docs/research/fluidsynth-music.md`): FluidSynth 2.6.2 is installed and on PATH; fast render keeps the reverb tail past the last MIDI event (a 1.0 s MIDI rendered 3.535 s and faded to zero on its own); output is stereo 16-bit 44.1 kHz wav; GeneralUser GS downloads as a 31 MB `.sf2` and renders. Still unverified: nothing below depends on an assumption that was not checked.
 
@@ -63,21 +63,20 @@ Track scripts write MIDI to a temp path, the wrapper renders to a temp wav, post
 ## Tasks
 
 ### Stage 1: the pipeline (no game code)
-- [ ] `.gitattributes` rule, then download GeneralUser GS into `Tools/audio/soundfonts/` and commit it with `docs/audio-credits.md` (after approval).
-- [ ] `midi.py` (writer) with a self-test in the script.
-- [ ] `postprocess_music.py`: trim trailing silence below a threshold but keep the reverb tail; normalize peak to 0.8; measure and report RMS against −18 dBFS ±2 dB; for loops, wrap the tail across the seam and check the first/last samples and a click measure; assert duration bounds (10–120 s) and non-empty output. Stdlib only.
-- [ ] `render_music.sh`: env checks (`fluidsynth` on PATH, `SOUNDFONT_PATH` or committed fallback), run the track script, render `fluidsynth -ni -r 44100 -g <gain> -F <temp.wav> <sf2> <temp.mid>`, post-process into the prototype's `Audio/` folder, print every check, exit non-zero loudly on any failure. Pass `ASEPRITE_PATH`-style inline env only; never persist it.
-- [ ] Deliberate-bug check on the wrapper: a track script that exits 1, a missing MIDI, an empty wav — each must exit non-zero with the reason.
-- [ ] `MusicClipImporter.cs` + EditMode tests (streaming load type for music paths, defaults unchanged for SFX paths).
-- [ ] `AGENTS.md` section, `README.md` updates, `.claude/skills/music-composition/SKILL.md` (portable frontmatter only), run `python3 Tools/agents/check_config.py`.
-- [ ] `Tools/unity/check.sh all`. Commit: `feat(tools): add FluidSynth music pipeline`.
+- [x] `.gitattributes` rule, then download GeneralUser GS into `Tools/audio/soundfonts/` and commit it with `docs/audio-credits.md` (after approval).
+- [x] `midi.py` (writer) with a self-test in the script.
+- [x] `postprocess_music.py`: trim trailing silence below a threshold but keep the reverb tail; normalize peak to 0.8; measure and report RMS against −18 dBFS ±2 dB; for loops, wrap the tail across the seam and check the first/last samples and a click measure; assert duration bounds (10–120 s) and non-empty output. Stdlib only.
+- [x] `render_music.sh`: env checks (`fluidsynth` on PATH, `SOUNDFONT_PATH` or committed fallback), run the track script, render `fluidsynth -ni -r 44100 -g <gain> -F <temp.wav> <sf2> <temp.mid>`, post-process into the prototype's `Audio/` folder, print every check, exit non-zero loudly on any failure. Pass `ASEPRITE_PATH`-style inline env only; never persist it.
+- [x] Deliberate-bug check on the wrapper: a track script that exits 1, a missing MIDI, an empty wav — each must exit non-zero with the reason.
+- [x] `MusicClipImporter.cs` + EditMode tests (streaming load type for music paths, defaults unchanged for SFX paths).
+- [x] `AGENTS.md` section, `README.md` updates, `.claude/skills/music-composition/SKILL.md` (portable frontmatter only), run `python3 Tools/agents/check_config.py`.
+- [x] `Tools/unity/check.sh all`. Commit: `feat(tools): add FluidSynth music pipeline`.
 
-### Stage 2: the pilot track (Medieval Chess) — stop for your listen
-- [ ] Write `Tools/audio/MedievalChess/music/torchlight.py`: slow lute/dulcimer over a low drone, ~60–90 s, seamless loop, named constants for tempo/key/instruments, stem-friendly structure (one function per layer).
-- [ ] Render through the wrapper; read the checks; look at a spectrogram (outside the repository).
-- [ ] Spec edit `docs/prototypes/medieval-chess.md` (audio section) per decision 5.
-- [ ] Code: `music` field on the settings asset (clamped, tested), `MusicPlayer.cs`, builder wiring, EditMode tests (source loops, clip assigned, volume from settings; the whole scene still builds).
-- [ ] `Tools/unity/check.sh all`. Commit: `feat(medieval-chess): add looping music track`.
+### Stage 2: the pilot track (DioramaTurn) — stop for your listen
+- [x] Write `Tools/audio/DioramaTurn/music/diorama_loop.py`: marimba arpeggio, music-box melody and soft bass, 8 bars at 84 BPM (22.86 s), seamless loop, named constants.
+- [x] Render through the wrapper: 22.86 s stereo, peak 0.8, RMS −16.4 dBFS, seam 0.019 (under the 0.02 limit). Structure checked by per-second RMS; no DC offset.
+- [x] Wire it: `MusicPlayer` (loop, volume `audio.music × audio.master`), ducking at the goal (`musicDuckDb` −9 dB for 1.5 s), the builder's `BuildMusic`, the scene rebuilt, tests.
+- [x] `Tools/unity/check.sh all`: 847 EditMode, 79 PlayMode.
 - [ ] **Stop.** You listen in the Editor and say what to change; nothing else is composed until then.
 
 ### Stage 3: the remaining track for the shipped games (Neon Pong)

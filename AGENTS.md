@@ -81,6 +81,16 @@ Pixel art is made by scripts, like models (Blender) and textures. Follow the `as
 - **Always look at the exported PNG** (scale it up first, outside the repository). Say if your model cannot read images.
 - **Unity import:** every texture under a `/Art/Sprites/` path is imported as a Sprite with Point filter, no compression and no mipmaps (`Assets/Shared/Editor/PixelArtTextureImporter.cs`, tested). A sprite sheet comes in as one Single sprite, so slicing it from the JSON is the prototype's own editor code.
 
+## Music (FluidSynth)
+Music is notes in code, rendered by instruments, like models and sprites. Follow the `music-composition` skill (`.claude/skills/music-composition/`).
+- **Scripts only.** Never hand-edit a rendered `.wav`. Change the track script and render it again.
+- **Track:** `Tools/audio/<Name>/music/<track>.py` composes with `Tools/audio/midi.py`, writes a MIDI file and prints `loop_seconds=<n>` for a looping track.
+- **Render:** `Tools/audio/render_music.sh <Prototype> <track>`. It needs `fluidsynth` on PATH and a SoundFont (`SOUNDFONT_PATH`, or the committed `Tools/audio/soundfonts/GeneralUser-GS.sf2`). It fails loudly on a broken script, a missing MIDI or an empty render, and checks duration, peak, RMS and the loop seam.
+- **SoundFont:** a build-time input only, committed under Git LFS. Licence, author and source are in `docs/audio-credits.md`. Never ship it as a runtime asset.
+- **One track at a time, and the person listens.** An agent can check length, silence, clipping, loudness and the seam; it cannot judge whether the music is good, and must never claim it is.
+- **Unity import:** `Assets/Shared/Editor/MusicClipImporter.cs` streams `<Prototype>/Audio/music.wav`; looping and ducking are on the AudioSource.
+- Sound effects stay in each prototype's `make_sounds.py`; this section is music only.
+
 ## Agent harness config (Claude Code + OpenCode)
 Follow the `dual-agent-config` skill whenever you touch agent config.
 - `AGENTS.md` is the only source of rules. `CLAUDE.md` stays one line: `@AGENTS.md`. Never put rules in `CLAUDE.md`.

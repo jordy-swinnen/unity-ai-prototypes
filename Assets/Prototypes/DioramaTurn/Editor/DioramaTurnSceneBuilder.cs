@@ -89,10 +89,11 @@ namespace Prototypes.DioramaTurn.Editor
             var star = BuildStar(settings, rig, spriteMaterial, starTexture, starJson);
             var hud = BuildHud(settings);
             var audio = BuildAudio(settings);
+            var music = BuildMusic(settings, AssetDatabase.LoadAssetAtPath<AudioClip>(Root + "/Audio/music.wav"));
             BuildVolume(settings);
             ApplyTiltSettings(settings);
             BuildEventSystem();
-            var game = BuildGame(settings, rig, room, pip, star, ribbons, hud, audio);
+            var game = BuildGame(settings, rig, room, pip, star, ribbons, hud, audio, music);
 
             // A preview of room 0 in view 0, so the scene is not empty before Play (Start rebuilds it).
             var preview = Rooms.Build(0);
@@ -209,7 +210,7 @@ namespace Prototypes.DioramaTurn.Editor
         }
 
         static DioramaTurnGame BuildGame(DioramaTurnSettings settings, CameraRig rig, RoomView room, PipView pip,
-            StarView star, LinkRibbons ribbons, Hud hud, DioramaAudio audio)
+            StarView star, LinkRibbons ribbons, Hud hud, DioramaAudio audio, MusicPlayer music)
         {
             var go = new GameObject("Game");
             var game = go.AddComponent<DioramaTurnGame>();
@@ -221,11 +222,28 @@ namespace Prototypes.DioramaTurn.Editor
             game.ribbons = ribbons;
             game.hud = hud;
             game.audio = audio;
+            game.music = music;
             var input = go.AddComponent<DioramaInput>();
             input.game = game;
             game.input = input;
             pip.rig = rig;
             return game;
+        }
+
+        /// <summary>The looping music, rendered by Tools/audio/render_music.sh.</summary>
+        static MusicPlayer BuildMusic(DioramaTurnSettings settings, AudioClip clip)
+        {
+            var go = new GameObject("Music");
+            var player = go.AddComponent<MusicPlayer>();
+            var source = go.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.spatialBlend = 0f;
+            source.clip = clip;
+            source.volume = settings.audio.music * settings.audio.master;
+            player.settings = settings;
+            player.source = source;
+            return player;
         }
 
         /// <summary>The generated sounds, one one-shot source.</summary>
