@@ -184,8 +184,8 @@ namespace Prototypes.PixelInvaders
         {
             pitchDeg = 55.0f,
             fovDeg = 34.0f,
-            distance = 13.5f,
-            lookAtZ = 0.2f,
+            distance = 14.8f,
+            lookAtZ = -0.15f,
             pixelsPerUnit = 16,
         };
     }

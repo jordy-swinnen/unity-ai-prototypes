@@ -128,13 +128,13 @@ Inside `game-build` and `game-polish`, stages run back to back with a commit per
 - [x] Commit: `feat(pixel-invaders): add simulation rules and EditMode tests`.
 
 ### Stage 2: playable (first Aseprite sheet, scene builder, input, view, PlayMode tests)
-- [ ] Generate the initial Aseprite sheets (`invaders.lua`, `cannon_and_shots.lua`, `powerups_and_fx.lua`, `bunker_and_hud.lua`) via `Tools/aseprite/run.sh`, inspect the scaled-up PNGs, and add `SpriteAssetTests` (Point filter, uncompressed, 16-colour palette compliance, JSON frame counts).
-- [ ] Implement `SpriteSheetAtlas`, `BunkerTextureView`, `PixelInvadersView`, `PixelInvadersGame`, and `PixelInvadersSceneBuilder` (`Prototypes/PixelInvaders/Build Scene`).
-- [ ] Build `Assets/Prototypes/PixelInvaders/Scenes/PixelInvaders.unity` twice via `Prototypes/PixelInvaders/Build Scene` and verify deterministic scene content in an EditMode scene-builder test.
-- [ ] Write and run PlayMode tests (`PixelInvadersPlayModeTests.cs`): scene loads with all 55 invaders, 4 bunkers, cannon and HUD; horizontal input moves cannon within bounds; firing destroys an invader and updates HUD score; catching a capsule activates the power-up; Game Over and restart reset the wave.
-- [ ] Capture the scene (`Tools/unity/capture.sh camera` and `screen`) to verify layout and framing against the layout table.
-- [ ] Run `Tools/unity/check.sh all` and perform a deliberate-bug check in `PixelInvadersView`.
-- [ ] Commit: `feat(pixel-invaders): add Aseprite sheets, playable scene and PlayMode tests`.
+- [x] Generate the initial Aseprite sheets (`invaders.lua`, `cannon_and_shots.lua`, `powerups_and_fx.lua`, `bunker_and_hud.lua`) via `Tools/aseprite/run.sh`, inspect the scaled-up PNGs, and add `SpriteAssetTests` (Point filter, uncompressed, 16-colour palette compliance, JSON frame counts).
+- [x] Implement `SpriteSheetAtlas`, `BunkerTextureView`, `PixelInvadersView`, `PixelInvadersGame`, and `PixelInvadersSceneBuilder` (`Prototypes/PixelInvaders/Build Scene`).
+- [x] Build `Assets/Prototypes/PixelInvaders/Scenes/PixelInvaders.unity` twice via `Prototypes/PixelInvaders/Build Scene` and verify deterministic scene content in an EditMode scene-builder test.
+- [x] Write and run PlayMode tests (`PixelInvadersPlayModeTests.cs`): scene loads with all 55 invaders, 4 bunkers, cannon and HUD; horizontal input moves cannon within bounds; firing destroys an invader and updates HUD score; catching a capsule activates the power-up; Game Over and restart reset the wave.
+- [x] Capture the scene (`Tools/unity/capture.sh camera` and `screen`) to verify layout and framing against the layout table.
+- [x] Run `Tools/unity/check.sh all` and perform a deliberate-bug check in `PixelInvadersView`.
+- [x] Commit: `feat(pixel-invaders): add Aseprite sheets, playable scene and PlayMode tests`.
 
 ### Stage 3: look (`game-polish` — surfaces, 3D trench, lighting, VFX, audio, music)
 - [ ] Take a baseline `screen` capture of the Stage 2 scene.
