@@ -31,7 +31,7 @@ MonoBehaviour:
     baseYawDeg: 45
     pixelsPerUnit: 32
     maxScale: 4
-    roomExtentUnits: 10.5
+    roomExtentUnits: 10
     snapSpritesToPixels: 1
     distance: 30
     spritePushToCamera: 0.3

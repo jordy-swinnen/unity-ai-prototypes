@@ -36,7 +36,7 @@ namespace Prototypes.DioramaTurn
         public float baseYawDeg = 45f;
         public float pixelsPerUnit = 32f;
         [Tooltip("The most screen pixels per sprite pixel.")] public int maxScale = 4;
-        [Tooltip("Height of the room on screen, in world units, that must fit.")] public float roomExtentUnits = 10.5f;
+        [Tooltip("Height of the room on screen, in world units, that must fit.")] public float roomExtentUnits = 10f;
         public bool snapSpritesToPixels = true;
         public float distance = 30f;
         [Tooltip("Sprites are pushed this far toward the camera so their feet do not sink into blocks.")] public float spritePushToCamera = 0.3f;

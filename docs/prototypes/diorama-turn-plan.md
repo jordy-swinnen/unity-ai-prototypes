@@ -124,15 +124,16 @@ Stage 1 notes (what differed or is still open):
 - [x] A first Pip sprite script (three frames) through `run.sh`, to prove the sprite path end to end (JSON reader, tiling and offset, lit quad, shadow). Look at the PNG.
 - [ ] Spikes, each on a capture: pixel scale (is a sprite pixel exactly 3 screen pixels at 1080?), sprite shadow and foot clipping, `LinkRibbons`, tag export. (Tag export passed; tilt-shift pass renders; the rest is open.)
 - [x] If decision 1 is approved: the renderer asset and the list entry, and the tilt-shift shader spike on a capture.
-- [ ] PlayMode tests: scene loads; camera orthographic and exactly on the view angle after each turn; Pip walks to a reachable node and stops; a turn during a walk is refused; each room completes from the solver's witness moves; the next room loads; restart restores the first state.
-- [ ] Capture each room in all four views (`capture.sh camera`), check the room fits the frame and against the layout table.
-- [ ] Run `Tools/unity/check.sh all`.
-- [ ] Commit: `feat(diorama-turn): add playable scene`.
+- [x] PlayMode tests: scene loads; camera orthographic and exactly on the view angle after each turn; Pip walks to a reachable node and stops; a turn during a walk is refused; each room completes from the solver's witness moves; the next room loads; restart restores the first state.
+- [x] Capture each room in all four views (`capture.sh camera`), check the room fits the frame and against the layout table.
+- [x] Run `Tools/unity/check.sh all`.
+- [x] Commit: `feat(diorama-turn): add playable scene`.
 
 Stage 2 notes (what is done at handoff):
 - The view code, scene builder, renderer asset and tilt-shift pass are written and the scene is built; view 0 renders correctly (plinth, four blocks, star, dotted join ribbon, Pip, HUD) and the tilt-shift is visible.
 - Two capture-found bugs fixed: a `MaterialPropertyBlock` is not saved with a scene, so the Pip sheet texture is now a serialised field rebound on first use; the camera could bake in a transient tiny game-view height during a capture.
-- Deliberate-bug check and PlayMode tests for stage 2 are still to do. The capture-size issue (room renders small in `capture.sh camera` because the tool's render height differs from the game view) is open.
+- Stage 2 closed: 833 EditMode and 79 PlayMode tests pass; the deliberate-bug check (reversing the view yaw) failed the camera test as it should; all three rooms captured in all four views and looked at.
+- Greybox look issues to fix in stage 3: the join ribbon reads as a solid yellow band rather than dots, the cursor is a large dark slab, and the room sits small in the frame at the 667px-tall game view (camera size 5.21).
 
 ### Stage 3: look (game-polish, small steps, each judged on a render, a commit per step)
 - [ ] Baseline capture (`screen`) of each room.
