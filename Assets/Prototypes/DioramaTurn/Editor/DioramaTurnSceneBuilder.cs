@@ -73,6 +73,7 @@ namespace Prototypes.DioramaTurn.Editor
             var blockModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/block.glb");
             var pillarModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/pillar.glb");
             var goalModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/goal_pedestal.glb");
+            var bridgeModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/bridge.glb");
             var plankTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Sprites/plank.png");
             var starTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Sprites/star_sheet.png");
             var starJson = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Art/Sprites/star_sheet.json");
@@ -83,7 +84,7 @@ namespace Prototypes.DioramaTurn.Editor
             var rig = BuildCamera(settings, rendererIndex, out var camera);
             BuildLight(settings, rig);
             var room = BuildRoom(settings, blockMaterials, startMaterial, goalMaterial, plinthMaterial, bridgeMaterial,
-                cursorMaterial, plinthModel, blockModel, goalModel, pillarModel, spriteMaterial, plankTexture);
+                cursorMaterial, plinthModel, blockModel, goalModel, pillarModel, bridgeModel, spriteMaterial, plankTexture);
             var ribbons = BuildRibbons(settings, room, ribbonMaterial);
             var pip = BuildPip(settings, room, spriteMaterial, pipTexture, pipJson);
             var star = BuildStar(settings, rig, spriteMaterial, starTexture, starJson);
@@ -99,7 +100,8 @@ namespace Prototypes.DioramaTurn.Editor
             var preview = Rooms.Build(0);
             var previewSim = new DioramaSimulation(preview, settings.ToTiming());
             room.Build(preview);
-            room.ShowCursor(previewSim.Room.Start);
+            room.ShowCursor(null);
+            room.ShowReachable(RoutePlanner.Reachable(previewSim.Graph, previewSim.PipCell));
             star.Place(preview.Goal);
             ribbons.ShowJoins(previewSim.ScreenJoins(0));
             pip.SnapTo(previewSim);
@@ -155,7 +157,7 @@ namespace Prototypes.DioramaTurn.Editor
 
         static RoomView BuildRoom(DioramaTurnSettings settings, Material[] blocks, Material start, Material goal,
             Material plinth, Material bridge, Material cursor, GameObject plinthModel, GameObject blockModel,
-            GameObject goalModel, GameObject pillarModel, Material spriteMaterial, Texture2D plankTexture)
+            GameObject goalModel, GameObject pillarModel, GameObject bridgeModel, Material spriteMaterial, Texture2D plankTexture)
         {
             var go = new GameObject("Room");
             var view = go.AddComponent<RoomView>();
@@ -170,6 +172,7 @@ namespace Prototypes.DioramaTurn.Editor
             view.blockModel = blockModel;
             view.goalModel = goalModel;
             view.pillarModel = pillarModel;
+            view.bridgeModel = bridgeModel;
             view.bridgeSpriteMaterial = spriteMaterial;
             view.bridgeTexture = plankTexture;
             view.bridgeJson = null; // a single-image sprite: the whole texture is the frame
@@ -366,7 +369,7 @@ namespace Prototypes.DioramaTurn.Editor
             hud.turnLeftButton = MakeButton(playing.transform, "Button Turn Left", "Turn left", new Vector2(160f, -70f), new Vector2(220f, 90f), topLeft: true);
             hud.turnRightButton = MakeButton(playing.transform, "Button Turn Right", "Turn right", new Vector2(-160f, -70f), new Vector2(220f, 90f), topRight: true);
             hud.restartButton = MakeButton(playing.transform, "Button Restart", "Restart", new Vector2(-160f, -180f), new Vector2(220f, 80f), topRight: true);
-            hud.hintText = Label(playing.transform, "Hints", "Q / E turn   -   arrows move   -   Enter confirm   -   R restart", 28,
+            hud.hintText = Label(playing.transform, "Hints", "Q / E turn   -   Click or Arrows / WASD walk   -   R restart", 28,
                 new Vector2(0f, 50f), new Vector2(1400f, 60f), ink, bottom: true);
 
             // complete

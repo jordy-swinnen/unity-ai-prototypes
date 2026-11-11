@@ -41,7 +41,7 @@ namespace Prototypes.DioramaTurn
         public float distance = 30f;
         [Tooltip("Sprites are pushed this far toward the camera so their feet do not sink into blocks.")] public float spritePushToCamera = 0.3f;
         [Tooltip("The screen height the builder sizes the camera for; at run time the real height is used.")] public int referenceHeight = 1080;
-        [Tooltip("A click counts as a node when it lands within this much of the screen height from it.")] public float clickRadiusViewport = 0.06f;
+        [Tooltip("A click counts as a node when it lands within this much of the screen height from it.")] public float clickRadiusViewport = 0.09f;
     }
 
     [Serializable]

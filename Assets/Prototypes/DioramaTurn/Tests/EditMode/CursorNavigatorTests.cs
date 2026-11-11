@@ -26,13 +26,19 @@ namespace Prototypes.DioramaTurn.Tests
         }
 
         [Test]
-        public void UpPicksTheNodeAbove()
+        public void UpPicksTheNodeAboveIncludingIsometricDiagonals()
         {
             var from = new Cell(2, 0, 2);
             var above = new Cell(2, 1, 2);
             var below = new Cell(2, -1, 2);
             Assert.AreEqual(above, CursorNavigator.Move(0, from, ScreenDirection.Up, new[] { below, above }));
             Assert.AreEqual(below, CursorNavigator.Move(0, from, ScreenDirection.Down, new[] { below, above }));
+
+            // An isometric horizontal neighbour (2, 0, 1) sits at 60 degrees from vertical (cosine 0.5).
+            var isoUpLeft = new Cell(2, 0, 1);
+            var isoDownRight = new Cell(2, 0, 3);
+            Assert.AreEqual(isoUpLeft, CursorNavigator.Move(0, from, ScreenDirection.Up, new[] { isoDownRight, isoUpLeft }));
+            Assert.AreEqual(isoDownRight, CursorNavigator.Move(0, from, ScreenDirection.Down, new[] { isoDownRight, isoUpLeft }));
         }
 
         [Test]

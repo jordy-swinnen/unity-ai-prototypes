@@ -105,7 +105,7 @@ namespace Prototypes.DioramaTurn.Tests
             {
                 game.PressTurn(1);
                 yield return Settle();
-                float expected = Mathf.Repeat(45f + 90f * game.Sim.View, 360f);
+                float expected = Mathf.Repeat(CameraMath.YawForView(game.Sim.View, game.settings.camera.baseYawDeg), 360f);
                 float actual = Mathf.Repeat(game.rig.Yaw, 360f);
                 Assert.AreEqual(expected, actual, 0.05f, $"view {game.Sim.View}");
             }
@@ -181,6 +181,10 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.AreEqual(1, game.RoomIndex);
             Assert.AreEqual(0, game.Sim.View);
             Assert.AreEqual(game.Sim.Room.Start, game.Sim.PipCell);
+            int activePiecesRoots = 0;
+            for (int i = 0; i < game.room.transform.childCount; i++)
+                if (game.room.transform.GetChild(i).gameObject.activeSelf) activePiecesRoots++;
+            Assert.AreEqual(1, activePiecesRoots, "the old room's Pieces hierarchy must be cleared when a new room builds");
         }
 
         [UnityTest]
@@ -227,6 +231,18 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.AreEqual(1, game.Sim.TurnCount, "Q must start a turn");
             InputSystem.QueueStateEvent(keyboard, new KeyboardState());
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Pressing_a_direction_walks_directly_to_the_reachable_neighbour()
+        {
+            yield return StartRoom();
+            var start = game.Sim.PipCell;
+            // In Room 0 view 0, (4,0,1) is one step in +X from Start (3,0,1), which is Left-Down on screen.
+            game.MoveCursor(ScreenDirection.Left);
+            Assert.AreEqual(Phase.Walking, game.Sim.Phase, "pressing a direction must start walking immediately");
+            yield return Settle();
+            Assert.AreNotEqual(start, game.Sim.PipCell);
         }
     }
 }

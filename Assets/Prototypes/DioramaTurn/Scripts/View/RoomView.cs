@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Prototypes.DioramaTurn
 {
-    /// <summary>Builds a room's pieces as simple shapes and keeps their cell positions. The stage 2 greybox.</summary>
+    /// <summary>Builds a room's pieces, support pillars, 3D bridges, reachable markers and hover cursor.</summary>
     public sealed class RoomView : MonoBehaviour
     {
         public DioramaTurnSettings settings;
@@ -16,14 +17,16 @@ namespace Prototypes.DioramaTurn
         public GameObject blockModel;
         public GameObject goalModel;
         public GameObject pillarModel;
-        [Tooltip("The plank sprite for Bridge pieces.")] public Material bridgeSpriteMaterial;
+        public GameObject bridgeModel;
+        [Tooltip("Fallback sprite fields kept for compatibility.")] public Material bridgeSpriteMaterial;
         public Texture2D bridgeTexture;
         public TextAsset bridgeJson;
 
         GameObject root;
         GameObject cursor;
+        GameObject reachableRoot;
         RoomData room;
-        readonly System.Collections.Generic.List<SpriteQuad> sprites = new System.Collections.Generic.List<SpriteQuad>();
+        readonly List<SpriteQuad> sprites = new List<SpriteQuad>();
 
         public RoomData Room => room;
 
@@ -40,7 +43,7 @@ namespace Prototypes.DioramaTurn
             root = new GameObject("Pieces");
             root.transform.SetParent(transform, false);
 
-            var plinth = Model(plinthModel, "Plinth", new Vector3(0f, -1.1f, 0f), Vector3.one, plinthMaterial);
+            Model(plinthModel, "Plinth", new Vector3(0f, -1.1f, 0f), Vector3.one, plinthMaterial);
 
             int index = 0;
             foreach (var piece in data.Pieces)
@@ -49,29 +52,62 @@ namespace Prototypes.DioramaTurn
                 switch (piece.Kind)
                 {
                     case PieceKind.Bridge:
-                        var bridgeGo = new GameObject($"Bridge {piece.Cell}");
-                        bridgeGo.transform.SetParent(root.transform, false);
-                        var bridge = bridgeGo.AddComponent<SpriteQuad>();
-                        bridge.SetSheet(bridgeSpriteMaterial, bridgeTexture, bridgeJson, new Vector2(1f, 1f));
-                        bridgeGo.transform.position = new Vector3(at.x, piece.Cell.Y + 0.25f, at.z);
-                        sprites.Add(bridge);
+                        var bridgeGo = Model(bridgeModel, $"Bridge {piece.Cell}", at, Vector3.one, bridgeMaterial);
+                        if (BridgeRunsAlongZ(data, piece.Cell))
+                            bridgeGo.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
                         break;
                     case PieceKind.Start:
                         Model(blockModel, $"Start {piece.Cell}", at, Vector3.one, startMaterial);
+                        BuildSupportPillars(data, piece.Cell);
                         break;
                     case PieceKind.Goal:
                         Model(goalModel, $"Goal {piece.Cell}", at, Vector3.one, goalMaterial);
+                        BuildSupportPillars(data, piece.Cell);
                         break;
                     default:
                         Model(blockModel, $"Block {piece.Cell}", at, Vector3.one, blockMaterials[index % blockMaterials.Length]);
+                        BuildSupportPillars(data, piece.Cell);
                         break;
                 }
                 index++;
             }
 
-            cursor = Cube("Cursor", TopFace(data.Start) + Vector3.up * 0.02f,
-                new Vector3(0.92f, 0.04f, 0.92f), cursorMaterial);
+            cursor = Cube("Cursor", TopFace(data.Start) + Vector3.up * 0.025f,
+                new Vector3(0.66f, 0.035f, 0.66f), cursorMaterial);
             cursor.SetActive(false);
+        }
+
+        void BuildSupportPillars(RoomData data, Cell top)
+        {
+            for (int py = 0; py < top.Y; py++)
+            {
+                var below = new Cell(top.X, py, top.Z);
+                if (data.Contains(below)) continue;
+                Model(pillarModel, $"Pillar {below}", CellCentre(below), Vector3.one, plinthMaterial);
+            }
+        }
+
+        static bool BridgeRunsAlongZ(RoomData data, Cell cell)
+        {
+            bool zNeighbour = data.Contains(cell + new Cell(0, 0, 1)) || data.Contains(cell + new Cell(0, 0, -1));
+            bool xNeighbour = data.Contains(cell + new Cell(1, 0, 0)) || data.Contains(cell + new Cell(-1, 0, 0));
+            return zNeighbour && !xNeighbour;
+        }
+
+        public void ShowReachable(IEnumerable<Cell> cells)
+        {
+            if (reachableRoot != null) Kill(reachableRoot);
+            if (root == null || cells == null) return;
+            reachableRoot = new GameObject("Reachable");
+            reachableRoot.transform.SetParent(root.transform, false);
+            int index = 0;
+            foreach (var cell in cells)
+            {
+                var dot = Cube($"Reachable {index++}", TopFace(cell) + Vector3.up * 0.03f,
+                    new Vector3(0.18f, 0.03f, 0.18f), cursorMaterial);
+                dot.transform.SetParent(reachableRoot.transform, false);
+                dot.transform.localRotation = Quaternion.Euler(0f, 45f, 0f);
+            }
         }
 
         public void ShowCursor(Cell? cell)
@@ -79,10 +115,10 @@ namespace Prototypes.DioramaTurn
             if (cursor == null) return;
             if (!cell.HasValue) { cursor.SetActive(false); return; }
             cursor.SetActive(true);
-            cursor.transform.localPosition = TopFace(cell.Value) + Vector3.up * 0.02f;
+            cursor.transform.localPosition = TopFace(cell.Value) + Vector3.up * 0.025f;
         }
 
-        /// <summary>Turns the bridge sprites to face the camera, like Pip and the star.</summary>
+        /// <summary>Turns any sprite quads to face the camera.</summary>
         public void FaceSprites(float cameraYawDeg)
         {
             foreach (var sprite in sprites)
@@ -91,9 +127,15 @@ namespace Prototypes.DioramaTurn
 
         public void Clear()
         {
-            if (root != null) Kill(root);
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i).gameObject;
+                child.SetActive(false);
+                Kill(child);
+            }
             root = null;
             cursor = null;
+            reachableRoot = null;
             room = null;
             sprites.Clear();
         }

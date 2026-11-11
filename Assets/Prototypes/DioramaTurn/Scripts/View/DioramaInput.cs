@@ -28,18 +28,18 @@ namespace Prototypes.DioramaTurn
             if (k.qKey.wasPressedThisFrame) game.PressTurn(-1);
             if (k.eKey.wasPressedThisFrame) game.PressTurn(1);
             bool shift = k.leftShiftKey.isPressed || k.rightShiftKey.isPressed;
-            if (k.leftArrowKey.wasPressedThisFrame)
+            if (k.leftArrowKey.wasPressedThisFrame || k.aKey.wasPressedThisFrame)
             {
                 if (shift) game.PressTurn(-1);
                 else game.MoveCursor(ScreenDirection.Left);
             }
-            if (k.rightArrowKey.wasPressedThisFrame)
+            if (k.rightArrowKey.wasPressedThisFrame || k.dKey.wasPressedThisFrame)
             {
                 if (shift) game.PressTurn(1);
                 else game.MoveCursor(ScreenDirection.Right);
             }
-            if (k.upArrowKey.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Up);
-            if (k.downArrowKey.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Down);
+            if (k.upArrowKey.wasPressedThisFrame || k.wKey.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Up);
+            if (k.downArrowKey.wasPressedThisFrame || k.sKey.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Down);
             if (k.enterKey.wasPressedThisFrame || k.spaceKey.wasPressedThisFrame) game.Confirm();
             if (k.rKey.wasPressedThisFrame) game.Restart();
         }
@@ -48,6 +48,9 @@ namespace Prototypes.DioramaTurn
         {
             var m = Mouse.current;
             if (m == null) return;
+            var pos = m.position.ReadValue();
+            if (!pressed && m.delta.ReadValue().sqrMagnitude > 0.5f)
+                game.HoverAtScreenPoint(pos);
             if (m.leftButton.wasPressedThisFrame)
             {
                 pressPoint = m.position.ReadValue();
@@ -84,6 +87,10 @@ namespace Prototypes.DioramaTurn
             if (g.rightShoulder.wasPressedThisFrame) game.PressTurn(1);
             if (g.buttonSouth.wasPressedThisFrame) game.Confirm();
             if (g.buttonNorth.wasPressedThisFrame) game.Restart();
+            if (g.dpad.left.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Left);
+            if (g.dpad.right.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Right);
+            if (g.dpad.up.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Up);
+            if (g.dpad.down.wasPressedThisFrame) game.MoveCursor(ScreenDirection.Down);
 
             stickCooldown -= Time.deltaTime;
             var stick = g.leftStick.ReadValue();

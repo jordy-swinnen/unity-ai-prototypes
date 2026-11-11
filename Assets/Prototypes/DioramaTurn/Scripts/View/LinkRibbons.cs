@@ -47,7 +47,12 @@ namespace Prototypes.DioramaTurn
 
         public void Clear()
         {
-            if (root != null) Kill(root);
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                var child = transform.GetChild(i).gameObject;
+                child.SetActive(false);
+                Kill(child);
+            }
             root = null;
             joinCount = 0;
         }

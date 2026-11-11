@@ -7,8 +7,8 @@ namespace Prototypes.DioramaTurn
     /// <summary>Moves a keyboard or gamepad cursor to the nearest node in a direction on the screen.</summary>
     public static class CursorNavigator
     {
-        // A node counts for a direction when it lies within 60 degrees of it.
-        const float MinCosine = 0.5f;
+        // A node counts for a direction when it lies within ~63 degrees of it (isometric vertical steps are at 60 deg, cosine 0.5).
+        const float MinCosine = 0.45f;
 
         public static Cell? Move(int view, Cell from, ScreenDirection direction, IEnumerable<Cell> candidates)
         {

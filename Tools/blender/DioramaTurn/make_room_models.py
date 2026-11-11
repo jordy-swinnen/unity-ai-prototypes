@@ -203,15 +203,26 @@ MODELS = {
     ],
     # 1 x 1 x 1, centred on its cell
     "block": [box((1.0, 1.0, 1.0), (0, 0, 0), bevel=0.12)],
-    # 0.9 x 1 x 0.9 with a cap whose top is at +0.5
+    # 0.56 x 1 x 0.56 support column with top and bottom caps, placed under elevated blocks
     "pillar": [
-        box((0.86, 0.9, 0.86), (0, -0.05, 0), bevel=0.09),
-        box((0.98, 0.1, 0.98), (0, 0.45, 0), bevel=0.05),
+        box((0.40, 0.84, 0.40), (0, 0.0, 0), bevel=0.06),
+        box((0.56, 0.08, 0.56), (0, 0.46, 0), bevel=0.03),
+        box((0.56, 0.08, 0.56), (0, -0.46, 0), bevel=0.03),
     ],
     # a round pedestal top on a 1 x 1 x 1 block
     "goal_pedestal": [
         box((1.0, 0.9, 1.0), (0, -0.05, 0), bevel=0.1),
         lathe([(0.0, 0.4), (0.42, 0.4), (0.42, 0.46), (0.36, 0.5), (0.0, 0.5)], segs=28),
+    ],
+    # a 3D wooden plank bridge (1.0 along x, 0.66 along z, walkable top at y = +0.5)
+    "bridge": [
+        box((0.30, 0.12, 0.66), (-0.33, 0.44, 0), bevel=0.025),
+        box((0.30, 0.12, 0.66), (0.0, 0.44, 0), bevel=0.025),
+        box((0.30, 0.12, 0.66), (0.33, 0.44, 0), bevel=0.025),
+        box((0.98, 0.08, 0.08), (0, 0.36, 0.24), bevel=0.02),
+        box((0.98, 0.08, 0.08), (0, 0.36, -0.24), bevel=0.02),
+        box((0.96, 0.07, 0.07), (0, 0.535, 0.28), bevel=0.02),
+        box((0.96, 0.07, 0.07), (0, 0.535, -0.28), bevel=0.02),
     ],
 }
 

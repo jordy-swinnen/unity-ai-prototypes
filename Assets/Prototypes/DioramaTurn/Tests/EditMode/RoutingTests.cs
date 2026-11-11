@@ -45,6 +45,14 @@ namespace Prototypes.DioramaTurn.Tests
         }
 
         [Test]
+        public void ReachableListsOnlyTheConnectedComponentBeyondTheOrigin()
+        {
+            var room = Row("sb.bg");
+            var reach = RoutePlanner.Reachable(JoinGraph.Build(room, 0), room.Start);
+            CollectionAssert.AreEquivalent(new[] { new Cell(1, 0, 0) }, reach);
+        }
+
+        [Test]
         public void AScreenJoinIsAHopAndOnlyInItsView()
         {
             // The goal sits one neighbour step plus one view 0 depth step from the block.

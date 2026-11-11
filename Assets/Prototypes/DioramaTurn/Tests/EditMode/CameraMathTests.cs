@@ -10,10 +10,11 @@ namespace Prototypes.DioramaTurn.Tests
         [Test]
         public void Each_view_is_a_quarter_turn_from_the_base_yaw()
         {
+            float[] expected = { 225f, 135f, 45f, 315f };
             for (int v = 0; v < 4; v++)
-                Assert.AreEqual(45f + 90f * v, CameraMath.YawForView(v, 45f), Tol);
-            Assert.AreEqual(45f, CameraMath.YawForView(4, 45f), Tol, "four turns come back to view 0");
-            Assert.AreEqual(315f, CameraMath.YawForView(-1, 45f), Tol);
+                Assert.AreEqual(expected[v], CameraMath.YawForView(v, 45f), Tol, $"view {v}");
+            Assert.AreEqual(expected[0], CameraMath.YawForView(4, 45f), Tol, "four turns come back to view 0");
+            Assert.AreEqual(expected[3], CameraMath.YawForView(-1, 45f), Tol);
         }
 
         [Test]
@@ -50,15 +51,24 @@ namespace Prototypes.DioramaTurn.Tests
         [Test]
         public void The_screen_lattice_agrees_with_the_camera_yaw_of_each_view()
         {
-            // View k looks from the r_k side, so a depth step must not move a cell on screen.
+            // View k looks from the r_k side: projecting a cell onto the camera's right and up axes
+            // must equal ViewRule.ScreenUnits(cell, k), and a depth step must not move it on screen.
             for (int v = 0; v < 4; v++)
             {
+                var rot = CameraMath.Rotation(35.2643897f, CameraMath.YawForView(v, 45f));
+                var right = rot * Vector3.right;
+                var up = rot * Vector3.up;
+
                 var cell = new Cell(1, 2, 3);
-                var same = cell + ViewRule.DepthStep(v) * 2;
-                var a = ViewRule.ScreenUnits(cell, v);
-                var b = ViewRule.ScreenUnits(same, v);
-                Assert.AreEqual(a.X, b.X, 0.0001f, $"view {v}");
-                Assert.AreEqual(a.Y, b.Y, 0.0001f, $"view {v}");
+                var world = new Vector3(cell.X, cell.Y, cell.Z);
+                var screen = ViewRule.ScreenUnits(cell, v);
+                Assert.AreEqual(screen.X, Vector3.Dot(world, right), 0.001f, $"view {v} right");
+                Assert.AreEqual(screen.Y, Vector3.Dot(world, up), 0.001f, $"view {v} up");
+
+                var shifted = cell + ViewRule.DepthStep(v) * 2;
+                var shiftedWorld = new Vector3(shifted.X, shifted.Y, shifted.Z);
+                Assert.AreEqual(Vector3.Dot(world, right), Vector3.Dot(shiftedWorld, right), 0.001f, $"view {v} depth right");
+                Assert.AreEqual(Vector3.Dot(world, up), Vector3.Dot(shiftedWorld, up), 0.001f, $"view {v} depth up");
             }
         }
     }

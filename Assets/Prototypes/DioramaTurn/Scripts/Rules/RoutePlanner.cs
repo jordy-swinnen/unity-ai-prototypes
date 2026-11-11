@@ -40,6 +40,28 @@ namespace Prototypes.DioramaTurn
             return null;
         }
 
+        /// <summary>Every node reachable from the origin in this view, excluding the origin itself.</summary>
+        public static List<Cell> Reachable(JoinGraph graph, Cell from)
+        {
+            var result = new List<Cell>();
+            if (!graph.Contains(from)) return result;
+            var seen = new HashSet<Cell> { from };
+            var queue = new Queue<Cell>();
+            queue.Enqueue(from);
+            while (queue.Count > 0)
+            {
+                var c = queue.Dequeue();
+                foreach (var e in graph.Neighbours(c))
+                {
+                    if (!seen.Add(e.To)) continue;
+                    result.Add(e.To);
+                    queue.Enqueue(e.To);
+                }
+            }
+            result.Sort((a, b) => a.CompareTo(b));
+            return result;
+        }
+
         static List<RouteStep> Build(Dictionary<Cell, (Cell From, bool Hop)> parent, Cell from, Cell to)
         {
             var steps = new List<RouteStep>();

@@ -58,7 +58,7 @@ namespace Prototypes.DioramaTurn
                 lastFromView = fromView;
                 lastToView = toView;
                 startYaw = CameraMath.YawForView(fromView, settings.camera.baseYawDeg);
-                targetYaw = startYaw + 90f * CameraMath.TurnDirection(fromView, toView);
+                targetYaw = startYaw - 90f * CameraMath.TurnDirection(fromView, toView);
             }
             float overshoot = Feel.OvershootDeg(settings.turn.overshootDeg, settings.feel.effectStrength) / 90f;
             yaw = Mathf.LerpUnclamped(startYaw, targetYaw, TurnEase.BackOut(progress, overshoot));

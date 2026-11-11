@@ -5,8 +5,12 @@ namespace Prototypes.DioramaTurn
     /// <summary>The camera's placement for a view, as plain maths so tests need no scene.</summary>
     public static class CameraMath
     {
-        /// <summary>View 0 sits at the base yaw, each next view a quarter turn further.</summary>
-        public static float YawForView(int view, float baseYawDeg) => baseYawDeg + 90f * ViewRule.Wrap(view);
+        /// <summary>
+        /// View 0 looks from the (+1, +1, +1) corner toward the origin (yaw = baseYaw + 180 = 225 deg),
+        /// and each next view steps -90 deg around Y so the camera's screen axes match ViewRule.ScreenUnits.
+        /// </summary>
+        public static float YawForView(int view, float baseYawDeg) =>
+            Mathf.Repeat(baseYawDeg + 180f - 90f * ViewRule.Wrap(view), 360f);
 
         public static Quaternion Rotation(float pitchDeg, float yawDeg) => Quaternion.Euler(pitchDeg, yawDeg, 0f);
 

@@ -42,6 +42,34 @@ namespace Prototypes.DioramaTurn.Tests
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
+        public void EveryRoomHasUniqueColumnsAndSupportPillarsNeverCoverWalkableNodes(int index)
+        {
+            var room = Rooms.Build(index);
+            var columns = new System.Collections.Generic.HashSet<(int X, int Z)>();
+            foreach (var p in room.Pieces)
+                Assert.IsTrue(columns.Add((p.Cell.X, p.Cell.Z)), $"two walkable pieces share column ({p.Cell.X},{p.Cell.Z}) in room {index}");
+
+            for (int v = 0; v < ViewRule.ViewCount; v++)
+            {
+                var walkableScreens = new System.Collections.Generic.HashSet<ScreenPoint>();
+                foreach (var p in room.Pieces) walkableScreens.Add(ViewRule.Screen(p.Cell, v));
+
+                foreach (var p in room.Pieces)
+                {
+                    if (p.Kind == PieceKind.Bridge) continue;
+                    for (int py = 0; py < p.Cell.Y; py++)
+                    {
+                        var pillarSpot = ViewRule.Screen(new Cell(p.Cell.X, py, p.Cell.Z), v);
+                        Assert.IsFalse(walkableScreens.Contains(pillarSpot),
+                            $"pillar under {p.Cell} at y={py} covers a walkable node in view {v} of room {index}");
+                    }
+                }
+            }
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
         public void TheSolversMovesFinishTheRoomInTheSimulation(int index)
         {
             var room = Rooms.Build(index);

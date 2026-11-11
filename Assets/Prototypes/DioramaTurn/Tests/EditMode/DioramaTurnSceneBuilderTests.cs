@@ -56,7 +56,7 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.AreEqual(PixelScale.OrthoSize(settings.camera.referenceHeight, settings.camera.pixelsPerUnit, (int)scale),
                 camera.orthographicSize, Tol);
             Assert.AreEqual(settings.camera.pitchDeg, go.transform.eulerAngles.x, 0.01f);
-            Assert.AreEqual(settings.camera.baseYawDeg, go.transform.eulerAngles.y, 0.01f);
+            Assert.AreEqual(CameraMath.YawForView(0, settings.camera.baseYawDeg), go.transform.eulerAngles.y, 0.01f);
             Assert.AreEqual(settings.camera.distance, Vector3.Distance(go.transform.position, CameraRig.Focus), 0.05f);
 
             var rig = go.GetComponent<CameraRig>();

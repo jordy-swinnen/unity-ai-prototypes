@@ -88,7 +88,12 @@ namespace Prototypes.DioramaTurn
             if (Flow != GameFlow.Playing || Sim == null) return;
             Sim.Restart();
             Cursor = null;
-            if (room != null) room.ShowCursor(null);
+            if (room != null)
+            {
+                room.ShowCursor(null);
+                room.ShowReachable(RoutePlanner.Reachable(Sim.Graph, Sim.PipCell));
+            }
+            if (ribbons != null) ribbons.ShowJoins(Sim.ScreenJoins(Sim.View));
             if (hud != null) hud.SetTurns(Sim.TurnCount);
             if (pip != null) pip.SnapTo(Sim);
             DrainEvents();
@@ -108,10 +113,32 @@ namespace Prototypes.DioramaTurn
 
         public void MoveCursor(ScreenDirection direction)
         {
-            if (Sim == null) return;
-            var candidates = new List<Cell>();
-            foreach (var piece in Sim.Room.Pieces) candidates.Add(piece.Cell);
-            Cursor = CursorNavigator.Move(Sim.View, Cursor ?? Sim.PipCell, direction, candidates);
+            if (Flow != GameFlow.Playing || Sim == null) return;
+            var neighbours = new List<Cell>();
+            foreach (var e in Sim.Graph.Neighbours(Sim.PipCell)) neighbours.Add(e.To);
+            var next = CursorNavigator.Move(Sim.View, Sim.PipCell, direction, neighbours)
+                       ?? CursorNavigator.Move(Sim.View, Sim.PipCell, direction, RoutePlanner.Reachable(Sim.Graph, Sim.PipCell));
+            if (next.HasValue)
+            {
+                Cursor = next;
+                if (room != null) room.ShowCursor(Cursor);
+                WalkTo(next.Value);
+            }
+            else if (Sim.Phase == Phase.Idle)
+            {
+                if (pip != null) pip.Shake();
+                if (audio != null) audio.Play(GameEventKind.Unreachable);
+            }
+        }
+
+        public void HoverAtScreenPoint(Vector2 screenPoint)
+        {
+            if (Flow != GameFlow.Playing || Sim == null) return;
+            var hit = NodeNearScreenPoint(screenPoint);
+            if (hit.HasValue && hit.Value != Sim.PipCell && RoutePlanner.Plan(Sim.Graph, Sim.PipCell, hit.Value) != null)
+                Cursor = hit;
+            else
+                Cursor = null;
             if (room != null) room.ShowCursor(Cursor);
         }
 
@@ -172,11 +199,15 @@ namespace Prototypes.DioramaTurn
             var definition = Rooms.All[RoomIndex];
             Sim = new DioramaSimulation(Rooms.Build(RoomIndex), settings.ToTiming(), 0);
 
-            if (room != null) room.Build(Sim.Room);
+            if (room != null)
+            {
+                room.Build(Sim.Room);
+                room.ShowCursor(null);
+                room.ShowReachable(RoutePlanner.Reachable(Sim.Graph, Sim.PipCell));
+            }
             if (star != null) star.Place(Sim.Room.Goal);
             if (ribbons != null) ribbons.ShowJoins(Sim.ScreenJoins(0));
             Cursor = null;
-            if (room != null) room.ShowCursor(null);
             if (rig != null) rig.SnapToView(0);
 
             Flow = GameFlow.Playing;
@@ -205,9 +236,15 @@ namespace Prototypes.DioramaTurn
                 {
                     case GameEventKind.TurnSettled:
                         if (ribbons != null) ribbons.ShowJoins(Sim.ScreenJoins(Sim.View));
+                        if (room != null) room.ShowReachable(RoutePlanner.Reachable(Sim.Graph, Sim.PipCell));
                         if (hud != null) hud.SetTurns(Sim.TurnCount);
                         break;
+                    case GameEventKind.StepTaken:
+                    case GameEventKind.HopTaken:
+                        if (room != null) room.ShowReachable(RoutePlanner.Reachable(Sim.Graph, Sim.PipCell));
+                        break;
                     case GameEventKind.GoalReached:
+                        if (room != null) room.ShowReachable(null);
                         if (pip != null) pip.Cheer();
                         if (music != null) music.Duck();
                         CompleteRoom();

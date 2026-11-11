@@ -73,7 +73,7 @@ namespace Prototypes.DioramaTurn.Tests
         [Test]
         public void Every_room_model_carries_baked_occlusion_that_varies()
         {
-            foreach (var name in new[] { "plinth", "block", "pillar", "goal_pedestal" })
+            foreach (var name in new[] { "plinth", "block", "pillar", "goal_pedestal", "bridge" })
             {
                 string path = $"{ModelFolder}/{name}.glb";
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(path);
