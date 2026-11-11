@@ -9,9 +9,9 @@ You are continuing work on a repository that a previous agent handed over. Do no
 ## Read first, in this order
 1. `AGENTS.md` — the only source of rules for this repository.
 2. `<handover file>` — what is done, what is next, environment notes, what nobody checked.
-3. `<spec>` — the approved spec.
-4. `<plan>` — the approved plan with its task list.
-5. `<the relevant skill>` — for example `.claude/skills/game-build/SKILL.md`, plus its references.
+3. `<spec or plan>` — the approved specification or plan, when one exists.
+4. `<task list>` — the active task list, when one exists.
+5. `<the relevant skill>` — for example `.claude/skills/<skill-name>/SKILL.md`, plus its references.
 
 ## Where the work is
 - Repository: `<absolute path>`
@@ -20,7 +20,7 @@ You are continuing work on a repository that a previous agent handed over. Do no
 - Uncommitted work: `<none | what and why>`
 
 ## What is done
-<What exists, with the checks that prove it. Include exact counts: compile, tests, captures.>
+<What exists, with the checks that prove it. Include exact counts: build, lint, tests, captures.>
 
 ## Your task
 <The next unit of work, in order, with the exact commands. State the stop condition: when this task is done, stop and report.>
@@ -39,7 +39,7 @@ You are continuing work on a repository that a previous agent handed over. Do no
 - <Unverified fact> — check it before relying on it.
 
 ## What nobody has checked
-- <Feel, visuals judged by a person, real hardware, audio quality>
+- <Visual quality, feel, audio, real hardware, production — whatever needs a person>
 
 ## Reporting
 At each stop say: what you built, which checks ran and what they showed, which checks you could not run, and what the person should look at.

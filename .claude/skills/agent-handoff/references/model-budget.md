@@ -50,4 +50,4 @@ Claude Code Pro includes Claude models under usage limits rather than token pric
 - Intervals overlap; a 2-point gap is directional, not certain.
 - Provider curation matters: a model the harness has not tested may behave differently in long tool loops.
 - Prices and scores move; give the date and the source, and re-query rather than trusting an old answer.
-- You cannot hear audio or feel a game; say which judgements are the person's.
+- You cannot hear audio or judge subjective visual quality and feel; say which judgements are the person's.
