@@ -120,14 +120,19 @@ Stage 1 notes (what differed or is still open):
 - `PixelScale.Scale` takes `roomExtentUnits` (10.5) and `maxScale` (4) as tuning, instead of the spec's `targetScale` 3. Same result: 3 at 1080, 2 at 720, 4 at 1440.
 - The simulation emits no `RoomComplete` event. `GoalReached` is the last event, and the game flow (stage 2) shows the card.
 ### Stage 2: playable (plain shapes, one placeholder sprite)
-- [ ] Scene builder with primitives (cubes for blocks and plinth, a coloured quad for the bridge), the camera rig, light, HUD, input. Build the scene twice and compare content.
-- [ ] A first Pip sprite script (three frames) through `run.sh`, to prove the sprite path end to end (JSON reader, tiling and offset, lit quad, shadow). Look at the PNG.
-- [ ] Spikes, each on a capture: pixel scale (is a sprite pixel exactly 3 screen pixels at 1080?), sprite shadow and foot clipping, `LinkRibbons`, tag export.
-- [ ] If decision 1 is approved: the renderer asset and the list entry, and the tilt-shift shader spike on a capture.
+- [x] Scene builder with primitives (cubes for blocks and plinth, a coloured quad for the bridge), the camera rig, light, HUD, input. Build the scene twice and compare content.
+- [x] A first Pip sprite script (three frames) through `run.sh`, to prove the sprite path end to end (JSON reader, tiling and offset, lit quad, shadow). Look at the PNG.
+- [ ] Spikes, each on a capture: pixel scale (is a sprite pixel exactly 3 screen pixels at 1080?), sprite shadow and foot clipping, `LinkRibbons`, tag export. (Tag export passed; tilt-shift pass renders; the rest is open.)
+- [x] If decision 1 is approved: the renderer asset and the list entry, and the tilt-shift shader spike on a capture.
 - [ ] PlayMode tests: scene loads; camera orthographic and exactly on the view angle after each turn; Pip walks to a reachable node and stops; a turn during a walk is refused; each room completes from the solver's witness moves; the next room loads; restart restores the first state.
 - [ ] Capture each room in all four views (`capture.sh camera`), check the room fits the frame and against the layout table.
 - [ ] Run `Tools/unity/check.sh all`.
 - [ ] Commit: `feat(diorama-turn): add playable scene`.
+
+Stage 2 notes (what is done at handoff):
+- The view code, scene builder, renderer asset and tilt-shift pass are written and the scene is built; view 0 renders correctly (plinth, four blocks, star, dotted join ribbon, Pip, HUD) and the tilt-shift is visible.
+- Two capture-found bugs fixed: a `MaterialPropertyBlock` is not saved with a scene, so the Pip sheet texture is now a serialised field rebound on first use; the camera could bake in a transient tiny game-view height during a capture.
+- Deliberate-bug check and PlayMode tests for stage 2 are still to do. The capture-size issue (room renders small in `capture.sh camera` because the tool's render height differs from the game view) is open.
 
 ### Stage 3: look (game-polish, small steps, each judged on a render, a commit per step)
 - [ ] Baseline capture (`screen`) of each room.

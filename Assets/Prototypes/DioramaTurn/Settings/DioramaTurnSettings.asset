@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b07e364d57f1b41e5bf7a7fbf46228c6, type: 3}
+  m_Name: DioramaTurnSettings
+  m_EditorClassIdentifier: DioramaTurn::Prototypes.DioramaTurn.DioramaTurnSettings
+  turn:
+    duration: 0.45
+    overshootDeg: 4
+    queueMax: 1
+  walk:
+    stepTime: 0.22
+    hopTime: 0.35
+    hopHeight: 0.6
+    squash: 0.18
+  rooms:
+    maxX: 5
+    maxY: 5
+    maxZ: 5
+    parTwoStarsExtra: 2
+  camera:
+    pitchDeg: 35.264
+    baseYawDeg: 45
+    pixelsPerUnit: 32
+    maxScale: 4
+    roomExtentUnits: 10.5
+    snapSpritesToPixels: 1
+    distance: 30
+    spritePushToCamera: 0.3
+    referenceHeight: 1080
+    clickRadiusViewport: 0.06
+  light:
+    keyColour: {r: 1, g: 0.941, b: 0.839, a: 1}
+    keyIntensity: 1.1
+    keyPitchDeg: 50
+    keyYawOffsetDeg: -30
+    fillColour: {r: 0.604, g: 0.859, b: 0.91, a: 1}
+    shadowTint: {r: 0.357, g: 0.294, b: 0.541, a: 1}
+    backdropColour: {r: 0.604, g: 0.859, b: 0.91, a: 1}
+    shadowStrength: 0.8
