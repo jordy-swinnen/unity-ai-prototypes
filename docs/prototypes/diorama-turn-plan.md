@@ -1,6 +1,6 @@
 # DioramaTurn: plan and tasks
 
-Plan for `docs/prototypes/diorama-turn.md`. Status: approved (you approved it and decision 1, option 1). Stage 1 is built and its EditMode tests pass (808 of 808); the deliberate-bug check and the stage 1 review are not done. Handed to OpenCode, see `docs/prototypes/diorama-turn-handoff.md`.
+Plan for `docs/prototypes/diorama-turn.md`. Status: approved (you approved it and decision 1, option 1). Stage 1 is done: built, its EditMode tests pass, the deliberate-bug check failed as it should, and `check.sh all` is green (808 EditMode, 69 PlayMode). Being built by OpenCode, see `docs/prototypes/diorama-turn-handoff.md`.
 
 ## Decisions needed first
 1. **Register a renderer in the shared render asset (APPROVED: option 1, the recommended one).** The look needs a tilt-shift blur, which is a full-screen pass on a renderer asset. URP's built-in Depth of Field cannot do it: both its shaders read depth with a perspective-only formula `[read]`, and ours is an orthographic camera. A renderer feature lives on a renderer asset, and `Assets/Settings/PC_RPAsset.asset` holds the list of renderers (`m_RendererDataList`, one entry today). Cameras pick one by index.
@@ -102,20 +102,20 @@ Everything is made by scripts, none by hand, all original. Outputs are never han
 Each stage ends with a stop for review (inside `game-build` and `game-polish` the stage stops run back to back, with a commit per stage, unless a check needs you).
 
 ### Stage 1: greybox (rules and levels, no scene)
-- [ ] Run `Tools/unity/check.sh all` first, so a regression is visible. (Not run before stage 1; the last green run, before this work, was 739 EditMode and 69 PlayMode.)
+- [x] Run `Tools/unity/check.sh all` first, so a regression is visible. (Not run before stage 1; run at the end of stage 1 instead: 808 EditMode, 69 PlayMode, all green.)
 - [x] Create `Assets/Prototypes/DioramaTurn/` with `Scripts`, `Editor`, `Settings`, `Tests/EditMode`, `Tests/PlayMode` and the four assembly definitions; PascalCase, no empty folders, commit every `.meta`.
 - [x] Write EditMode tests first: the join rule table in all four views, view rotation, the parser (bad row length, unknown character, no Start, two Goals), the validator, the join graph, route planning with hops and unreachable, the solver on small hand-made rooms, the cursor, the stars, the pixel-scale maths, the sheet JSON reader.
 - [x] Write the rules until they pass. `Tools/unity/check.sh editmode`.
 - [x] Write `DioramaSimulation` tests first (turn refused while walking, one queued turn, Pip keeps its node, events in order, goal ends the room, restart), then the class.
 - [x] Design the three rooms as text maps. Tests: each passes the validator, is solvable, is not solvable with zero turns, and par equals the solver's minimum (room 1: par 1, room 2: par 2 or 3, room 3: par 4 to 6, with one dead-end join).
 - [x] The settings class with range clamps and tests (`DioramaTurnSettings`). The asset itself is created by the scene builder in stage 2, so `Settings/` does not exist yet (no empty folders).
-- [ ] Deliberate-bug check: break the join rule (flip one depth step sign), see tests fail, restore.
-- [ ] Commit: `feat(diorama-turn): add rules, rooms and solver with EditMode tests`.
+- [x] Deliberate-bug check: break the join rule (flip one depth step sign), see tests fail, restore.
+- [x] Commit: `feat(diorama-turn): add rules, rooms and solver with EditMode tests`. (The WIP commit `b69b985` already carries the code; this stage closed with the check run and this tick.)
 
 
 Stage 1 notes (what differed or is still open):
-- The starting full check was not run before stage 1 (the repository was green at the last run, 739 EditMode and 69 PlayMode, before this work). After stage 1: EditMode 808 of 808 pass. PlayMode was not re-run (the DioramaTurn PlayMode assembly has no tests yet).
-- Still to do for stage 1: the deliberate-bug check (flip one depth-step sign in `ViewRule`, see `JoinRuleTests` and `RoomsTests` fail, restore), then `Tools/unity/check.sh all`, then the stage 1 commit message is already used as a WIP commit.
+- The starting full check was not run before stage 1 (the repository was green at the last run, 739 EditMode and 69 PlayMode, before this work). After stage 1: EditMode 808 of 808 pass, PlayMode 69 of 69 pass (`check.sh all`).
+- Deliberate-bug check done by OpenCode on 2026-11-11: view 0's depth step flipped from (1,1,1) to (-1,1,1) in `ViewRule`. 12 tests failed (join rule table, depth steps, validator, cursor, rooms' validity and par, solver witness moves, simulation, routing) and 796 passed. Restored, and the full run is green again.
 - The three rooms were found with a throwaway Python search of the join rule and solver (islands of 1 to 3 blocks, validity and par checked), then pasted into `Rooms.cs` and re-checked by the C# solver in tests. Room 1 par 1 (4 pieces), room 2 par 2 (5 pieces, one bridge), room 3 par 5 (8 pieces, two bridges). They are small and sparse on purpose for the greybox; the "dead-end join" for room 3 is NOT proven (the search only checked par, and that the first view already offers joins). A person should solve all three in the play test and say if room 3 needs a decoy.
 - `PixelScale.Scale` takes `roomExtentUnits` (10.5) and `maxScale` (4) as tuning, instead of the spec's `targetScale` 3. Same result: 3 at 1080, 2 at 720, 4 at 1440.
 - The simulation emits no `RoomComplete` event. `GoalReached` is the last event, and the game flow (stage 2) shows the card.
