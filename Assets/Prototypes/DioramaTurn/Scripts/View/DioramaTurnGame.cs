@@ -19,6 +19,7 @@ namespace Prototypes.DioramaTurn
         public LinkRibbons ribbons;
         public Hud hud;
         public DioramaInput input;
+        public DioramaAudio audio;
 
         [System.NonSerialized] public bool autoStep = true;
 
@@ -77,7 +78,7 @@ namespace Prototypes.DioramaTurn
         public void WalkTo(Cell target)
         {
             if (Flow != GameFlow.Playing || Sim == null) return;
-            Sim.PickNode(target);
+            if (Sim.PickNode(target) && audio != null) audio.Tap();
             DrainEvents();
         }
 
@@ -184,6 +185,7 @@ namespace Prototypes.DioramaTurn
                 hud.SetTurns(0);
             }
             if (pip != null) pip.SnapTo(Sim);
+            if (audio != null) audio.Pop();
         }
 
         void FollowCamera()
@@ -197,6 +199,7 @@ namespace Prototypes.DioramaTurn
         {
             foreach (var e in Sim.DrainEvents())
             {
+                if (audio != null) audio.Play(e.Kind);
                 switch (e.Kind)
                 {
                     case GameEventKind.TurnSettled:
@@ -221,6 +224,7 @@ namespace Prototypes.DioramaTurn
             var definition = Rooms.All[RoomIndex];
             int stars = Stars.For(Sim.TurnCount, definition.Par, settings.rooms.parTwoStarsExtra);
             if (hud != null) hud.ShowComplete(definition.Name, Sim.TurnCount, definition.Par, stars);
+            if (audio != null) audio.Chime();
 
             float slow = Feel.SlowMoScale(settings.feel.goalSlowMo, settings.feel.effectStrength);
             if (slow < 1f)

@@ -88,10 +88,11 @@ namespace Prototypes.DioramaTurn.Editor
             var pip = BuildPip(settings, room, spriteMaterial, pipTexture, pipJson);
             var star = BuildStar(settings, rig, spriteMaterial, starTexture, starJson);
             var hud = BuildHud(settings);
+            var audio = BuildAudio(settings);
             BuildVolume(settings);
             ApplyTiltSettings(settings);
             BuildEventSystem();
-            var game = BuildGame(settings, rig, room, pip, star, ribbons, hud);
+            var game = BuildGame(settings, rig, room, pip, star, ribbons, hud, audio);
 
             // A preview of room 0 in view 0, so the scene is not empty before Play (Start rebuilds it).
             var preview = Rooms.Build(0);
@@ -208,7 +209,7 @@ namespace Prototypes.DioramaTurn.Editor
         }
 
         static DioramaTurnGame BuildGame(DioramaTurnSettings settings, CameraRig rig, RoomView room, PipView pip,
-            StarView star, LinkRibbons ribbons, Hud hud)
+            StarView star, LinkRibbons ribbons, Hud hud, DioramaAudio audio)
         {
             var go = new GameObject("Game");
             var game = go.AddComponent<DioramaTurnGame>();
@@ -219,11 +220,53 @@ namespace Prototypes.DioramaTurn.Editor
             game.star = star;
             game.ribbons = ribbons;
             game.hud = hud;
+            game.audio = audio;
             var input = go.AddComponent<DioramaInput>();
             input.game = game;
             game.input = input;
             pip.rig = rig;
             return game;
+        }
+
+        /// <summary>The generated sounds, one one-shot source.</summary>
+        static DioramaAudio BuildAudio(DioramaTurnSettings settings)
+        {
+            var go = new GameObject("Audio");
+            var audio = go.AddComponent<DioramaAudio>();
+            audio.settings = settings;
+
+            var sourceGo = new GameObject("Sfx");
+            sourceGo.transform.SetParent(go.transform, false);
+            var source = sourceGo.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            audio.source = source;
+
+            audio.turnWhoosh = Clip("turn_whoosh");
+            audio.turnClunk = Clip("turn_clunk");
+            audio.joinUp = Clip("join_up");
+            audio.joinDown = Clip("join_down");
+            audio.tapPluck = Clip("tap_pluck");
+            audio.stepA = Clip("step_a");
+            audio.stepB = Clip("step_b");
+            audio.hopBoing = Clip("hop_boing");
+            audio.landing = Clip("landing");
+            audio.bonk = Clip("bonk");
+            audio.tick = Clip("tick");
+            audio.starArpeggio = Clip("star_arpeggio");
+            audio.starChime = Clip("star_chime");
+            audio.pop = Clip("pop");
+            audio.restart = Clip("restart");
+            return audio;
+        }
+
+        static AudioClip Clip(string name)
+        {
+            string path = $"{Root}/Audio/{name}.wav";
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            if (clip == null)
+                throw new System.InvalidOperationException($"Missing sound: {path}. Run Tools/audio/DioramaTurn/make_sounds.py first.");
+            return clip;
         }
 
         static void BuildEventSystem()

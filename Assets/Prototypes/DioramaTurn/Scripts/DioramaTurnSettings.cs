@@ -88,6 +88,15 @@ namespace Prototypes.DioramaTurn
         [Tooltip("How long the goal slow motion lasts.")] public float goalSlowMoSeconds = 0.5f;
     }
 
+    [Serializable]
+    public class AudioSettings
+    {
+        [Range(0f, 1f)] public float master = 0.8f;
+        [Range(0f, 1f)] public float sfx = 0.8f;
+        [Tooltip("Music is rendered later by the FluidSynth pipeline; the value is kept here for it.")]
+        [Range(0f, 1f)] public float music = 0.35f;
+    }
+
     /// <summary>Every tuning value of DioramaTurn. A value is never written into code.</summary>
     [CreateAssetMenu(menuName = "Prototypes/DioramaTurn/Settings")]
     public sealed class DioramaTurnSettings : ScriptableObject
@@ -100,6 +109,7 @@ namespace Prototypes.DioramaTurn
         public LookSettings look = new LookSettings();
         public PostSettings post = new PostSettings();
         public FeelSettings feel = new FeelSettings();
+        public AudioSettings audio = new AudioSettings();
 
         void OnValidate() => Clamp();
 
@@ -143,6 +153,9 @@ namespace Prototypes.DioramaTurn
             feel.effectStrength = Mathf.Clamp01(feel.effectStrength);
             feel.goalSlowMo = Mathf.Clamp(feel.goalSlowMo, 0.05f, 1f);
             feel.goalSlowMoSeconds = Mathf.Clamp(feel.goalSlowMoSeconds, 0f, 3f);
+            audio.master = Mathf.Clamp01(audio.master);
+            audio.sfx = Mathf.Clamp01(audio.sfx);
+            audio.music = Mathf.Clamp01(audio.music);
         }
 
         public SimulationTiming ToTiming() => new SimulationTiming(turn.duration, walk.stepTime, walk.hopTime, turn.queueMax);

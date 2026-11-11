@@ -206,6 +206,8 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.IsNotNull(game.ribbons);
             Assert.IsNotNull(game.hud);
             Assert.IsNotNull(game.input);
+            Assert.IsNotNull(game.audio);
+            Assert.IsNotNull(game.audio.source);
             Assert.AreEqual(game, game.input.game);
             Assert.AreSame(game.rig, game.pip.rig);
             Assert.AreSame(game.room, game.pip.room);
