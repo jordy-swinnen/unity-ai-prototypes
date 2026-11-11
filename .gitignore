@@ -122,3 +122,6 @@ InitTestScene*.unity*
 
 # Python bytecode from the tooling scripts
 __pycache__/
+
+# APM dependencies
+apm_modules/
