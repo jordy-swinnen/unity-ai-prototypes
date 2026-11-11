@@ -22,6 +22,8 @@ namespace Prototypes.DioramaTurn
 
         [System.NonSerialized] public bool autoStep = true;
 
+        float slowMoLeft;
+
         public GameFlow Flow { get; private set; }
         public DioramaSimulation Sim { get; private set; }
         public int RoomIndex { get; private set; }
@@ -45,6 +47,11 @@ namespace Prototypes.DioramaTurn
 
         void Update()
         {
+            if (slowMoLeft > 0f)
+            {
+                slowMoLeft -= Time.unscaledDeltaTime;
+                if (slowMoLeft <= 0f) Time.timeScale = 1f;
+            }
             if (autoStep) Step(Time.deltaTime);
         }
 
@@ -76,8 +83,8 @@ namespace Prototypes.DioramaTurn
         {
             if (Flow != GameFlow.Playing || Sim == null) return;
             Sim.Restart();
-            Cursor = Sim.Room.Start;
-            if (room != null) room.ShowCursor(Cursor);
+            Cursor = null;
+            if (room != null) room.ShowCursor(null);
             if (hud != null) hud.SetTurns(Sim.TurnCount);
             if (pip != null) pip.SnapTo(Sim);
             DrainEvents();
@@ -155,6 +162,8 @@ namespace Prototypes.DioramaTurn
 
         void BeginRoom(int index)
         {
+            Time.timeScale = 1f;
+            slowMoLeft = 0f;
             RoomIndex = Mathf.Clamp(index, 0, Rooms.All.Count - 1);
             var definition = Rooms.All[RoomIndex];
             Sim = new DioramaSimulation(Rooms.Build(RoomIndex), settings.ToTiming(), 0);
@@ -162,8 +171,8 @@ namespace Prototypes.DioramaTurn
             if (room != null) room.Build(Sim.Room);
             if (star != null) star.Place(Sim.Room.Goal);
             if (ribbons != null) ribbons.ShowJoins(Sim.ScreenJoins(0));
-            Cursor = Sim.Room.Start;
-            if (room != null) room.ShowCursor(Cursor);
+            Cursor = null;
+            if (room != null) room.ShowCursor(null);
             if (rig != null) rig.SnapToView(0);
 
             Flow = GameFlow.Playing;
@@ -206,6 +215,13 @@ namespace Prototypes.DioramaTurn
             var definition = Rooms.All[RoomIndex];
             int stars = Stars.For(Sim.TurnCount, definition.Par, settings.rooms.parTwoStarsExtra);
             if (hud != null) hud.ShowComplete(definition.Name, Sim.TurnCount, definition.Par, stars);
+
+            float slow = Feel.SlowMoScale(settings.feel.goalSlowMo, settings.feel.effectStrength);
+            if (slow < 1f)
+            {
+                Time.timeScale = slow;
+                slowMoLeft = settings.feel.goalSlowMoSeconds;
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Prototypes.DioramaTurn
 {
-    /// <summary>Draws one dotted ribbon per screen join of the current view. Stage 2: a dotted line, no texture.</summary>
+    /// <summary>Draws one dotted ribbon per screen join of the current view: small diamonds along the link.</summary>
     public sealed class LinkRibbons : MonoBehaviour
     {
         public DioramaTurnSettings settings;
@@ -12,9 +11,9 @@ namespace Prototypes.DioramaTurn
         public Material ribbonMaterial;
 
         GameObject root;
-        readonly List<LineRenderer> lines = new List<LineRenderer>();
+        int joinCount;
 
-        public int Count => lines.Count;
+        public int Count => joinCount;
 
         public void ShowJoins(IEnumerable<(Cell A, Cell B)> joins)
         {
@@ -25,48 +24,38 @@ namespace Prototypes.DioramaTurn
             int index = 0;
             foreach (var (a, b) in joins)
             {
-                var line = new GameObject($"Join {index++}").AddComponent<LineRenderer>();
-                line.transform.SetParent(root.transform, false);
-                Configure(line);
-                var from = RoomView.TopFace(a) + Vector3.up * 0.2f;
-                var to = RoomView.TopFace(b) + Vector3.up * 0.2f;
-                line.positionCount = 33;
-                for (int i = 0; i <= 32; i++) line.SetPosition(i, Vector3.Lerp(from, to, i / 32f));
-                lines.Add(line);
+                var from = RoomView.TopFace(a) + Vector3.up * 0.24f;
+                var to = RoomView.TopFace(b) + Vector3.up * 0.24f;
+                float length = Vector3.Distance(from, to);
+                int dots = Mathf.Clamp(Mathf.RoundToInt(length / 0.2f), 2, 24);
+                for (int i = 0; i <= dots; i++)
+                {
+                    var dot = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    dot.name = $"Join {index} dot {i}";
+                    dot.transform.SetParent(root.transform, false);
+                    dot.transform.position = Vector3.Lerp(from, to, i / (float)dots);
+                    dot.transform.localScale = Vector3.one * 0.07f;
+                    dot.transform.localRotation = Quaternion.Euler(45f, 45f, 45f);
+                    var collider = dot.GetComponent<Collider>();
+                    if (collider != null) Kill(collider);
+                    dot.GetComponent<Renderer>().sharedMaterial = ribbonMaterial;
+                }
+                index++;
             }
+            joinCount = index;
         }
 
         public void Clear()
         {
-            if (root != null)
-            {
-                if (Application.isPlaying) Destroy(root);
-                else DestroyImmediate(root);
-            }
+            if (root != null) Kill(root);
             root = null;
-            lines.Clear();
+            joinCount = 0;
         }
 
-        void Configure(LineRenderer line)
+        static void Kill(Object target)
         {
-            if (ribbonMaterial != null) line.sharedMaterial = ribbonMaterial;
-            line.useWorldSpace = true;
-            line.widthMultiplier = 0.08f;
-            line.widthCurve = Beads();
-            line.numCapVertices = 0;
-            line.numCornerVertices = 0;
-            line.shadowCastingMode = ShadowCastingMode.Off;
-            line.receiveShadows = false;
-        }
-
-        /// <summary>A width curve that goes full width and to nothing, so the line reads as dots.</summary>
-        static AnimationCurve Beads()
-        {
-            const int keys = 24;
-            var frames = new Keyframe[keys + 1];
-            for (int i = 0; i <= keys; i++)
-                frames[i] = new Keyframe(i / (float)keys, i % 2 == 0 ? 1f : 0f);
-            return new AnimationCurve(frames);
+            if (Application.isPlaying) Destroy(target);
+            else DestroyImmediate(target);
         }
     }
 }

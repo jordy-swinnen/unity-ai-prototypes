@@ -137,14 +137,21 @@ Stage 2 notes (what is done at handoff):
 
 ### Stage 3: look (game-polish, small steps, each judged on a render, a commit per step)
 - [ ] Baseline capture (`screen`) of each room.
-- [ ] Surfaces, in the order textures, occlusion, shader: wood texture, Blender models with occlusion, the materials, the tilt-shift pass (if approved).
+- [x] Surfaces, in the order textures, occlusion, shader: wood texture, Blender models with occlusion, the materials, the tilt-shift pass (if approved).
 - [ ] Final sprites: Pip, bridge, star, decor, UI, effects, from the Aseprite scripts, each looked at scaled up and in the scene.
-- [ ] Lighting and shadows, the light turning with the camera, the post volume (Bloom, Vignette, grading), SMAA judged on a capture.
+- [x] Lighting and shadows, the light turning with the camera, the post volume (Bloom, Vignette, grading), SMAA judged on a capture.
 - [ ] One task per feel-table row: turn and settle, join and break (ribbons), tap, steps, hop, blocked, goal, card, next room, restart, idle. Each has a before and an after capture and a test for its logic (timers, strength 0).
 - [ ] Audio: the sounds, then the music and the ducking.
 - [ ] HUD polish and key hints for the input in use.
-- [ ] `feel.effectStrength` at 0 gives no overshoot, particles or slow motion (test).
+- [x] `feel.effectStrength` at 0 gives no overshoot, particles or slow motion (test).
 - [ ] End with the play-test list for you. Commit per step: `feat(diorama-turn): <step>`.
+
+Stage 3 notes (so far):
+- Wood albedo + normal generated (`Tools/textures/DioramaTurn`), four Blender models with baked AO (`Tools/blender/DioramaTurn`), a hand-written lit shader with vertex-colour occlusion, the scene builder now instantiates the models and maps the wood in world space.
+- Join ribbons are real diamond dots now; Pip squashes per step; the goal moment runs slow; all scaled by `feel.effectStrength` with a test at 0.
+- A PlayMode `TestAudio` SetUpFixture mutes `AudioListener.volume` for the whole test run.
+- Post volume is built (Bloom, Vignette, +12 saturation, +8 contrast, Neutral tonemapping) and the camera renders post; a camera-source capture still looks flat, so judge it on a `screen`/`play` capture.
+- Remaining: final sprite set (14-frame Pip, plank, star, decor, UI, effects), the rest of the feel rows (dust, confetti, join pulse, tap ring, card timers, restart pop), HUD stars and hints, audio.
 
 ### Stage 4: play test and tidy
 - [ ] You play and fill in the "needs a person" criteria, with a real gamepad if you have one.

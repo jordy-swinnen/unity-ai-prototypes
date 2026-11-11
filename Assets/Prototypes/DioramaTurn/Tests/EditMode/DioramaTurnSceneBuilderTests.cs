@@ -94,8 +94,45 @@ namespace Prototypes.DioramaTurn.Tests
                 Assert.AreEqual(Vector3.one, go.transform.localScale);
             }
             var plinth = Find("Plinth");
-            Assert.AreEqual(-0.8f, plinth.transform.position.y, Tol);
-            Assert.AreEqual(7f, plinth.transform.localScale.x, Tol);
+            Assert.AreEqual(-1.1f, plinth.transform.position.y, Tol, "the model's origin is its bottom");
+            Assert.AreEqual(Vector3.one, plinth.transform.localScale);
+        }
+
+        [Test]
+        public void The_room_uses_the_surface_shader_and_the_plinth_carries_the_wood_textures()
+        {
+            var plinthMaterial = Find("Plinth").GetComponentInChildren<Renderer>().sharedMaterial;
+            Assert.AreEqual(DioramaTurnSceneBuilder.SurfaceShaderName, plinthMaterial.shader.name);
+            Assert.IsNotNull(plinthMaterial.GetTexture("_BaseMap"), "the plinth has the wood albedo");
+            Assert.IsNotNull(plinthMaterial.GetTexture("_NormalMap"), "the plinth has the wood normal");
+            Assert.AreEqual(1f, plinthMaterial.GetFloat("_WorldMapping"), "the plinth maps in world space");
+
+            var start = Rooms.Build(0).Start;
+            var blockMaterial = Find($"Start {start}").GetComponentInChildren<Renderer>().sharedMaterial;
+            Assert.AreEqual(DioramaTurnSceneBuilder.SurfaceShaderName, blockMaterial.shader.name);
+            Assert.AreEqual(0f, blockMaterial.GetFloat("_TextureStrength"), "blocks are flat painted colour");
+            Assert.Greater(blockMaterial.GetFloat("_AoStrength"), 0f, "the baked occlusion is on");
+        }
+
+        [Test]
+        public void The_post_volume_holds_bloom_vignette_grading_and_neutral_tonemapping()
+        {
+            var go = Find("Post Volume");
+            var volume = go.GetComponent<UnityEngine.Rendering.Volume>();
+            Assert.IsNotNull(volume);
+            Assert.IsTrue(volume.isGlobal);
+            Assert.IsNotNull(volume.sharedProfile);
+            Assert.IsTrue(volume.sharedProfile.TryGet(out UnityEngine.Rendering.Universal.Bloom bloom));
+            Assert.AreEqual(settings.post.bloomIntensity, bloom.intensity.value, Tol);
+            Assert.IsTrue(volume.sharedProfile.TryGet(out UnityEngine.Rendering.Universal.Vignette vignette));
+            Assert.AreEqual(settings.post.vignette, vignette.intensity.value, Tol);
+            Assert.IsTrue(volume.sharedProfile.TryGet(out UnityEngine.Rendering.Universal.ColorAdjustments colour));
+            Assert.AreEqual(settings.post.saturation, colour.saturation.value, Tol);
+            Assert.IsTrue(volume.sharedProfile.TryGet(out UnityEngine.Rendering.Universal.Tonemapping tonemapping));
+            Assert.AreEqual(UnityEngine.Rendering.Universal.TonemappingMode.Neutral, tonemapping.mode.value);
+
+            var camera = Find("Main Camera").GetComponent<Camera>();
+            Assert.IsTrue(Find("Main Camera").GetComponent<UniversalAdditionalCameraData>().renderPostProcessing);
         }
 
         [Test]

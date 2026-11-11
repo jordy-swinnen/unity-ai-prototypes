@@ -54,30 +54,40 @@ namespace Prototypes.DioramaTurn.Editor
 
             var blockMaterials = new[]
             {
-                Surface("Block Tomato", "#FF5A4F", 0.45f),
-                Surface("Block Sun", "#FFC83D", 0.45f),
-                Surface("Block Mint", "#4CCB9B", 0.45f),
-                Surface("Block Sky", "#4C9BFF", 0.45f),
+                Surface(settings, "Block Tomato", "#FF5A4F", 0.45f),
+                Surface(settings, "Block Sun", "#FFC83D", 0.45f),
+                Surface(settings, "Block Mint", "#4CCB9B", 0.45f),
+                Surface(settings, "Block Sky", "#4C9BFF", 0.45f),
             };
-            var startMaterial = Surface("Start Mint", "#4CCB9B", 0.45f);
-            var goalMaterial = Surface("Goal Blue", "#4C9BFF", 0.45f);
-            var plinthMaterial = Surface("Plinth Wood", "#C98B5A", 0.2f);
-            var bridgeMaterial = Surface("Plank Wood", "#E8B67A", 0.3f);
+            var startMaterial = Surface(settings, "Start Mint", "#4CCB9B", 0.45f);
+            var goalMaterial = Surface(settings, "Goal Blue", "#4C9BFF", 0.45f);
+            var woodAlbedo = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Textures/wood_albedo.png");
+            var woodNormal = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Textures/wood_normal.png");
+            var plinthMaterial = Surface(settings, "Plinth Wood", "#C98B5A", 0.2f, woodAlbedo, woodNormal, world: true);
+            var bridgeMaterial = Surface(settings, "Plank Wood", "#E8B67A", 0.3f, woodAlbedo, woodNormal, world: true);
             var cursorMaterial = Unlit("Cursor", "#3B2A4D", 0.55f);
             var ribbonMaterial = Unlit("Ribbon", "#FFF6B0", 1f);
             var starMaterial = Emissive("Goal Star", "#FFD93B");
             var spriteMaterial = SpriteMaterial();
+
+            var plinthModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/plinth.glb");
+            var blockModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/block.glb");
+            var pillarModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/pillar.glb");
+            var goalModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/goal_pedestal.glb");
 
             var pipTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(SpritePath);
             var pipJson = AssetDatabase.LoadAssetAtPath<TextAsset>(SpriteJsonPath);
 
             var rig = BuildCamera(settings, rendererIndex, out var camera);
             BuildLight(settings, rig);
-            var room = BuildRoom(settings, blockMaterials, startMaterial, goalMaterial, plinthMaterial, bridgeMaterial, cursorMaterial);
+            var room = BuildRoom(settings, blockMaterials, startMaterial, goalMaterial, plinthMaterial, bridgeMaterial,
+                cursorMaterial, plinthModel, blockModel, goalModel, pillarModel);
             var ribbons = BuildRibbons(settings, room, ribbonMaterial);
             var pip = BuildPip(settings, room, spriteMaterial, pipTexture, pipJson);
             var star = BuildStar(settings, starMaterial);
             var hud = BuildHud(settings);
+            BuildVolume(settings);
+            ApplyTiltSettings(settings);
             BuildEventSystem();
             var game = BuildGame(settings, rig, room, pip, star, ribbons, hud);
 
@@ -118,6 +128,7 @@ namespace Prototypes.DioramaTurn.Editor
             var data = go.AddComponent<UniversalAdditionalCameraData>();
             data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
             data.antialiasingQuality = AntialiasingQuality.Medium;
+            data.renderPostProcessing = true;
             data.SetRenderer(rendererIndex);
 
             var rig = go.AddComponent<CameraRig>();
@@ -139,7 +150,8 @@ namespace Prototypes.DioramaTurn.Editor
         }
 
         static RoomView BuildRoom(DioramaTurnSettings settings, Material[] blocks, Material start, Material goal,
-            Material plinth, Material bridge, Material cursor)
+            Material plinth, Material bridge, Material cursor, GameObject plinthModel, GameObject blockModel,
+            GameObject goalModel, GameObject pillarModel)
         {
             var go = new GameObject("Room");
             var view = go.AddComponent<RoomView>();
@@ -150,6 +162,10 @@ namespace Prototypes.DioramaTurn.Editor
             view.plinthMaterial = plinth;
             view.bridgeMaterial = bridge;
             view.cursorMaterial = cursor;
+            view.plinthModel = plinthModel;
+            view.blockModel = blockModel;
+            view.goalModel = goalModel;
+            view.pillarModel = pillarModel;
             return view;
         }
 
@@ -215,6 +231,47 @@ namespace Prototypes.DioramaTurn.Editor
             var go = new GameObject("EventSystem");
             go.AddComponent<EventSystem>();
             go.AddComponent<InputSystemUIInputModule>();
+        }
+
+        /// <summary>The post volume: Bloom, Vignette, warm grading and Neutral tonemapping.</summary>
+        static void BuildVolume(DioramaTurnSettings settings)
+        {
+            string path = Root + "/Settings/DioramaTurnVolumeProfile.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(path);
+            if (profile == null)
+            {
+                profile = ScriptableObject.CreateInstance<VolumeProfile>();
+                AssetDatabase.CreateAsset(profile, path);
+            }
+            if (!profile.TryGet(out Bloom bloom)) bloom = profile.Add<Bloom>(true);
+            bloom.intensity.Override(settings.post.bloomIntensity);
+            bloom.threshold.Override(settings.post.bloomThreshold);
+            if (!profile.TryGet(out Vignette vignette)) vignette = profile.Add<Vignette>(true);
+            vignette.intensity.Override(settings.post.vignette);
+            vignette.smoothness.Override(0.5f);
+            if (!profile.TryGet(out ColorAdjustments colour)) colour = profile.Add<ColorAdjustments>(true);
+            colour.saturation.Override(settings.post.saturation);
+            colour.contrast.Override(settings.post.contrast);
+            if (!profile.TryGet(out Tonemapping tonemapping)) tonemapping = profile.Add<Tonemapping>(true);
+            tonemapping.mode.Override(TonemappingMode.Neutral);
+            EditorUtility.SetDirty(profile);
+
+            var go = new GameObject("Post Volume");
+            var volume = go.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.priority = 1f;
+            volume.sharedProfile = profile;
+        }
+
+        /// <summary>Pushes the tilt-shift band and blur from the settings onto the feature's material.</summary>
+        static void ApplyTiltSettings(DioramaTurnSettings settings)
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(RendererSetup.MaterialPath);
+            if (material == null) return;
+            material.SetFloat("_BandCentre", settings.post.tiltBandCentre);
+            material.SetFloat("_BandHalfHeight", settings.post.tiltBandHalfHeight);
+            material.SetFloat("_BlurStrength", settings.post.tiltBlur);
+            EditorUtility.SetDirty(material);
         }
 
         // --- HUD ---
@@ -355,19 +412,30 @@ namespace Prototypes.DioramaTurn.Editor
 
         // --- materials ---
 
-        static Material Surface(string name, string hex, float smoothness)
+        public const string SurfaceShaderName = "Prototypes/DioramaTurn/Lit";
+
+        static Material Surface(DioramaTurnSettings settings, string name, string hex, float smoothness,
+            Texture2D albedo = null, Texture2D normal = null, bool world = false)
         {
             ColorUtility.TryParseHtmlString(hex, out var colour);
             string path = $"{MaterialFolder}/{name.Replace(" ", string.Empty)}.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (material == null)
             {
-                material = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = name };
+                material = new Material(Shader.Find(SurfaceShaderName)) { name = name };
                 AssetDatabase.CreateAsset(material, path);
             }
+            material.shader = Shader.Find(SurfaceShaderName);
             material.SetColor("_BaseColor", colour);
             material.SetFloat("_Smoothness", smoothness);
             material.SetFloat("_Metallic", 0f);
+            material.SetFloat("_AoStrength", settings.look.occlusion);
+            material.SetFloat("_TextureStrength", albedo != null ? settings.look.woodTexture : 0f);
+            material.SetFloat("_NormalStrength", normal != null ? settings.look.woodNormal : 0f);
+            material.SetFloat("_MapScale", settings.look.woodScale);
+            material.SetFloat("_WorldMapping", world ? 1f : 0f);
+            if (albedo != null) material.SetTexture("_BaseMap", albedo);
+            if (normal != null) material.SetTexture("_NormalMap", normal);
             EditorUtility.SetDirty(material);
             return material;
         }

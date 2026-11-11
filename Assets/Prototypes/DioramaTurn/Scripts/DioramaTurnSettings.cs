@@ -57,6 +57,37 @@ namespace Prototypes.DioramaTurn
         public float shadowStrength = 0.8f;
     }
 
+    [Serializable]
+    public class LookSettings
+    {
+        [Tooltip("Baked occlusion strength on the lit shader (0 turns it off).")] public float occlusion = 0.6f;
+        [Tooltip("Wood texture strength (0 turns it off).")] public float woodTexture = 1f;
+        [Tooltip("Wood normal strength.")] public float woodNormal = 0.5f;
+        [Tooltip("Wood repeats per metre.")] public float woodScale = 0.35f;
+    }
+
+    [Serializable]
+    public class PostSettings
+    {
+        public float bloomIntensity = 0.35f;
+        public float bloomThreshold = 1f;
+        public float vignette = 0.2f;
+        [Tooltip("Screen fraction kept sharp by the tilt-shift pass.")] public float tiltBandCentre = 0.5f;
+        public float tiltBandHalfHeight = 0.28f;
+        public float tiltBlur = 1f;
+        [Tooltip("Colour grading, in -100..100 like the Volume component.")] public float saturation = 12f;
+        public float contrast = 8f;
+    }
+
+    [Serializable]
+    public class FeelSettings
+    {
+        [Tooltip("Scales the overshoot, the squash, particles and the goal slow motion. 0 turns them all off.")]
+        [Range(0f, 1f)] public float effectStrength = 1f;
+        [Tooltip("How slow the goal moment runs.")] public float goalSlowMo = 0.4f;
+        [Tooltip("How long the goal slow motion lasts.")] public float goalSlowMoSeconds = 0.5f;
+    }
+
     /// <summary>Every tuning value of DioramaTurn. A value is never written into code.</summary>
     [CreateAssetMenu(menuName = "Prototypes/DioramaTurn/Settings")]
     public sealed class DioramaTurnSettings : ScriptableObject
@@ -66,6 +97,9 @@ namespace Prototypes.DioramaTurn
         public RoomSettings rooms = new RoomSettings();
         public CameraSettings camera = new CameraSettings();
         public LightSettings light = new LightSettings();
+        public LookSettings look = new LookSettings();
+        public PostSettings post = new PostSettings();
+        public FeelSettings feel = new FeelSettings();
 
         void OnValidate() => Clamp();
 
@@ -94,6 +128,21 @@ namespace Prototypes.DioramaTurn
             light.keyPitchDeg = Mathf.Clamp(light.keyPitchDeg, 5f, 89f);
             light.keyYawOffsetDeg = Mathf.Clamp(light.keyYawOffsetDeg, -180f, 180f);
             light.shadowStrength = Mathf.Clamp01(light.shadowStrength);
+            look.occlusion = Mathf.Clamp01(look.occlusion);
+            look.woodTexture = Mathf.Clamp01(look.woodTexture);
+            look.woodNormal = Mathf.Clamp(look.woodNormal, 0f, 2f);
+            look.woodScale = Mathf.Clamp(look.woodScale, 0.05f, 2f);
+            post.bloomIntensity = Mathf.Clamp(post.bloomIntensity, 0f, 8f);
+            post.bloomThreshold = Mathf.Clamp(post.bloomThreshold, 0f, 4f);
+            post.vignette = Mathf.Clamp01(post.vignette);
+            post.tiltBandCentre = Mathf.Clamp01(post.tiltBandCentre);
+            post.tiltBandHalfHeight = Mathf.Clamp(post.tiltBandHalfHeight, 0.02f, 0.5f);
+            post.tiltBlur = Mathf.Clamp(post.tiltBlur, 0f, 3f);
+            post.saturation = Mathf.Clamp(post.saturation, -100f, 100f);
+            post.contrast = Mathf.Clamp(post.contrast, -100f, 100f);
+            feel.effectStrength = Mathf.Clamp01(feel.effectStrength);
+            feel.goalSlowMo = Mathf.Clamp(feel.goalSlowMo, 0.05f, 1f);
+            feel.goalSlowMoSeconds = Mathf.Clamp(feel.goalSlowMoSeconds, 0f, 3f);
         }
 
         public SimulationTiming ToTiming() => new SimulationTiming(turn.duration, walk.stepTime, walk.hopTime, turn.queueMax);

@@ -37,6 +37,7 @@ namespace Prototypes.DioramaTurn.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            Time.timeScale = 1f;
             if (keyboard != null)
             {
                 InputSystem.RemoveDevice(keyboard);

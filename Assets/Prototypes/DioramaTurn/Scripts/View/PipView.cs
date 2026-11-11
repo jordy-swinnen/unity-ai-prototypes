@@ -34,6 +34,16 @@ namespace Prototypes.DioramaTurn
             quad.Place(feet, push, settings.camera.spritePushToCamera);
             quad.Face(rig != null ? rig.Yaw : 45f);
             quad.ShowFrame(frame);
+            if (sim.Phase == Phase.Walking)
+            {
+                float squash = Feel.Squash(settings.walk.squash, settings.feel.effectStrength);
+                float pinched = 1f - squash * Mathf.Sin(sim.StepProgress * Mathf.PI);
+                quad.transform.localScale = new Vector3(quad.size.x, quad.size.y * pinched, 1f);
+            }
+            else
+            {
+                quad.transform.localScale = new Vector3(quad.size.x, quad.size.y, 1f);
+            }
         }
 
         public void SnapTo(DioramaSimulation sim) => Show(sim, 0f);

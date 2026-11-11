@@ -12,6 +12,10 @@ namespace Prototypes.DioramaTurn
         public Material plinthMaterial;
         public Material bridgeMaterial;
         public Material cursorMaterial;
+        [Tooltip("Blender models; when missing a primitive cube stands in.")] public GameObject plinthModel;
+        public GameObject blockModel;
+        public GameObject goalModel;
+        public GameObject pillarModel;
 
         GameObject root;
         GameObject cursor;
@@ -32,7 +36,7 @@ namespace Prototypes.DioramaTurn
             root = new GameObject("Pieces");
             root.transform.SetParent(transform, false);
 
-            Cube("Plinth", new Vector3(0f, -0.8f, 0f), new Vector3(7f, 0.6f, 7f), plinthMaterial);
+            var plinth = Model(plinthModel, "Plinth", new Vector3(0f, -1.1f, 0f), Vector3.one, plinthMaterial);
 
             int index = 0;
             foreach (var piece in data.Pieces)
@@ -46,13 +50,13 @@ namespace Prototypes.DioramaTurn
                             new Vector3(1f, 0.12f, 0.5f), bridgeMaterial);
                         break;
                     case PieceKind.Start:
-                        Cube($"Start {piece.Cell}", at, Vector3.one, startMaterial);
+                        Model(blockModel, $"Start {piece.Cell}", at, Vector3.one, startMaterial);
                         break;
                     case PieceKind.Goal:
-                        Cube($"Goal {piece.Cell}", at, Vector3.one, goalMaterial);
+                        Model(goalModel, $"Goal {piece.Cell}", at, Vector3.one, goalMaterial);
                         break;
                     default:
-                        Cube($"Block {piece.Cell}", at, Vector3.one, blockMaterials[index % blockMaterials.Length]);
+                        Model(blockModel, $"Block {piece.Cell}", at, Vector3.one, blockMaterials[index % blockMaterials.Length]);
                         break;
                 }
                 index++;
@@ -91,6 +95,24 @@ namespace Prototypes.DioramaTurn
             var renderer = go.GetComponent<Renderer>();
             if (material != null) renderer.sharedMaterial = material;
             return go;
+        }
+
+        /// <summary>Places a Blender model, or a cube when the model is missing (the greybox fallback).</summary>
+        GameObject Model(GameObject model, string name, Vector3 position, Vector3 scale, Material material)
+        {
+            if (model == null) return Cube(name, position, scale, material);
+            var go = Instantiate(model, root.transform, false);
+            go.name = name;
+            go.transform.localPosition = position;
+            go.transform.localScale = scale;
+            SetMaterial(go, material);
+            return go;
+        }
+
+        static void SetMaterial(GameObject go, Material material)
+        {
+            if (material == null) return;
+            foreach (var renderer in go.GetComponentsInChildren<MeshRenderer>()) renderer.sharedMaterial = material;
         }
 
         static void Kill(Object target)
