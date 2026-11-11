@@ -144,7 +144,7 @@ namespace Shared.Tests
                 foreach (var f in Directory.GetFiles(proto, "*.glb", SearchOption.AllDirectories))
                     if (!Rel(f).Contains("/Art/Exports/")) problems.Add($"{Rel(f)}: .glb files belong in Art/Exports");
                 foreach (var f in Directory.GetFiles(proto, "*.png", SearchOption.AllDirectories))
-                    if (!Rel(f).Contains("/Art/Textures/")) problems.Add($"{Rel(f)}: .png files belong in Art/Textures");
+                    if (!Rel(f).Contains("/Art/Textures/") && !Rel(f).Contains("/Art/Sprites/")) problems.Add($"{Rel(f)}: .png files belong in Art/Textures (generated textures) or Art/Sprites (Aseprite pixel art)");
                 foreach (var f in Directory.GetFiles(proto, "*.shader", SearchOption.AllDirectories))
                     if (!Rel(f).Contains("/Shaders/")) problems.Add($"{Rel(f)}: .shader files belong in Shaders");
             }

@@ -9,6 +9,7 @@ namespace Prototypes.MedievalChess
     {
         [Header("Sound")]
         [Range(0f, 1f)] public float masterVolume = 0.8f;
+        [Range(0f, 1f)] public float musicVolume = 0.35f;
         [Tooltip("The swing sounds this long before the blow lands.")]
         public float swingLead = 0.22f;
         [Tooltip("The victim's collapse starts this long after the blow.")]

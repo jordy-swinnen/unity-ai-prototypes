@@ -119,3 +119,6 @@ InitTestScene*.unity*
 # Personal experiments (see docs/project-structure.md)
 /[Aa]ssets/[Ss]andbox/
 /[Aa]ssets/[Ss]andbox.meta
+
+# Python bytecode from the tooling scripts
+__pycache__/

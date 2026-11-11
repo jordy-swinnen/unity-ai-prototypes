@@ -127,6 +127,7 @@ namespace Prototypes.NeonPong
 
         [Header("Audio")]
         [Range(0f, 1f)] public float masterVolume = 0.6f;
+        [Range(0f, 1f)] public float musicVolume = 0.35f;
         [Tooltip("The paddle sound is played at this pitch at base speed, and the higher one at max speed.")]
         public float pitchMin = 0.85f;
         public float pitchMax = 1.6f;

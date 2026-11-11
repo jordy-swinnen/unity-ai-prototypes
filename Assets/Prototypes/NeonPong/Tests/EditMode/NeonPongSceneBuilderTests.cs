@@ -209,6 +209,10 @@ namespace Prototypes.NeonPong.Tests
             Assert.AreEqual(game, audio.game);
             Assert.IsNotNull(audio.sfx);
             Assert.IsNotNull(audio.paddleSfx);
+            Assert.IsNotNull(audio.musicSource);
+            Assert.IsTrue(audio.musicSource.loop);
+            Assert.IsNotNull(audio.music);
+            Assert.AreEqual(settings.masterVolume * settings.musicVolume, audio.musicSource.volume, Tol);
             foreach (var clip in new[] { audio.wall, audio.paddle, audio.serve, audio.point, audio.win, audio.restart })
                 Assert.IsNotNull(clip);
         }

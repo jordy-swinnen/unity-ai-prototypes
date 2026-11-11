@@ -343,6 +343,11 @@ namespace Prototypes.NeonPong.Editor
             audio.point = Clip("point");
             audio.win = Clip("win");
             audio.restart = Clip("restart");
+            audio.musicSource = NewSource(go, "Music");
+            audio.music = Clip("music");
+            audio.musicSource.clip = audio.music;
+            audio.musicSource.loop = true;
+            audio.musicSource.volume = Mathf.Clamp01(game.settings.masterVolume * game.settings.musicVolume);
         }
 
         static AudioSource NewSource(GameObject parent, string name)

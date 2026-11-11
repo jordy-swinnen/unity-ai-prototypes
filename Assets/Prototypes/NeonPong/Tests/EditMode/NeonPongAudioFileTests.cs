@@ -73,5 +73,16 @@ namespace Prototypes.NeonPong.Tests
             Assert.IsNotNull(clip, name);
             Assert.Less(clip.length, 1.5f);
         }
+
+        [Test]
+        public void The_music_clip_exists_and_is_a_loop_length_stereo_clip()
+        {
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{Folder}/music.wav");
+            Assert.IsNotNull(clip, "music.wav is missing. Run Tools/audio/render_music.sh NeonPong neon_drift");
+            Assert.AreEqual(2, clip.channels);
+            Assert.AreEqual(44100, clip.frequency);
+            Assert.Greater(clip.length, 8f);
+            Assert.Less(clip.length, 130f);
+        }
     }
 }

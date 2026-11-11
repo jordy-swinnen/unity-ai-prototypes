@@ -14,7 +14,7 @@ Source: Unity's guide [Organizing your project](https://unity.com/how-to/organiz
 | Separate sandbox areas | `Assets/Sandbox/<user>/`, ignored by git, created when needed | `.gitignore` |
 | Avoid extra folders at the root of `Assets` | Only `Prototypes`, `Shared`, `ThirdParty`, `Sandbox` and `Settings` | test |
 | Keep internal assets apart from third-party ones | Anything we did not make goes in `Assets/ThirdParty/<Vendor>/` | test (root rule), review |
-| Split assets by type in subfolders | Per prototype: `Scripts`, `Editor`, `Tests`, `Art/Exports`, `Art/Textures`, `Audio`, `Materials`, `Shaders`, `Scenes`, `Settings` | test (art, textures, shaders) |
+| Split assets by type in subfolders | Per prototype: `Scripts`, `Editor`, `Tests`, `Art/Exports`, `Art/Textures`, `Art/Sprites`, `Audio`, `Materials`, `Shaders`, `Scenes`, `Settings` | test (art, textures and sprites, shaders) |
 | Define the structure early: moving assets looks like delete plus add in version control | Moves and renames go through Unity (`AssetDatabase.MoveAsset` or `RenameAsset`), so `.meta` and GUIDs follow. Git shows them as renames. | rule in `AGENTS.md` |
 | Avoid empty folders | None exist | test |
 | Commit `.meta` files | Always, with their assets | test |
@@ -27,7 +27,8 @@ Source: Unity's guide [Organizing your project](https://unity.com/how-to/organiz
 ## Our own rules that the guide does not cover
 - **Assemblies:** one per folder part, named like the folder (`<Name>`, `<Name>.Editor`, `<Name>.Tests.EditMode`, `<Name>.Tests.PlayMode`). Prototypes never reference each other, and `Shared` never references a prototype. Move code into `Assets/Shared` only when a second prototype needs it.
 - **Generated files:** scenes, materials, models, textures and sounds come from scripts and editor commands, never by hand, so they can be rebuilt and reviewed as code.
-- **Large files:** `.png`, `.glb`, `.wav`, `.blend` and similar are in Git LFS (`.gitattributes`).
+- **Large files:** `.png`, `.glb`, `.wav`, `.blend`, `.aseprite` and similar are in Git LFS (`.gitattributes`).
+- **Pixel art:** sprites come from Aseprite Lua scripts (`Tools/aseprite/`) and land in `Art/Sprites/`, apart from generated textures in `Art/Textures/`, because they need different import settings: a Sprite, Point filter, no compression, no mipmaps. A path-based `AssetPostprocessor` sets them. It lives in `Assets/Shared/Editor/` as its own editor-only assembly `Shared.Editor`, not in `Shared`, because `Shared` also builds into players and editor code would break that build. It is in Shared, not in one prototype, because the rule is by path and applies to all of them.
 
 ## Known leftovers
 - **Visible Meta Files:** a Unity project setting (`ProjectSettings/`). We did not change it. `.meta` files exist on disk and are committed for every asset, which `ProjectStructureTests` checks, so the setting does not need to change.

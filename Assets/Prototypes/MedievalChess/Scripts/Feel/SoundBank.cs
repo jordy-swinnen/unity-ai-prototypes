@@ -13,9 +13,20 @@ namespace Prototypes.MedievalChess
         [Tooltip("One clip per SoundId, in the order of the enum.")]
         public AudioClip[] clips;
         public AudioSource[] sources;
+        public AudioSource musicSource;
+        public AudioClip musicClip;
 
         readonly List<SoundId> history = new List<SoundId>();
         int next;
+
+        void Start()
+        {
+            if (musicSource == null || musicClip == null) return;
+            musicSource.clip = musicClip;
+            musicSource.loop = true;
+            musicSource.volume = settings != null ? Mathf.Clamp01(settings.feel.masterVolume * settings.feel.musicVolume) : 0.28f;
+            if (!musicSource.isPlaying) musicSource.Play();
+        }
 
         public IReadOnlyList<SoundId> History => history;
         public int PlayCount { get; private set; }

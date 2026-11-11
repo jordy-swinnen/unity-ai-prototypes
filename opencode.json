@@ -3,7 +3,7 @@
   "model": "opencode-go/deepseek-v4.1-flash",
   "agent": {
     "plan": {
-      "model": "opencode-go/glm-5.3"
+      "model": "opencode-go/mimo-v2.6-pro"
     },
     "build": {
       "model": "opencode-go/deepseek-v4.1-flash"

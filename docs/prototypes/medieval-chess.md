@@ -66,7 +66,7 @@ Decided by the agent from the look brief (rules in `.claude/skills/game-polish/r
 | Torch flames, rings, particles | flat colour with emission, no texture, by design | glow and clarity matter more than detail (pillar 3) |
 
 ### Audio direction
-Weighty and dry: stone and wood on stone, iron on iron, a low war drum, a horn for check and mate. No music and no voices in this version. All sounds are made by a script (filtered noise bursts, decaying low sines and plucked-string tones). Whether they sound good is the person's call. (pillar 3)
+Weighty and dry: stone and wood on stone, iron on iron, a low war drum, a horn for check and mate. One 64-second looping Dorian lute, harp and cello track (`Tools/audio/MedievalChess/music/torchlight.py`, rendered by `Tools/audio/render_music.sh` with FluidSynth and GeneralUser GS) plays underneath at `musicVolume` 0.35. No voices. All sound effects are made by a script (filtered noise bursts, decaying low sines and plucked-string tones). Whether they sound good is the person's call. (pillar 3)
 
 ### Feel table
 | Event or action | Visual | Audio | Camera | Time | Pillar |
@@ -130,6 +130,7 @@ All on one settings asset. Feel and look values are starting points, tuned on re
 - **Shader (hand-written URP, `Shaders/MedievalLit.shader`):** world-space triplanar textures for the set, object-space grain and baked occlusion for the pieces, and a dissolve with a glowing rim.
 - **Effects (Unity):** torch flames, embers, dust, sparks on weapon hits, glow rings for selection and legal moves, the check pulse.
 - **Sounds (Python script, `.wav`):** about 16 sounds, each under 2 s: footstep thud, knight leap, rook slide, six attack swings, an impact, a collapse, selection clink, illegal knock, check horn, checkmate fanfare, draw bell, promotion anvil, drum hit, UI creak.
+- **Music (FluidSynth track script, `.wav`):** `Tools/audio/MedievalChess/music/torchlight.py` -> `Audio/music.wav`, 64 s stereo loop.
 - **Fonts:** the built-in font for now. See Open questions.
 
 ## Acceptance criteria
