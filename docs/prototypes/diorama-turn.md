@@ -1,6 +1,6 @@
 # DioramaTurn
 
-Status: approved
+Status: play-tested
 Kind: new game
 
 <!-- Written by the game-spec skill. Research and sources: docs/research/diorama-turn.md -->
@@ -140,19 +140,19 @@ Every value is a field on the settings asset `DioramaTurnSettings`, in groups.
 
 ## Acceptance criteria
 ### Checked by tests or captures
-- [ ] The join rule gives the expected result for a table of example node pairs in all four views, including t = 0, t = +1, t = -1 and pairs that are not joined.
-- [ ] Turning left or right four times returns to view 0; a turn changes the set of joins as the table says.
-- [ ] Walking finds the shortest route, reports "unreachable" when none exists, and marks steps across a join as hops.
-- [ ] A turn is refused while Pip walks, one extra turn is queued during a turn, and no turn changes Pip's node.
-- [ ] Every shipped room passes the validator (size, one Start, one Goal, no two nodes on one screen spot in any view).
-- [ ] Every shipped room is solvable, its par equals the solver's minimum turns, and it is not solvable with zero turns.
-- [ ] The cursor moves to the nearest reachable node in the pressed screen direction and stays put when there is none.
-- [ ] The scale maths gives a whole number of screen pixels per sprite pixel at 1080, 720 and 1440 high, never below 1.
-- [ ] Every PNG under `Art/Sprites/` imports as a Point-filtered Sprite (from Part 1) and every sprite pixel is in the shared palette.
-- [ ] The sheet's JSON slices into the expected number of frames for Pip, the star and the effects.
-- [ ] With `feel.effectStrength` at 0 the overshoot, the squash, the particles and the slow motion are all 0.
-- [ ] A capture of each room in each of the four views shows the whole room inside the frame, with no error in the console.
-- [ ] A PlayMode run reaches the Goal in each room using only the input that the solver gives (turns and node picks) and ends in "room complete".
+- [x] The join rule gives the expected result for a table of example node pairs in all four views, including t = 0, t = +1, t = -1 and pairs that are not joined.
+- [x] Turning left or right four times returns to view 0; a turn changes the set of joins as the table says.
+- [x] Walking finds the shortest route, reports "unreachable" when none exists, and marks steps across a join as hops.
+- [x] A turn is refused while Pip walks, one extra turn is queued during a turn, and no turn changes Pip's node.
+- [x] Every shipped room passes the validator (size, one Start, one Goal, no two nodes on one screen spot in any view).
+- [x] Every shipped room is solvable, its par equals the solver's minimum turns, and it is not solvable with zero turns.
+- [x] The cursor moves to the nearest reachable node in the pressed screen direction and stays put when there is none.
+- [x] The scale maths gives a whole number of screen pixels per sprite pixel at 1080, 720 and 1440 high, never below 1.
+- [x] Every PNG under `Art/Sprites/` imports as a Point-filtered Sprite (from Part 1) and every sprite pixel is in the shared palette.
+- [x] The sheet's JSON slices into the expected number of frames for Pip, the star and the effects.
+- [x] With `feel.effectStrength` at 0 the overshoot, the squash, the particles and the slow motion are all 0.
+- [x] A capture of each room in each of the four views shows the whole room inside the frame, with no error in the console.
+- [x] A PlayMode run reaches the Goal in each room using only the input that the solver gives (turns and node picks) and ends in "room complete".
 ### Needs a person
 - [ ] Turn a room slowly and fast: the quarter turn feels good (0.45 s is a starting guess), starts at once and settles with a small bounce, and the user never loses track of which piece is which.
 - [ ] A join reads as a join: when two pieces line up, the player sees it without being told (ribbon, glow, chime) and without confusion about pieces at different depths.

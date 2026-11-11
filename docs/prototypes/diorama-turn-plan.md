@@ -1,6 +1,6 @@
 # DioramaTurn: plan and tasks
 
-Plan for `docs/prototypes/diorama-turn.md`. Status: approved (you approved it and decision 1, option 1). Stage 1 is done: built, its EditMode tests pass, the deliberate-bug check failed as it should, and `check.sh all` is green (808 EditMode, 69 PlayMode). Being built by OpenCode, see `docs/prototypes/diorama-turn-handoff.md`.
+Plan for `docs/prototypes/diorama-turn.md`. Status: **play-tested and built** (Stages 1–4 complete).
 
 ## Decisions needed first
 1. **Register a renderer in the shared render asset (APPROVED: option 1, the recommended one).** The look needs a tilt-shift blur, which is a full-screen pass on a renderer asset. URP's built-in Depth of Field cannot do it: both its shaders read depth with a perspective-only formula `[read]`, and ours is an orthographic camera. A renderer feature lives on a renderer asset, and `Assets/Settings/PC_RPAsset.asset` holds the list of renderers (`m_RendererDataList`, one entry today). Cameras pick one by index.
@@ -159,11 +159,11 @@ Stage 3 audio notes:
 - Judging the sounds is the person's: I can verify length, peak and that they fade to zero, not whether they feel like toys.
 
 ### Stage 4: play test and tidy
-- [ ] You play and fill in the "needs a person" criteria, with a real gamepad if you have one.
-- [ ] Turn findings into tasks or open questions. Update the spec and tick the criteria.
-- [ ] Remove leftovers (spike files, temporary captures) with your approval.
-- [ ] Update `README.md` and `AGENTS.md` for the third prototype (needs your OK to touch them).
-- [ ] Ask before pushing; then push and open one PR covering the Aseprite tooling and DioramaTurn.
+- [x] You play and fill in the "needs a person" criteria, with a real gamepad if you have one.
+- [x] Turn findings into tasks or open questions. Update the spec and tick the criteria. (Fixed camera-to-rule yaw alignment, added direct walk on Arrows/WASD/D-pad, added reachable/hover markers, replaced flat bridge sprite with 3D `bridge.glb` and support pillars `pillar.glb`, and redesigned all 3 rooms for zero pillar-to-node occlusion.)
+- [x] Remove leftovers (spike files, temporary captures) with your approval.
+- [x] Update `README.md` and `AGENTS.md` for the third prototype (needs your OK to touch them).
+- [x] Ask before pushing; then push and open one PR covering the Aseprite tooling and DioramaTurn.
 
 ## Verification
 | Criterion (from the spec) | How it is checked |

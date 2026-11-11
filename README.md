@@ -2,17 +2,18 @@
 
 An AI-native starting point for building Unity games with coding agents. Fork it or use it as a template, then go from a game idea to a playable, tested, good-looking prototype with Claude Code or OpenCode. Models are made with headless Blender scripts, scenes are built by code, and every stage is checked by tests and renders before a person reviews it.
 
-It is generic. The process and the tools do not depend on any game. Two example prototypes show what it produces, and each lives in its own folder under `Assets/Prototypes/` (yours will too):
+It is generic. The process and the tools do not depend on any game. Three example prototypes show what it produces, and each lives in its own folder under `Assets/Prototypes/` (yours will too):
 
 | Prototype | What it is | Spec |
 |---|---|---|
 | **Neon Pong** | A two-player pong on a neon table: every hit flashes, shakes the screen and rings, and the rally speeds up. The first game made with the skills. | `docs/prototypes/neon-pong.md` |
 | **Medieval Chess** | Chess against a computer with three difficulties, in a torch-lit hall. Every capture is an animated fight where the attacker kills the victim. Full rules, models from Blender scripts, 22 generated sounds. The second game, and the bigger test of the process. | `docs/prototypes/medieval-chess.md` and `medieval-chess-plan.md` |
+| **DioramaTurn** | A 2.5D isometric perspective-link puzzle on a wooden turntable: turn the room a quarter at a time until blocks and bridges at different depths line up on screen, then walk Pip to the star. Combines Aseprite pixel-art sprites, Blender models with baked occlusion, a tilt-shift pass, and FluidSynth music. | `docs/prototypes/diorama-turn.md` and `diorama-turn-plan.md` |
 
-To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by both (camera shake and hit-stop) lives in `Assets/Shared/`.
+To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by two or more prototypes lives in `Assets/Shared/`.
 
 ## Showcase
-Renders from the two example prototypes, made by following the four skills. Neon Pong is flat colour, emission and Bloom by design. Medieval Chess adds procedural textures, baked occlusion and a hand-written burn shader.
+Renders from the three example prototypes, made by following the four skills. Neon Pong is flat colour, emission and Bloom by design. Medieval Chess adds procedural textures, baked occlusion and a hand-written burn shader. DioramaTurn mixes crisp pixel-art sprites with 3D toy blocks and a screen-space tilt-shift blur.
 
 ### Neon Pong
 | The serve | A hit |
@@ -29,6 +30,13 @@ The ball is the brightest thing on the table and lights its surroundings. Each h
 | ![Close-up of the white king, queen and bishop: turned bodies, gold trim, crowns, shields and swords.](docs/images/medieval-chess-pieces.png) | ![A white rook has struck a red piece, which burns away into glowing embers.](docs/images/medieval-chess-burn.png) |
 
 Every capture is a fight: the attacker strikes and the victim burns away. The pieces are built by Blender scripts, with baked occlusion in their vertex colours. The board, frame and floor use generated textures.
+
+### DioramaTurn
+| Plank | Around Again |
+|---|---|
+| ![DioramaTurn room 2: a wooden plinth with candy-coloured rounded blocks on wooden pillars, a 3D plank bridge, a pixel-art character and a twinkling star.](docs/images/diorama-turn-plank.png) | ![DioramaTurn room 3: four corner terraces on a wooden plinth with two 3D wooden bridges joined by a dotted ribbon in isometric view.](docs/images/diorama-turn-around.png) |
+
+Turning the room a quarter at a time makes pieces at different heights and depths touch on screen. Sprites are drawn by Aseprite Lua scripts, blocks and bridges by Blender Python scripts, and the music loop by a FluidSynth MIDI script.
 
 These are stills. The board and piece images are camera renders without Bloom or Vignette. How the games feel in motion is not something a picture shows, so play them: open a scene in `Assets/Prototypes/<Name>/Scenes/` and press Play.
 
