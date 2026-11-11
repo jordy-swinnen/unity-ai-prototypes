@@ -67,13 +67,15 @@ namespace Prototypes.DioramaTurn.Editor
             var bridgeMaterial = Surface(settings, "Plank Wood", "#E8B67A", 0.3f, woodAlbedo, woodNormal, world: true);
             var cursorMaterial = Unlit("Cursor", "#3B2A4D", 0.55f);
             var ribbonMaterial = Unlit("Ribbon", "#FFF6B0", 1f);
-            var starMaterial = Emissive("Goal Star", "#FFD93B");
             var spriteMaterial = SpriteMaterial();
 
             var plinthModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/plinth.glb");
             var blockModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/block.glb");
             var pillarModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/pillar.glb");
             var goalModel = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "/Art/Exports/goal_pedestal.glb");
+            var plankTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Sprites/plank.png");
+            var starTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Sprites/star_sheet.png");
+            var starJson = AssetDatabase.LoadAssetAtPath<TextAsset>(Root + "/Art/Sprites/star_sheet.json");
 
             var pipTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(SpritePath);
             var pipJson = AssetDatabase.LoadAssetAtPath<TextAsset>(SpriteJsonPath);
@@ -81,10 +83,10 @@ namespace Prototypes.DioramaTurn.Editor
             var rig = BuildCamera(settings, rendererIndex, out var camera);
             BuildLight(settings, rig);
             var room = BuildRoom(settings, blockMaterials, startMaterial, goalMaterial, plinthMaterial, bridgeMaterial,
-                cursorMaterial, plinthModel, blockModel, goalModel, pillarModel);
+                cursorMaterial, plinthModel, blockModel, goalModel, pillarModel, spriteMaterial, plankTexture);
             var ribbons = BuildRibbons(settings, room, ribbonMaterial);
             var pip = BuildPip(settings, room, spriteMaterial, pipTexture, pipJson);
-            var star = BuildStar(settings, starMaterial);
+            var star = BuildStar(settings, rig, spriteMaterial, starTexture, starJson);
             var hud = BuildHud(settings);
             BuildVolume(settings);
             ApplyTiltSettings(settings);
@@ -151,7 +153,7 @@ namespace Prototypes.DioramaTurn.Editor
 
         static RoomView BuildRoom(DioramaTurnSettings settings, Material[] blocks, Material start, Material goal,
             Material plinth, Material bridge, Material cursor, GameObject plinthModel, GameObject blockModel,
-            GameObject goalModel, GameObject pillarModel)
+            GameObject goalModel, GameObject pillarModel, Material spriteMaterial, Texture2D plankTexture)
         {
             var go = new GameObject("Room");
             var view = go.AddComponent<RoomView>();
@@ -166,6 +168,9 @@ namespace Prototypes.DioramaTurn.Editor
             view.blockModel = blockModel;
             view.goalModel = goalModel;
             view.pillarModel = pillarModel;
+            view.bridgeSpriteMaterial = spriteMaterial;
+            view.bridgeTexture = plankTexture;
+            view.bridgeJson = null; // a single-image sprite: the whole texture is the frame
             return view;
         }
 
@@ -191,19 +196,14 @@ namespace Prototypes.DioramaTurn.Editor
             return view;
         }
 
-        static StarView BuildStar(DioramaTurnSettings settings, Material material)
+        static StarView BuildStar(DioramaTurnSettings settings, CameraRig rig, Material sprite, Texture2D texture, TextAsset json)
         {
             var go = new GameObject("Star");
-            var shape = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            shape.name = "Star Shape";
-            shape.transform.SetParent(go.transform, false);
-            shape.transform.localScale = Vector3.one * 0.45f;
-            shape.transform.localRotation = Quaternion.Euler(0f, 45f, 45f);
-            UnityEngine.Object.DestroyImmediate(shape.GetComponent<Collider>());
-            shape.GetComponent<Renderer>().sharedMaterial = material;
-
+            var quad = go.AddComponent<SpriteQuad>();
+            quad.SetSheet(sprite, texture, json, new Vector2(1f, 1f));
             var view = go.AddComponent<StarView>();
-            view.star = go.transform;
+            view.quad = quad;
+            view.rig = rig;
             return view;
         }
 

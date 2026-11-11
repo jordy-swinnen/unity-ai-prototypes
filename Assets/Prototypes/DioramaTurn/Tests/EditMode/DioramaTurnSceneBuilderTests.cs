@@ -144,7 +144,7 @@ namespace Prototypes.DioramaTurn.Tests
             Assert.AreEqual("pip_sheet", quad.sheet.name);
             quad.ShowFrame(0); // binds and parses the json at first use
             Assert.IsNotNull(quad.Frames);
-            Assert.AreEqual(3, quad.Frames.FrameCount);
+            Assert.AreEqual(14, quad.Frames.FrameCount);
 
             var start = Rooms.Build(0).Start;
             var pip = Find("Pip").transform;
@@ -157,11 +157,11 @@ namespace Prototypes.DioramaTurn.Tests
         {
             var star = Find("Star").GetComponent<StarView>();
             Assert.IsNotNull(star);
-            Assert.IsNotNull(star.star);
+            Assert.IsNotNull(star.quad, "the star is a sprite quad");
             var goal = Rooms.Build(0).Goal;
-            var expected = RoomView.TopFace(goal) + Vector3.up * 0.65f;
-            Assert.AreEqual(expected.y, star.star.position.y, Tol);
-            Assert.AreEqual(expected.x, star.star.position.x, Tol);
+            var expected = RoomView.TopFace(goal) + Vector3.up * 0.4f;
+            Assert.AreEqual(expected.y, star.quad.transform.position.y, Tol);
+            Assert.AreEqual(expected.x, star.quad.transform.position.x, Tol);
         }
 
         [Test]

@@ -22,14 +22,14 @@ namespace Prototypes.DioramaTurn.Tests
         }
 
         [Test]
-        public void The_sheet_json_reads_into_three_frames_with_the_idle_and_walk_tags()
+        public void The_sheet_json_reads_into_fourteen_frames_with_the_five_tags()
         {
             var json = AssetDatabase.LoadAssetAtPath<TextAsset>(JsonPath);
             Assert.IsNotNull(json, $"no sheet data at {JsonPath}");
             var sheet = SheetFrames.Parse(json.text);
 
-            Assert.AreEqual(3, sheet.FrameCount);
-            Assert.AreEqual(96, sheet.Width);
+            Assert.AreEqual(14, sheet.FrameCount);
+            Assert.AreEqual(14 * 32, sheet.Width);
             Assert.AreEqual(32, sheet.Height);
             for (int i = 0; i < sheet.FrameCount; i++)
             {
@@ -40,10 +40,19 @@ namespace Prototypes.DioramaTurn.Tests
 
             Assert.IsTrue(sheet.TryGetTag("idle", out int idleFrom, out int idleTo));
             Assert.AreEqual(0, idleFrom);
-            Assert.AreEqual(0, idleTo);
+            Assert.AreEqual(1, idleTo);
             Assert.IsTrue(sheet.TryGetTag("walk", out int walkFrom, out int walkTo));
-            Assert.AreEqual(1, walkFrom);
-            Assert.AreEqual(2, walkTo);
+            Assert.AreEqual(2, walkFrom);
+            Assert.AreEqual(5, walkTo);
+            Assert.IsTrue(sheet.TryGetTag("hop", out int hopFrom, out int hopTo));
+            Assert.AreEqual(6, hopFrom);
+            Assert.AreEqual(8, hopTo);
+            Assert.IsTrue(sheet.TryGetTag("cheer", out int cheerFrom, out int cheerTo));
+            Assert.AreEqual(9, cheerFrom);
+            Assert.AreEqual(11, cheerTo);
+            Assert.IsTrue(sheet.TryGetTag("shake", out int shakeFrom, out int shakeTo));
+            Assert.AreEqual(12, shakeFrom);
+            Assert.AreEqual(13, shakeTo);
         }
 
         [Test]
@@ -53,10 +62,10 @@ namespace Prototypes.DioramaTurn.Tests
             var sheet = SheetFrames.Parse(json.text);
             sheet.Uv(0, out var scale0, out var offset0);
             sheet.Uv(1, out var scale1, out var offset1);
-            Assert.AreEqual(1f / 3f, scale0.x, 0.0001f);
+            Assert.AreEqual(1f / 14f, scale0.x, 0.0001f);
             Assert.AreEqual(1f, scale0.y, 0.0001f);
             Assert.AreEqual(0f, offset0.x, 0.0001f);
-            Assert.AreEqual(1f / 3f, offset1.x, 0.0001f, "the second frame starts one frame to the right");
+            Assert.AreEqual(1f / 14f, offset1.x, 0.0001f, "the second frame starts one frame to the right");
         }
     }
 }

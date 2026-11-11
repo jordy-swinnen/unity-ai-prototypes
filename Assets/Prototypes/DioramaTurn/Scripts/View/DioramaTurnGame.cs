@@ -62,6 +62,8 @@ namespace Prototypes.DioramaTurn
             Sim.Tick(dt);
             FollowCamera();
             if (pip != null) pip.Show(Sim, dt);
+            if (star != null) star.Show(dt);
+            if (room != null) room.FaceSprites(rig != null ? rig.Yaw : 45f);
             DrainEvents();
         }
 
@@ -202,7 +204,11 @@ namespace Prototypes.DioramaTurn
                         if (hud != null) hud.SetTurns(Sim.TurnCount);
                         break;
                     case GameEventKind.GoalReached:
+                        if (pip != null) pip.Cheer();
                         CompleteRoom();
+                        break;
+                    case GameEventKind.Unreachable:
+                        if (pip != null) pip.Shake();
                         break;
                 }
             }

@@ -16,10 +16,14 @@ namespace Prototypes.DioramaTurn
         public GameObject blockModel;
         public GameObject goalModel;
         public GameObject pillarModel;
+        [Tooltip("The plank sprite for Bridge pieces.")] public Material bridgeSpriteMaterial;
+        public Texture2D bridgeTexture;
+        public TextAsset bridgeJson;
 
         GameObject root;
         GameObject cursor;
         RoomData room;
+        readonly System.Collections.Generic.List<SpriteQuad> sprites = new System.Collections.Generic.List<SpriteQuad>();
 
         public RoomData Room => room;
 
@@ -45,9 +49,12 @@ namespace Prototypes.DioramaTurn
                 switch (piece.Kind)
                 {
                     case PieceKind.Bridge:
-                        // A plank whose top sits on the cell's top face, where Pip's feet go.
-                        Cube($"Bridge {piece.Cell}", new Vector3(at.x, piece.Cell.Y + 0.44f, at.z),
-                            new Vector3(1f, 0.12f, 0.5f), bridgeMaterial);
+                        var bridgeGo = new GameObject($"Bridge {piece.Cell}");
+                        bridgeGo.transform.SetParent(root.transform, false);
+                        var bridge = bridgeGo.AddComponent<SpriteQuad>();
+                        bridge.SetSheet(bridgeSpriteMaterial, bridgeTexture, bridgeJson, new Vector2(1f, 1f));
+                        bridgeGo.transform.position = new Vector3(at.x, piece.Cell.Y + 0.25f, at.z);
+                        sprites.Add(bridge);
                         break;
                     case PieceKind.Start:
                         Model(blockModel, $"Start {piece.Cell}", at, Vector3.one, startMaterial);
@@ -75,12 +82,20 @@ namespace Prototypes.DioramaTurn
             cursor.transform.localPosition = TopFace(cell.Value) + Vector3.up * 0.02f;
         }
 
+        /// <summary>Turns the bridge sprites to face the camera, like Pip and the star.</summary>
+        public void FaceSprites(float cameraYawDeg)
+        {
+            foreach (var sprite in sprites)
+                if (sprite != null) sprite.Face(cameraYawDeg);
+        }
+
         public void Clear()
         {
             if (root != null) Kill(root);
             root = null;
             cursor = null;
             room = null;
+            sprites.Clear();
         }
 
         GameObject Cube(string name, Vector3 position, Vector3 scale, Material material)
