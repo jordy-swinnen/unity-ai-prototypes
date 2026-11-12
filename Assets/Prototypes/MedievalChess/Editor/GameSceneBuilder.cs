@@ -508,9 +508,9 @@ namespace Prototypes.MedievalChess.Editor
             var go = new GameObject("Effects");
             var view = go.AddComponent<EffectsView>();
             view.settings = s;
-            view.dust = BuildParticles(go.transform, "Dust", ParticleMaterial("Dust", additive: false), 0.25f, 0.4f);
-            view.embers = BuildParticles(go.transform, "Embers", ParticleMaterial("Ember", additive: true), -0.05f, 0.3f);
-            view.sparks = BuildParticles(go.transform, "Sparks", ParticleMaterial("Spark", additive: true), 0.6f, 0f);
+            view.dust = BuildParticles(go.transform, "Dust", ParticleMaterial("Dust"), 0.25f, 0.4f);
+            view.embers = BuildParticles(go.transform, "Embers", ParticleMaterial("Ember"), -0.05f, 0.3f);
+            view.sparks = BuildParticles(go.transform, "Sparks", ParticleMaterial("Spark"), 0.6f, 0f);
             return view;
         }
 
@@ -550,8 +550,8 @@ namespace Prototypes.MedievalChess.Editor
             return ps;
         }
 
-        /// <summary>An unlit particle material: additive for embers and sparks (Bloom picks them up), alpha blended for dust.</summary>
-        static Material ParticleMaterial(string name, bool additive)
+        /// <summary>An unlit, alpha-blended particle material: soft glows for the embers and sparks, and dust.</summary>
+        static Material ParticleMaterial(string name)
         {
             string path = DuelSceneBuilder.MaterialPath("Particle " + name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -563,11 +563,11 @@ namespace Prototypes.MedievalChess.Editor
                 AssetDatabase.CreateAsset(mat, path);
             }
             mat.SetFloat("_Surface", 1f);
-            mat.SetFloat("_Blend", additive ? 2f : 0f);
-            mat.SetFloat("_SrcBlend", additive ? (float)BlendMode.One : (float)BlendMode.SrcAlpha);
-            mat.SetFloat("_DstBlend", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             mat.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
-            mat.SetFloat("_DstBlendAlpha", additive ? (float)BlendMode.One : (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
             mat.SetFloat("_ZWrite", 0f);
             mat.SetOverrideTag("RenderType", "Transparent");
             mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");

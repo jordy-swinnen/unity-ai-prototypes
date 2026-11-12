@@ -108,8 +108,8 @@ namespace Prototypes.NeonPong.Editor
                 paddleLeft = Material("Paddle Left", s.player1Color, s.player1Color, s.paddleEmission, 0.2f),
                 paddleRight = Material("Paddle Right", s.player2Color, s.player2Color, s.paddleEmission, 0.2f),
                 ball = Material("Ball", s.ballColor, s.ballColor, s.ballEmission, 0.3f),
-                spark = Additive("Spark", Color.white * s.burstEmission),
-                trail = Additive("Trail", Color.white * s.trailEmission),
+                spark = Glow("Spark", Color.white * s.burstEmission),
+                trail = Glow("Trail", Color.white * s.trailEmission),
             };
         }
 
@@ -143,8 +143,8 @@ namespace Prototypes.NeonPong.Editor
             return mat;
         }
 
-        /// <summary>An unlit, additive particle material. The colour is a brightness multiplier (HDR).</summary>
-        static Material Additive(string name, Color tint)
+        /// <summary>An unlit, alpha-blended particle material: a soft glow that fades out instead of stacking additively. The colour is a brightness multiplier (HDR).</summary>
+        static Material Glow(string name, Color tint)
         {
             string path = MaterialPath(name);
             var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -155,13 +155,13 @@ namespace Prototypes.NeonPong.Editor
                 mat = new Material(shader) { name = Path.GetFileNameWithoutExtension(path) };
                 AssetDatabase.CreateAsset(mat, path);
             }
-            // Transparent surface, additive blend, no depth write.
+            // Transparent surface, alpha blend, no depth write.
             mat.SetFloat("_Surface", 1f);
-            mat.SetFloat("_Blend", 2f);
-            mat.SetFloat("_SrcBlend", (float)BlendMode.One);
-            mat.SetFloat("_DstBlend", (float)BlendMode.One);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
             mat.SetFloat("_SrcBlendAlpha", (float)BlendMode.One);
-            mat.SetFloat("_DstBlendAlpha", (float)BlendMode.One);
+            mat.SetFloat("_DstBlendAlpha", (float)BlendMode.OneMinusSrcAlpha);
             mat.SetFloat("_ZWrite", 0f);
             mat.SetOverrideTag("RenderType", "Transparent");
             mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
