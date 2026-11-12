@@ -8,12 +8,12 @@ It is generic. The process and the tools do not depend on any game. Three exampl
 |---|---|---|
 | **Neon Pong** | A two-player pong on a neon table: every hit flashes, shakes the screen and rings, and the rally speeds up. The first game made with the skills. | `docs/prototypes/neon-pong.md` |
 | **Medieval Chess** | Chess against a computer with three difficulties, in a torch-lit hall. Every capture is an animated fight where the attacker kills the victim. Full rules, models from Blender scripts, 22 generated sounds. The second game, and the bigger test of the process. | `docs/prototypes/medieval-chess.md` and `medieval-chess-plan.md` |
-| **DioramaTurn** | A 2.5D isometric perspective-link puzzle on a wooden turntable: turn the room a quarter at a time until blocks and bridges at different depths line up on screen, then walk Pip to the star. Combines Aseprite pixel-art sprites, Blender models with baked occlusion, a tilt-shift pass, and FluidSynth music. | `docs/prototypes/diorama-turn.md` and `diorama-turn-plan.md` |
+| **PixelInvaders** | Classic alien wave defense in a 2.5D retro command trench: 55 upright pixel-art invaders march faster with every kill alongside a 4-note descending bass heartbeat, erode pixel bunkers from above and below, and drop temporary arcade power-ups (`Rapid Fire`, `Twin Shot`, `Shield Repair`) from top-lane UFOs. Combines Aseprite sprite sheets, Blender models with baked occlusion, procedural brushed-metal textures, and FluidSynth music. | `docs/prototypes/pixel-invaders.md` and `pixel-invaders-plan.md` |
 
 To play one, open its scene (`Assets/Prototypes/<Name>/Scenes/`) in Unity and press Play. Delete the prototypes you don't want. Code used by two or more prototypes lives in `Assets/Shared/`.
 
 ## Showcase
-Renders from the three example prototypes, made by following the four skills. Neon Pong is flat colour, emission and Bloom by design. Medieval Chess adds procedural textures, baked occlusion and a hand-written burn shader. DioramaTurn mixes crisp pixel-art sprites with 3D toy blocks and a screen-space tilt-shift blur.
+Renders from the three example prototypes, made by following the four skills. Neon Pong is flat colour, emission and Bloom by design. Medieval Chess adds procedural textures, baked occlusion and a hand-written burn shader. PixelInvaders puts crisp Aseprite pixel-art sprite sheets and destructible pixel bunkers onto a lit 3D brushed-metal command trench.
 
 ### Neon Pong
 | The serve | A hit |
@@ -31,12 +31,12 @@ The ball is the brightest thing on the table and lights its surroundings. Each h
 
 Every capture is a fight: the attacker strikes and the victim burns away. The pieces are built by Blender scripts, with baked occlusion in their vertex colours. The board, frame and floor use generated textures.
 
-### DioramaTurn
-| Plank | Around Again |
+### PixelInvaders
+| Wave start | Mid-battle (UFO & Twin Shot) |
 |---|---|
-| ![DioramaTurn room 2: a wooden plinth with candy-coloured rounded blocks on wooden pillars, a 3D plank bridge, a pixel-art character and a twinkling star.](docs/images/diorama-turn-plank.png) | ![DioramaTurn room 3: four corner terraces on a wooden plinth with two 3D wooden bridges joined by a dotted ribbon in isometric view.](docs/images/diorama-turn-around.png) |
+| ![PixelInvaders at wave start: 5 rows of coral, violet and emerald pixel-art invaders and 4 emerald pixel bunkers casting shadows onto a dark brushed-metal 3D command trench.](docs/images/pixel-invaders-wave.png) | ![PixelInvaders mid-battle: a glowing UFO crosses the top lane, a Rapid Fire capsule drifts down, eroded bunkers show damaged edges, and an alien zig-zag shot lights the metal deck.](docs/images/pixel-invaders-action.png) |
 
-Turning the room a quarter at a time makes pieces at different heights and depths touch on screen. Sprites are drawn by Aseprite Lua scripts, blocks and bridges by Blender Python scripts, and the music loop by a FluidSynth MIDI script.
+Upright Point-filtered pixel sprites cast 3D shadows onto a brushed-metal command trench built in Blender. Invader ranks, explosions, power-up capsules and HUD badges are drawn by headless Aseprite Lua scripts (`Tools/aseprite/run.sh`), bunkers erode cell by cell, and the D-minor synthwave loop is rendered by FluidSynth.
 
 These are stills. The board and piece images are camera renders without Bloom or Vignette. How the games feel in motion is not something a picture shows, so play them: open a scene in `Assets/Prototypes/<Name>/Scenes/` and press Play.
 

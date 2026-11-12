@@ -41,6 +41,7 @@ namespace Prototypes.PixelInvaders.Tests
 
             var view = game.view;
             Assert.IsNotNull(view.mainCamera);
+            Assert.IsNotNull(view.mainCamera.GetComponent<AudioListener>(), "Main Camera must have an AudioListener");
             Assert.AreEqual(55, view.invaderQuads.Length);
             Assert.AreEqual(4, view.bunkerViews.Length);
             Assert.IsNotNull(view.cannonQuad);

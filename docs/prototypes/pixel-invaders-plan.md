@@ -143,9 +143,9 @@ Inside `game-build` and `game-polish`, stages run back to back with a commit per
 - [x] **Audio & FluidSynth music:** run `Tools/audio/PixelInvaders/make_sounds.py` (12 SFX clips) and `Tools/audio/render_music.sh PixelInvaders trench_pulse` (`Audio/music.wav`), wire `PixelInvadersAudio` with the accelerating 4-note heartbeat and music ducking, and add `AudioAssetTests` (non-silent, unclipped, loop seam). Commit: `feat(pixel-invaders): add arcade synth SFX and FluidSynth music loop`.
 
 ### Stage 4: play test and tidy
-- [ ] Run `Tools/unity/check.sh all` and `python3 Tools/agents/check_config.py`.
-- [ ] Present the final captures and the "Needs a person" play-test checklist for you to play in the Editor.
-- [ ] Fold in any play-test tuning feedback and decide whether to keep or remove `DioramaTurn`.
+- [x] Run `Tools/unity/check.sh all` and `python3 Tools/agents/check_config.py`.
+- [x] Present the final captures and the "Needs a person" play-test checklist for you to play in the Editor.
+- [x] Fold in any play-test tuning feedback (added `AudioListener` to `Main Camera` and enabled `playOnAwake` on `MusicSource`) and remove `DioramaTurn`.
 
 ---
 

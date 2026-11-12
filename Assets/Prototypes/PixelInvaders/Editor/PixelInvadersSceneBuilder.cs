@@ -29,6 +29,11 @@ namespace Prototypes.PixelInvaders.Editor
         [MenuItem("Prototypes/PixelInvaders/Build Scene")]
         public static void BuildMenu()
         {
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("PixelInvadersSceneBuilder: stop Play Mode before building the scene.");
+                return;
+            }
             BuildScene(ScenePath);
         }
 
@@ -67,6 +72,7 @@ namespace Prototypes.PixelInvaders.Editor
             var camGo = new GameObject("Main Camera");
             camGo.tag = "MainCamera";
             var cam = camGo.AddComponent<Camera>();
+            camGo.AddComponent<AudioListener>();
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.035f, 0.047f, 0.071f, 1f); // #090C12 Void black
             cam.fieldOfView = settings.camera.fovDeg;
@@ -118,6 +124,12 @@ namespace Prototypes.PixelInvaders.Editor
             audio.ufoLoopSource = CreateAudioSource(gameRoot.transform, "UfoLoopSource", loop: true);
             audio.musicSource = CreateAudioSource(gameRoot.transform, "MusicSource", loop: true);
             BindAudioClipsIfPresent(audio);
+            if (audio.musicLoopClip != null)
+            {
+                audio.musicSource.clip = audio.musicLoopClip;
+                audio.musicSource.playOnAwake = true;
+                audio.musicSource.volume = settings.audio.masterVolume * settings.audio.musicVolume;
+            }
 
             game.settings = settings;
             game.view = view;

@@ -32,6 +32,11 @@ namespace Prototypes.PixelInvaders
 
         public float CurrentMusicVolume => musicSource != null ? musicSource.volume : 0f;
 
+        void Start()
+        {
+            SyncSettings();
+        }
+
         public void SyncSettings()
         {
             if (settings == null) return;

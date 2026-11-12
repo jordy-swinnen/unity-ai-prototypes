@@ -35,6 +35,9 @@ namespace Prototypes.PixelInvaders.Tests
 
             var view = game.view;
             Assert.IsNotNull(view);
+            Assert.IsNotNull(Object.FindAnyObjectByType<AudioListener>(), "Scene must have an active AudioListener");
+            Assert.IsNotNull(game.audioDirector.musicSource.clip, "MusicSource must have music.wav assigned");
+            Assert.IsTrue(game.audioDirector.musicSource.isPlaying, "MusicSource must be playing in Play Mode");
             Assert.AreEqual(55, view.ActiveInvaderQuadCount);
             Assert.AreEqual(4, view.bunkerViews.Length);
             Assert.IsNotNull(view.bunkerViews[0].RuntimeTexture);

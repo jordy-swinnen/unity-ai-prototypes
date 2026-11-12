@@ -224,7 +224,7 @@ Every number sits on `PixelInvadersSettings` (`Assets/Prototypes/PixelInvaders/S
 ## Open questions
 - **Prototype folder name (`PixelInvaders`, assumed):** named `PixelInvaders` (`Assets/Prototypes/PixelInvaders/`, `docs/prototypes/pixel-invaders.md`) to sit alongside `NeonPong` and `MedievalChess`.
 - **Bunker rendering representation (decided for plan):** each bunker's `12 x 8` cells will be rendered as crisp Point-filtered pixel sprites driven directly by the simulation's cell state (intact vs. damaged neighbour vs. empty), so erosion is 100% deterministic and casts real 3D shadows matching the rest of the sprite cast.
-- **`DioramaTurn` fate:** per your instruction, `DioramaTurn` stays untouched while we build and play-test `PixelInvaders`, and we will decide whether to remove `DioramaTurn` after finishing the game.
+- **`DioramaTurn` fate (resolved):** `DioramaTurn` was removed and replaced by `PixelInvaders` per your confirmation.
 
 ## Sources
 Details and full notes in `docs/research/pixel-invaders.md`.
