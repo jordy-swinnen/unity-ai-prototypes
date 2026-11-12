@@ -83,10 +83,9 @@ namespace Prototypes.PixelInvaders
 
         void EnsureInitialized()
         {
-            if (meshRenderer != null && propBlock != null) return;
-            meshRenderer = GetComponent<MeshRenderer>();
+            if (meshRenderer == null) meshRenderer = GetComponent<MeshRenderer>();
             var filter = GetComponent<MeshFilter>();
-            if (filter.sharedMesh == null) filter.sharedMesh = GetOrCreateQuadMesh();
+            if (filter != null && filter.sharedMesh == null) filter.sharedMesh = GetOrCreateQuadMesh();
             if (propBlock == null) propBlock = new MaterialPropertyBlock();
         }
 

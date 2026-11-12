@@ -60,6 +60,8 @@ namespace Prototypes.PixelInvaders.Editor
             var cannonJson = AssetDatabase.LoadAssetAtPath<TextAsset>(SpritesFolder + "/cannon_and_shots_sheet.json");
             var fxTex = AssetDatabase.LoadAssetAtPath<Texture2D>(SpritesFolder + "/powerups_and_fx_sheet.png");
             var fxJson = AssetDatabase.LoadAssetAtPath<TextAsset>(SpritesFolder + "/powerups_and_fx_sheet.json");
+            var hudTex = AssetDatabase.LoadAssetAtPath<Texture2D>(SpritesFolder + "/bunker_and_hud_sheet.png");
+            var hudJson = AssetDatabase.LoadAssetAtPath<TextAsset>(SpritesFolder + "/bunker_and_hud_sheet.json");
 
             // 1. Camera & Lighting
             var camGo = new GameObject("Main Camera");
@@ -108,6 +110,8 @@ namespace Prototypes.PixelInvaders.Editor
             view.settings = settings;
             view.mainCamera = cam;
             view.keyLight = keyLight;
+            view.hudSheet = hudTex;
+            view.hudSheetJson = hudJson;
 
             audio.settings = settings;
             audio.sfxSource = CreateAudioSource(gameRoot.transform, "SfxSource", loop: false);
@@ -275,8 +279,9 @@ namespace Prototypes.PixelInvaders.Editor
                 view.fxPool[i] = fq;
             }
 
-            // 5. HUD Canvas
-            BuildHudCanvas(gameRoot.transform, view);
+            // 5. HUD Canvas (with Aseprite RawImage badges and ScorePopupPool)
+            BuildHudCanvas(gameRoot.transform, view, hudTex, hudJson);
+            view.Sync(sim, 0f, Vector2.zero);
 
             EditorSceneManager.SaveScene(scene, outputScenePath);
             AssetDatabase.Refresh();
@@ -418,7 +423,7 @@ namespace Prototypes.PixelInvaders.Editor
             audio.musicLoopClip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{AudioFolder}/music.wav");
         }
 
-        static void BuildHudCanvas(Transform parent, PixelInvadersView view)
+        static void BuildHudCanvas(Transform parent, PixelInvadersView view, Texture2D hudTex, TextAsset hudJson)
         {
             var canvasGo = new GameObject("HUDCanvas");
             canvasGo.transform.SetParent(parent, false);
@@ -437,20 +442,71 @@ namespace Prototypes.PixelInvaders.Editor
             view.scoreText = CreateHudText(canvasGo.transform, "ScoreText", font, 24, TextAnchor.UpperLeft,
                 new Vector2(0f, 1f), new Vector2(28f, -18f), new Vector2(280f, 40f), phosphorWhite, "SCORE 0000");
 
+            view.crownIcon = CreateHudRawImage(canvasGo.transform, "CrownIcon", hudTex,
+                new Vector2(0.5f, 1f), new Vector2(-72f, -18f), new Vector2(28f, 28f));
+
             view.highScoreText = CreateHudText(canvasGo.transform, "HighScoreText", font, 24, TextAnchor.UpperCenter,
-                new Vector2(0.5f, 1f), new Vector2(0f, -18f), new Vector2(280f, 40f), solarGold, "HI 1000");
+                new Vector2(0.5f, 1f), new Vector2(12f, -18f), new Vector2(260f, 40f), solarGold, "HI 1000");
 
             view.waveText = CreateHudText(canvasGo.transform, "WaveText", font, 24, TextAnchor.UpperRight,
                 new Vector2(1f, 1f), new Vector2(-28f, -18f), new Vector2(220f, 40f), phosphorWhite, "WAVE 1");
 
             view.livesText = CreateHudText(canvasGo.transform, "LivesText", font, 20, TextAnchor.LowerLeft,
-                new Vector2(0f, 0f), new Vector2(28f, 18f), new Vector2(220f, 36f), cyanTurret, "LIVES 3");
+                new Vector2(0f, 0f), new Vector2(28f, 18f), new Vector2(120f, 36f), cyanTurret, "LIVES 3");
+
+            view.lifeIcons = new RawImage[3];
+            for (int i = 0; i < 3; i++)
+            {
+                view.lifeIcons[i] = CreateHudRawImage(canvasGo.transform, $"LifeIcon_{i}", hudTex,
+                    new Vector2(0f, 0f), new Vector2(124f + i * 32f, 22f), new Vector2(28f, 28f));
+            }
+
+            view.powerupBadgeIcon = CreateHudRawImage(canvasGo.transform, "PowerupBadgeIcon", hudTex,
+                new Vector2(1f, 0f), new Vector2(-248f, 22f), new Vector2(28f, 28f));
+            view.powerupBadgeIcon.enabled = false;
 
             view.powerupText = CreateHudText(canvasGo.transform, "PowerupText", font, 20, TextAnchor.LowerRight,
-                new Vector2(1f, 0f), new Vector2(-28f, 18f), new Vector2(320f, 36f), solarGold, "");
+                new Vector2(1f, 0f), new Vector2(-28f, 18f), new Vector2(215f, 36f), solarGold, "");
 
             view.statusOverlayText = CreateHudText(canvasGo.transform, "StatusOverlayText", font, 34, TextAnchor.MiddleCenter,
                 new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 140f), phosphorWhite, "");
+
+            var popupRoot = new GameObject("ScorePopups");
+            popupRoot.transform.SetParent(canvasGo.transform, false);
+            var prt = popupRoot.AddComponent<RectTransform>();
+            prt.anchorMin = Vector2.zero;
+            prt.anchorMax = Vector2.one;
+            prt.offsetMin = Vector2.zero;
+            prt.offsetMax = Vector2.zero;
+            view.scorePopupPool = new Text[8];
+            for (int i = 0; i < 8; i++)
+            {
+                var pTxt = CreateHudText(popupRoot.transform, $"ScorePopup_{i}", font, 20, TextAnchor.MiddleCenter,
+                    new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(160f, 36f), solarGold, "");
+                pTxt.gameObject.SetActive(false);
+                view.scorePopupPool[i] = pTxt;
+            }
+        }
+
+        static RawImage CreateHudRawImage(
+            Transform parent,
+            string name,
+            Texture2D tex,
+            Vector2 anchorPos,
+            Vector2 anchoredOffset,
+            Vector2 sizeDelta)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = anchorPos;
+            rt.anchorMax = anchorPos;
+            rt.pivot = anchorPos;
+            rt.anchoredPosition = anchoredOffset;
+            rt.sizeDelta = sizeDelta;
+            var img = go.AddComponent<RawImage>();
+            img.texture = tex;
+            return img;
         }
 
         static Text CreateHudText(
@@ -574,7 +630,7 @@ namespace Prototypes.PixelInvaders.Editor
             spriteLit.SetFloat("_EnvironmentReflections", 0f);
             spriteLit.SetFloat("_AlphaClip", 1f);
             spriteLit.SetFloat("_Cutoff", 0.5f);
-            spriteLit.SetFloat("_Cull", 0f); // Render both faces so shadows and sprites work from any angle
+            spriteLit.SetFloat("_Cull", 0f);
             spriteLit.EnableKeyword("_ALPHATEST_ON");
             spriteLit.renderQueue = (int)RenderQueue.AlphaTest;
             EditorUtility.SetDirty(spriteLit);

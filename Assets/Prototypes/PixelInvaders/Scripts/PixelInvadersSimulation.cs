@@ -726,6 +726,7 @@ namespace Prototypes.PixelInvaders
         }
 
         // Test helpers
+        public void ClearEvents() => events.Clear();
         public void KillInvaderForTest(int index) => KillInvader(index);
         public void SetInvaderAliveForTest(int index, bool alive)
         {

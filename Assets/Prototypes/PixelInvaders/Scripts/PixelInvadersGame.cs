@@ -81,6 +81,10 @@ namespace Prototypes.PixelInvaders
             }
 
             timeFeel.UpdateSlow(realDt);
+            if (simulation.Events.Count > 0)
+            {
+                ProcessEvents();
+            }
             float simDt = timeFeel.Advance(realDt) * timeFeel.VisualScale;
             if (simDt > 0f)
             {
@@ -105,6 +109,7 @@ namespace Prototypes.PixelInvaders
                 if (view != null) view.HandleEvent(ev);
                 if (audioDirector != null) audioDirector.HandleEvent(ev);
             }
+            simulation.ClearEvents();
         }
 
         void ApplyFeel(GameEvent ev)

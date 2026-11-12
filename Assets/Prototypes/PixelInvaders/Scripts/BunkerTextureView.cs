@@ -19,6 +19,7 @@ namespace Prototypes.PixelInvaders
         MaterialPropertyBlock propBlock;
         Texture2D runtimeTexture;
         Color32[] pixelBuffer;
+        BunkerGrid boundGrid;
         int lastVersion = -1;
 
         public int LastRenderedVersion => lastVersion;
@@ -30,6 +31,10 @@ namespace Prototypes.PixelInvaders
             {
                 Sync(new BunkerGrid(transform.localPosition.x, transform.localPosition.z));
             }
+            else
+            {
+                BindTextureBlock();
+            }
         }
 
         public void Initialize(Material sharedLitMaterial, Vector2 worldSize, float x, float z, float tiltXDeg = 35f)
@@ -39,6 +44,7 @@ namespace Prototypes.PixelInvaders
             transform.localPosition = new Vector3(x, 0.02f, z);
             transform.localRotation = Quaternion.Euler(tiltXDeg, 0f, 0f);
             transform.localScale = new Vector3(worldSize.x, worldSize.y, 1f);
+            boundGrid = null;
             lastVersion = -1;
         }
 
@@ -58,10 +64,16 @@ namespace Prototypes.PixelInvaders
                     wrapMode = TextureWrapMode.Clamp,
                 };
                 pixelBuffer = new Color32[texW * texH];
+                boundGrid = null;
                 lastVersion = -1;
             }
 
-            if (lastVersion == grid.Version) return;
+            if (boundGrid == grid && lastVersion == grid.Version)
+            {
+                BindTextureBlock();
+                return;
+            }
+            boundGrid = grid;
             lastVersion = grid.Version;
 
             for (int i = 0; i < pixelBuffer.Length; i++) pixelBuffer[i] = ClearColor;
@@ -100,6 +112,13 @@ namespace Prototypes.PixelInvaders
             runtimeTexture.SetPixels32(pixelBuffer);
             runtimeTexture.Apply(false, false);
 
+            BindTextureBlock();
+        }
+
+        void BindTextureBlock()
+        {
+            EnsureComponents();
+            if (runtimeTexture == null) return;
             meshRenderer.GetPropertyBlock(propBlock);
             propBlock.SetTexture("_BaseMap", runtimeTexture);
             propBlock.SetVector("_BaseMap_ST", new Vector4(1f, 1f, 0f, 0f));
@@ -108,11 +127,10 @@ namespace Prototypes.PixelInvaders
 
         void EnsureComponents()
         {
-            if (meshRenderer != null && propBlock != null) return;
-            meshRenderer = GetComponent<MeshRenderer>();
+            if (meshRenderer == null) meshRenderer = GetComponent<MeshRenderer>();
             var filter = GetComponent<MeshFilter>();
-            if (filter.sharedMesh == null) filter.sharedMesh = SpriteQuad.GetOrCreateQuadMesh();
-            propBlock = new MaterialPropertyBlock();
+            if (filter != null && filter.sharedMesh == null) filter.sharedMesh = SpriteQuad.GetOrCreateQuadMesh();
+            if (propBlock == null) propBlock = new MaterialPropertyBlock();
         }
 
         void OnDestroy()

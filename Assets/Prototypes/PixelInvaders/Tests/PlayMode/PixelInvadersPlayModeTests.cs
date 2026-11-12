@@ -55,6 +55,13 @@ namespace Prototypes.PixelInvaders.Tests
             }
 
             Assert.AreEqual(54, game.Simulation.AliveInvaderCount);
+            Assert.AreEqual(55, view.ActiveInvaderQuadCount, "Killed invader quad stays active briefly for its white hit-flash frame");
+
+            // Step past the 0.055s white hit-flash timer so the killed quad deactivates
+            for (int i = 0; i < 4; i++)
+            {
+                game.StepFrame(0.02f, default);
+            }
             Assert.AreEqual(54, view.ActiveInvaderQuadCount);
             Assert.AreEqual(10, game.Simulation.Score);
             StringAssert.Contains("0010", view.scoreText.text);
@@ -98,6 +105,33 @@ namespace Prototypes.PixelInvaders.Tests
             Assert.AreEqual(55, game.Simulation.AliveInvaderCount);
             Assert.AreEqual(55, game.view.ActiveInvaderQuadCount);
             Assert.AreEqual(highScoreBefore, game.Simulation.HighScore);
+        }
+
+        [UnityTest]
+        public IEnumerator EffectStrength_zero_disables_runtime_shake_hitstop_and_transient_fx()
+        {
+            yield return LoadPrototypeScene();
+
+            var game = Object.FindAnyObjectByType<PixelInvadersGame>();
+            Assert.IsNotNull(game);
+            game.autoStep = false;
+
+            float savedStrength = game.settings.feel.effectStrength;
+            try
+            {
+                game.settings.feel.effectStrength = 0f;
+                game.Simulation.KillInvaderForTest(0);
+                game.StepFrame(0.02f, new PixelInvadersInput { firePressed = true });
+
+                Assert.IsFalse(game.TimeFeel.HitStopActive, "Hit-stop must be off when effectStrength is 0");
+                Assert.AreEqual(0f, game.Shake.Amplitude, 1e-5f, "Shake amplitude must be 0 when effectStrength is 0");
+                Assert.AreEqual(0, game.view.ActiveExplosionCount, "Transient explosions must not spawn when effectStrength is 0");
+                Assert.AreEqual(0, game.view.ActivePopupCount, "Score popups must not spawn when effectStrength is 0");
+            }
+            finally
+            {
+                game.settings.feel.effectStrength = savedStrength;
+            }
         }
     }
 }

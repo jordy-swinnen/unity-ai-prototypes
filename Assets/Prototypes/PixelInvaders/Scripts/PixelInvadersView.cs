@@ -16,9 +16,20 @@ namespace Prototypes.PixelInvaders
         public float Scale;
     }
 
+    [Serializable]
+    public struct ScorePopupFx
+    {
+        public Vector3 WorldPos;
+        public string Label;
+        public Color Color;
+        public float Elapsed;
+        public float Duration;
+    }
+
     /// <summary>
-    /// Synchronizes the 2.5D scene objects (55 invader quads, 4 bunker quads, cannon, UFO, capsule,
-    /// projectiles, dynamic point lights, explosion sprite pool, camera rig and uGUI HUD) with the simulation.
+    /// Synchronizes the 2.5D scene objects (55 invader quads with white hit-flash frames, 4 bunker quads,
+    /// cannon, UFO, capsule, projectiles, dynamic point lights, explosion sprite pool, floating score popups,
+    /// Aseprite HUD badges, camera rig and uGUI HUD) with the simulation.
     /// </summary>
     public sealed class PixelInvadersView : MonoBehaviour
     {
@@ -44,9 +55,18 @@ namespace Prototypes.PixelInvaders
         public Text livesText;
         public Text powerupText;
         public Text statusOverlayText;
-        public Image[] lifeIcons = Array.Empty<Image>();
+
+        public Texture2D hudSheet;
+        public TextAsset hudSheetJson;
+        public RawImage crownIcon;
+        public RawImage[] lifeIcons = Array.Empty<RawImage>();
+        public RawImage powerupBadgeIcon;
+        public Text[] scorePopupPool = Array.Empty<Text>();
 
         readonly List<TransientSpriteFx> activeFx = new List<TransientSpriteFx>();
+        readonly List<ScorePopupFx> activePopups = new List<ScorePopupFx>();
+        readonly float[] invaderHitFlashTimers = new float[55];
+        SheetFrames parsedHudFrames;
         float recoilTimer;
         float muzzleFlashTimer;
         float cannonShatterTimer;
@@ -66,6 +86,9 @@ namespace Prototypes.PixelInvaders
             }
         }
 
+        public int ActiveExplosionCount => activeFx.Count;
+        public int ActivePopupCount => activePopups.Count;
+
         public void HandleEvent(GameEvent ev)
         {
             switch (ev.Kind)
@@ -75,23 +98,59 @@ namespace Prototypes.PixelInvaders
                     muzzleFlashTimer = 0.055f;
                     break;
                 case GameEventKind.InvaderKilled:
-                    // Frames 6..8 in powerups_and_fx_sheet are the 3-frame alien pixel burst
-                    SpawnFx(ev.Position, startFrame: 6, endFrame: 8, frameDuration: 0.06f, scale: 0.90f);
+                    int hitIndex = FindInvaderIndexAt(ev.Position);
+                    if (hitIndex >= 0 && hitIndex < invaderHitFlashTimers.Length &&
+                        (settings == null || settings.feel.effectStrength > 0f))
+                    {
+                        invaderHitFlashTimers[hitIndex] = 0.055f;
+                    }
+                    SpawnFx(ev.Position, startFrame: 6, endFrame: 8, frameDuration: 0.065f, scale: 0.92f);
+                    Color rankColor = ev.Rank == InvaderRank.Scout
+                        ? new Color(1.0f, 0.28f, 0.41f)
+                        : (ev.Rank == InvaderRank.Guard ? new Color(0.72f, 0.36f, 1.0f) : new Color(0.22f, 0.85f, 0.45f));
+                    SpawnPopup(ev.Position, $"+{ev.Value}", rankColor);
                     break;
                 case GameEventKind.UfoDestroyed:
-                    // Frames 9..12 in powerups_and_fx_sheet are the 4-frame UFO burst
                     SpawnFx(ev.Position, startFrame: 9, endFrame: 12, frameDuration: 0.075f, scale: 1.35f);
+                    SpawnPopup(ev.Position, $"+{ev.Value}", new Color(1.0f, 0.82f, 0.28f));
+                    break;
+                case GameEventKind.PowerupCollected:
+                    string pLabel = ev.Powerup == PowerupKind.RapidFire
+                        ? "RAPID!"
+                        : (ev.Powerup == PowerupKind.TwinShot ? "TWIN SHOT!" : "SHIELD REPAIRED!");
+                    Color pCol = ev.Powerup == PowerupKind.RapidFire
+                        ? new Color(1.0f, 0.82f, 0.28f)
+                        : (ev.Powerup == PowerupKind.TwinShot ? new Color(0.17f, 0.91f, 0.96f) : new Color(0.22f, 0.85f, 0.45f));
+                    SpawnPopup(ev.Position, pLabel, pCol);
                     break;
                 case GameEventKind.BunkerEroded:
                 case GameEventKind.ShotMissed:
                 case GameEventKind.ShotsCancelled:
-                    // Frames 13..14 in powerups_and_fx_sheet are the 2-frame impact spark
                     SpawnFx(ev.Position, startFrame: 13, endFrame: 14, frameDuration: 0.05f, scale: 0.65f);
                     break;
                 case GameEventKind.CannonDestroyed:
                     cannonShatterTimer = 0f;
                     break;
             }
+        }
+
+        int FindInvaderIndexAt(Vector2 pos)
+        {
+            if (invaderQuads == null) return -1;
+            int best = -1;
+            float bestDist = 0.25f;
+            for (int i = 0; i < invaderQuads.Length; i++)
+            {
+                if (invaderQuads[i] == null) continue;
+                Vector3 lp = invaderQuads[i].transform.localPosition;
+                float d = Vector2.Distance(new Vector2(lp.x, lp.z), pos);
+                if (d < bestDist)
+                {
+                    bestDist = d;
+                    best = i;
+                }
+            }
+            return best;
         }
 
         void SpawnFx(Vector2 pos, int startFrame, int endFrame, float frameDuration, float scale)
@@ -108,6 +167,19 @@ namespace Prototypes.PixelInvaders
             });
         }
 
+        void SpawnPopup(Vector2 pos, string label, Color color)
+        {
+            if (settings != null && settings.feel.effectStrength <= 0f) return;
+            activePopups.Add(new ScorePopupFx
+            {
+                WorldPos = new Vector3(pos.x, 0.45f, pos.y),
+                Label = label,
+                Color = color,
+                Elapsed = 0f,
+                Duration = 0.55f,
+            });
+        }
+
         public void Sync(PixelInvadersSimulation sim, float dt, Vector2 cameraShakeOffset)
         {
             if (sim == null) return;
@@ -115,6 +187,13 @@ namespace Prototypes.PixelInvaders
             if (recoilTimer > 0f) recoilTimer = Mathf.Max(0f, recoilTimer - dt);
             if (muzzleFlashTimer > 0f) muzzleFlashTimer = Mathf.Max(0f, muzzleFlashTimer - dt);
             if (sim.Phase == GamePhase.Respawning) cannonShatterTimer += dt;
+            for (int i = 0; i < invaderHitFlashTimers.Length; i++)
+            {
+                if (invaderHitFlashTimers[i] > 0f)
+                {
+                    invaderHitFlashTimers[i] = Mathf.Max(0f, invaderHitFlashTimers[i] - dt);
+                }
+            }
 
             SyncCamera(cameraShakeOffset);
             SyncInvaders(sim);
@@ -123,6 +202,7 @@ namespace Prototypes.PixelInvaders
             SyncUfoAndCapsule(sim);
             SyncProjectiles(sim);
             SyncTransientFx(dt);
+            SyncScorePopups(dt);
             SyncHud(sim);
         }
 
@@ -149,16 +229,24 @@ namespace Prototypes.PixelInvaders
                 var quad = invaderQuads[i];
                 if (quad == null) continue;
                 var inv = list[i];
+                int baseFrame = inv.Rank == InvaderRank.Scout ? 0 : (inv.Rank == InvaderRank.Guard ? 3 : 6);
+
                 if (!inv.Alive)
                 {
-                    if (quad.gameObject.activeSelf) quad.gameObject.SetActive(false);
+                    if (i < invaderHitFlashTimers.Length && invaderHitFlashTimers[i] > 0f)
+                    {
+                        if (!quad.gameObject.activeSelf) quad.gameObject.SetActive(true);
+                        quad.PlaceOnDeck(inv.Position.x, inv.Position.y, 0.025f);
+                        quad.ShowFrame(baseFrame + 2); // White hit-flash frame in invaders_sheet
+                    }
+                    else if (quad.gameObject.activeSelf)
+                    {
+                        quad.gameObject.SetActive(false);
+                    }
                     continue;
                 }
                 if (!quad.gameObject.activeSelf) quad.gameObject.SetActive(true);
                 quad.PlaceOnDeck(inv.Position.x, inv.Position.y, 0.02f);
-
-                // invaders_sheet: Scout 0..2, Guard 3..5, Heavy 6..8
-                int baseFrame = inv.Rank == InvaderRank.Scout ? 0 : (inv.Rank == InvaderRank.Guard ? 3 : 6);
                 quad.ShowFrame(baseFrame + (sim.PoseFrame & 1));
             }
         }
@@ -204,8 +292,8 @@ namespace Prototypes.PixelInvaders
                 }
                 if (showFlash)
                 {
-                    muzzleFlashQuad.PlaceOnDeck(sim.CannonX, sim.CannonZ + 0.45f, 0.03f);
-                    muzzleFlashQuad.ShowFrame(10); // muzzle_flash frame in cannon_and_shots_sheet
+                    muzzleFlashQuad.PlaceOnDeck(sim.CannonX, sim.CannonZ + 0.45f, 0.22f);
+                    muzzleFlashQuad.ShowFrame(10);
                 }
             }
         }
@@ -239,7 +327,7 @@ namespace Prototypes.PixelInvaders
                 if (capsuleQuad.gameObject.activeSelf != active) capsuleQuad.gameObject.SetActive(active);
                 if (active)
                 {
-                    capsuleQuad.PlaceOnDeck(sim.ActiveCapsule.Position.x, sim.ActiveCapsule.Position.y, 0.03f);
+                    capsuleQuad.PlaceOnDeck(sim.ActiveCapsule.Position.x, sim.ActiveCapsule.Position.y, 0.28f);
                     int pulse = Mathf.FloorToInt(visualTime * 8f) & 1;
                     int baseIdx = sim.ActiveCapsule.Kind == PowerupKind.RapidFire
                         ? 0
@@ -261,8 +349,8 @@ namespace Prototypes.PixelInvaders
                 if (quad != null)
                 {
                     if (!quad.gameObject.activeSelf) quad.gameObject.SetActive(true);
-                    quad.PlaceOnDeck(shot.Position.x, shot.Position.y, 0.03f);
-                    quad.ShowFrame(shot.TwinBolt ? 9 : 8); // 8 = player bolt, 9 = twin bolt
+                    quad.PlaceOnDeck(shot.Position.x, shot.Position.y, 0.20f);
+                    quad.ShowFrame(shot.TwinBolt ? 9 : 8);
                 }
                 if (projectileLights != null && used < projectileLights.Length && projectileLights[used] != null)
                 {
@@ -282,8 +370,8 @@ namespace Prototypes.PixelInvaders
                 if (quad != null)
                 {
                     if (!quad.gameObject.activeSelf) quad.gameObject.SetActive(true);
-                    quad.PlaceOnDeck(shot.Position.x, shot.Position.y, 0.03f);
-                    quad.ShowFrame(11 + alienAnim); // 11 & 12 = alien zig-zag A & B
+                    quad.PlaceOnDeck(shot.Position.x, shot.Position.y, 0.20f);
+                    quad.ShowFrame(11 + alienAnim);
                 }
                 if (projectileLights != null && used < projectileLights.Length && projectileLights[used] != null)
                 {
@@ -334,7 +422,7 @@ namespace Prototypes.PixelInvaders
                 {
                     var fx = activeFx[i];
                     if (!quad.gameObject.activeSelf) quad.gameObject.SetActive(true);
-                    quad.PlaceOnDeck(fx.Position.x, fx.Position.y, 0.04f);
+                    quad.PlaceOnDeck(fx.Position.x, fx.Position.y, 0.30f);
                     quad.SetSize(new Vector2(fx.Scale, fx.Scale));
                     int frame = Mathf.Clamp(
                         fx.StartFrame + Mathf.FloorToInt(fx.Elapsed / fx.FrameDuration),
@@ -349,18 +437,70 @@ namespace Prototypes.PixelInvaders
             }
         }
 
+        void SyncScorePopups(float dt)
+        {
+            for (int i = activePopups.Count - 1; i >= 0; i--)
+            {
+                var p = activePopups[i];
+                p.Elapsed += dt;
+                p.WorldPos.z += 0.65f * dt;
+                if (p.Elapsed >= p.Duration)
+                {
+                    activePopups.RemoveAt(i);
+                }
+                else
+                {
+                    activePopups[i] = p;
+                }
+            }
+
+            if (scorePopupPool == null || mainCamera == null) return;
+            for (int i = 0; i < scorePopupPool.Length; i++)
+            {
+                var txt = scorePopupPool[i];
+                if (txt == null) continue;
+                if (i < activePopups.Count)
+                {
+                    var p = activePopups[i];
+                    if (!txt.gameObject.activeSelf) txt.gameObject.SetActive(true);
+                    txt.text = p.Label;
+                    float alpha = 1f - Mathf.Clamp01(p.Elapsed / p.Duration);
+                    Color c = p.Color;
+                    c.a = alpha;
+                    txt.color = c;
+                    Vector3 vp = mainCamera.WorldToViewportPoint(p.WorldPos);
+                    var rt = txt.rectTransform;
+                    rt.anchorMin = new Vector2(vp.x, vp.y);
+                    rt.anchorMax = new Vector2(vp.x, vp.y);
+                    rt.anchoredPosition = Vector2.zero;
+                }
+                else if (txt.gameObject.activeSelf)
+                {
+                    txt.gameObject.SetActive(false);
+                }
+            }
+        }
+
         void SyncHud(PixelInvadersSimulation sim)
         {
+            EnsureHudSheetParsed();
+
             if (scoreText != null) scoreText.text = $"SCORE {sim.Score:D4}";
             if (highScoreText != null) highScoreText.text = $"HI {sim.HighScore:D4}";
             if (waveText != null) waveText.text = $"WAVE {sim.Wave}";
             if (livesText != null) livesText.text = $"LIVES {sim.Lives}";
 
+            if (crownIcon != null) ApplyHudFrame(crownIcon, 2); // crown_icon in bunker_and_hud_sheet
+
             if (lifeIcons != null)
             {
                 for (int i = 0; i < lifeIcons.Length; i++)
                 {
-                    if (lifeIcons[i] != null) lifeIcons[i].enabled = i < sim.Lives;
+                    if (lifeIcons[i] != null)
+                    {
+                        lifeIcons[i].enabled = i < sim.Lives;
+                        ApplyHudFrame(lifeIcons[i], 1); // life_icon in bunker_and_hud_sheet
+                    }
                 }
             }
 
@@ -370,10 +510,17 @@ namespace Prototypes.PixelInvaders
                 {
                     string label = sim.ActivePowerup == PowerupKind.RapidFire ? "RAPID FIRE" : "TWIN SHOT";
                     powerupText.text = $"{label} {sim.PowerupTimeLeft:0.0}s";
+                    if (powerupBadgeIcon != null)
+                    {
+                        powerupBadgeIcon.enabled = true;
+                        int badgeFrame = sim.ActivePowerup == PowerupKind.RapidFire ? 3 : 4;
+                        ApplyHudFrame(powerupBadgeIcon, badgeFrame);
+                    }
                 }
                 else
                 {
                     powerupText.text = "";
+                    if (powerupBadgeIcon != null) powerupBadgeIcon.enabled = false;
                 }
             }
 
@@ -392,6 +539,22 @@ namespace Prototypes.PixelInvaders
                     statusOverlayText.text = "";
                 }
             }
+        }
+
+        void EnsureHudSheetParsed()
+        {
+            if (parsedHudFrames == null && hudSheetJson != null && !string.IsNullOrEmpty(hudSheetJson.text))
+            {
+                parsedHudFrames = SheetFrames.Parse(hudSheetJson.text);
+            }
+        }
+
+        void ApplyHudFrame(RawImage img, int frameIndex)
+        {
+            if (img == null || hudSheet == null || parsedHudFrames == null) return;
+            img.texture = hudSheet;
+            parsedHudFrames.Uv(frameIndex, out Vector2 scale, out Vector2 offset);
+            img.uvRect = new Rect(offset.x, offset.y, scale.x, scale.y);
         }
     }
 }
