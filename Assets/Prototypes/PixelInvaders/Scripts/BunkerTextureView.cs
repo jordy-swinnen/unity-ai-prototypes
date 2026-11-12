@@ -6,6 +6,7 @@ namespace Prototypes.PixelInvaders
     /// Renders a single 12x8 BunkerGrid onto one upright alpha-clipped URP Lit quad using a live 24x16
     /// Point-filtered Texture2D (2x2 pixels per cell with dark outlines). Casts eroded 3D shadows onto the deck.
     /// </summary>
+    [ExecuteAlways]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class BunkerTextureView : MonoBehaviour
     {
@@ -22,6 +23,14 @@ namespace Prototypes.PixelInvaders
 
         public int LastRenderedVersion => lastVersion;
         public Texture2D RuntimeTexture => runtimeTexture;
+
+        void OnEnable()
+        {
+            if (runtimeTexture == null)
+            {
+                Sync(new BunkerGrid(transform.localPosition.x, transform.localPosition.z));
+            }
+        }
 
         public void Initialize(Material sharedLitMaterial, Vector2 worldSize, float x, float z, float tiltXDeg = 35f)
         {

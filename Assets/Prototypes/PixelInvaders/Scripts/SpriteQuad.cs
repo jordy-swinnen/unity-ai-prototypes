@@ -7,6 +7,7 @@ namespace Prototypes.PixelInvaders
     /// Uses a shared URP Lit (alpha-clipped, shadow-casting) or Unlit material and selects frames
     /// from an Aseprite sheet via _BaseMap_ST on a MaterialPropertyBlock.
     /// </summary>
+    [ExecuteAlways]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class SpriteQuad : MonoBehaviour
     {
@@ -19,6 +20,14 @@ namespace Prototypes.PixelInvaders
         MeshRenderer meshRenderer;
         MaterialPropertyBlock propBlock;
         SheetFrames parsedFrames;
+
+        void OnEnable()
+        {
+            if (sheet != null && sheetJson != null)
+            {
+                ShowFrame(currentFrame);
+            }
+        }
 
         public SheetFrames Frames
         {
