@@ -1,6 +1,6 @@
 # PixelInvaders
 
-Status: approved
+Status: built, waiting for the play test (stage 4)
 Kind: new game
 
 <!-- Written by the game-spec skill. Research and sources: docs/research/pixel-invaders.md -->
@@ -184,18 +184,18 @@ Every number sits on `PixelInvadersSettings` (`Assets/Prototypes/PixelInvaders/S
 
 ## Acceptance criteria
 ### Checked by tests or captures
-- [ ] Headless Aseprite script(s) run via `Tools/aseprite/run.sh PixelInvaders ...`, write `.aseprite` files to `Art/source/PixelInvaders/` and `.png` + `.json` files to `Assets/Prototypes/PixelInvaders/Art/Sprites/`, every PNG imports as a Point-filtered Sprite with no compression, every opaque pixel belongs to the 16-colour palette, and the JSON slices into the exact expected frame counts.
-- [ ] Headless Blender script writes `trench_deck.glb`, `trench_rail.glb` and `trench_markers.glb` within the triangle budget and with populated vertex-colour `AO`; headless texture script writes valid `512 x 512` tileable albedo and normal PNGs; `PixelInvadersLit.shader` compiles with zero errors.
-- [ ] A fresh wave spawns `55` invaders in `5` rows of `11` (`11` Scouts, `22` Guards, `22` Heavies) and `4` intact bunkers with identical arch masks.
-- [ ] Stepping the simulation advances all living invaders horizontally in lockstep, toggles their pose (`0 <-> 1`), reverses and drops the formation by `stepVertical` at the horizontal boundary, and shrinks the step interval monotonically as `aliveCount` drops from `55` to `1`.
-- [ ] Base weapon allows only `1` active player shot at a time, honours the `0.10 s` fire buffer, destroys hit invaders, awards `10`/`20`/`30` points by rank, and increments high score when score exceeds it.
-- [ ] Only the bottom-most living invader in each column can fire; alien shots and player shots erode bunker cells from above and below, and low-marching invaders scrape away overlapping bunker cells.
-- [ ] Destroying a UFO awards points from the deterministic shot-count table (`100`, `150`, `200`, `300`) and spawns a falling power-up capsule (`Rapid Fire`, `Twin Shot`, or `Shield Repair`).
-- [ ] Catching `Rapid Fire` allows up to `3` active shots for `6.0 s`; catching `Twin Shot` fires paired bolts for `6.0 s`; catching `Shield Repair` restores eroded bunker cells immediately.
-- [ ] Clearing all `55` invaders advances to `wave + 1` with its top row starting one step lower (up to `4` steps).
-- [ ] Losing all `3` lives or allowing any living invader to reach `defenseLineZ` triggers `Game Over`, and pressing restart resets to Wave 1 with 3 lives while preserving `highScore`.
-- [ ] With `feel.effectStrength = 0`, camera shake, hit-stop, slow-motion and recoil offsets are all `0`.
-- [ ] `Tools/unity/check.sh all` passes with zero errors, and a `Tools/unity/capture.sh play` render shows the 3D trench, all 3 alien ranks, the 4 bunkers, the cannon and the HUD inside the camera frame.
+- [x] Headless Aseprite script(s) run via `Tools/aseprite/run.sh PixelInvaders ...`, write `.aseprite` files to `Art/source/PixelInvaders/` and `.png` + `.json` files to `Assets/Prototypes/PixelInvaders/Art/Sprites/`, every PNG imports as a Point-filtered Sprite with no compression, every opaque pixel belongs to the 16-colour palette, and the JSON slices into the exact expected frame counts.
+- [x] Headless Blender script writes `trench_deck.glb`, `trench_rail.glb` and `trench_markers.glb` within the triangle budget and with populated vertex-colour `AO`; headless texture script writes valid `512 x 512` tileable albedo and normal PNGs; `PixelInvadersLit.shader` compiles with zero errors.
+- [x] A fresh wave spawns `55` invaders in `5` rows of `11` (`11` Scouts, `22` Guards, `22` Heavies) and `4` intact bunkers with identical arch masks.
+- [x] Stepping the simulation advances all living invaders horizontally in lockstep, toggles their pose (`0 <-> 1`), reverses and drops the formation by `stepVertical` at the horizontal boundary, and shrinks the step interval monotonically as `aliveCount` drops from `55` to `1`.
+- [x] Base weapon allows only `1` active player shot at a time, honours the `0.10 s` fire buffer, destroys hit invaders, awards `10`/`20`/`30` points by rank, and increments high score when score exceeds it.
+- [x] Only the bottom-most living invader in each column can fire; alien shots and player shots erode bunker cells from above and below, and low-marching invaders scrape away overlapping bunker cells.
+- [x] Destroying a UFO awards points from the deterministic shot-count table (`100`, `150`, `200`, `300`) and spawns a falling power-up capsule (`Rapid Fire`, `Twin Shot`, or `Shield Repair`).
+- [x] Catching `Rapid Fire` allows up to `3` active shots for `6.0 s`; catching `Twin Shot` fires paired bolts for `6.0 s`; catching `Shield Repair` restores eroded bunker cells immediately.
+- [x] Clearing all `55` invaders advances to `wave + 1` with its top row starting one step lower (up to `4` steps).
+- [x] Losing all `3` lives or allowing any living invader to reach `defenseLineZ` triggers `Game Over`, and pressing restart resets to Wave 1 with 3 lives while preserving `highScore`.
+- [x] With `feel.effectStrength = 0`, camera shake, hit-stop, slow-motion and recoil offsets are all `0`.
+- [x] `Tools/unity/check.sh all` passes with zero errors, and a `Tools/unity/capture.sh play` render shows the 3D trench, all 3 alien ranks, the 4 bunkers, the cannon and the HUD inside the camera frame.
 
 ### Needs a person
 - [ ] Play a full wave from 55 aliens down to the last 1: the accelerating 4-note heartbeat and step speed feel tense and fair, and the final alien is exciting rather than impossible to hit.

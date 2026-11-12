@@ -1,6 +1,6 @@
 # PixelInvaders: plan and tasks
 
-Plan for `docs/prototypes/pixel-invaders.md`. Status: approved
+Plan for `docs/prototypes/pixel-invaders.md`. Status: stages 1 to 3 done, waiting for play test (stage 4)
 
 ## Decisions needed first
 1. **Which Unity Editor checkout to target during `game-build`.**
@@ -137,10 +137,10 @@ Inside `game-build` and `game-polish`, stages run back to back with a commit per
 - [x] Commit: `feat(pixel-invaders): add Aseprite sheets, playable scene and PlayMode tests`.
 
 ### Stage 3: look (`game-polish` — surfaces, 3D trench, lighting, VFX, audio, music)
-- [ ] Take a baseline `screen` capture of the Stage 2 scene.
-- [ ] **Surfaces & 3D Trench:** write and run `Tools/textures/PixelInvaders/make_textures.py` (`metal_deck_albedo.png`, `metal_deck_normal.png`), `Tools/blender/PixelInvaders/make_trench.py` (`trench_deck.glb`, `trench_rail.glb`, `trench_markers.glb` with vertex `AO`), `SurfaceTextureImporter`, and `Shaders/PixelInvadersLit.shader`. Add `SurfaceAndModelTests` (shader compiles, textures tile/power-of-two/unit normals, `.glb` triangle count and vertex `AO` variation). Rebuild scene and inspect capture. Commit: `feat(pixel-invaders): add 3D command trench models, metal textures and lit shader`.
-- [ ] **Lighting, post-processing & feel juice:** add URP Volume (Bloom, Vignette, Neutral tonemapping), projectile dynamic point lights, hit-flash frames, pixel explosion and spark pools, floating score popups, cannon tilt/recoil, camera shake (`ShakeState`), and hit-stop/slow-mo (`TimeFeel`). Verify on `screen`/`play` captures and test `effectStrength = 0`. Commit: `feat(pixel-invaders): add lighting, bloom, explosions and camera/time feel`.
-- [ ] **Audio & FluidSynth music:** run `Tools/audio/PixelInvaders/make_sounds.py` (12 SFX clips) and `Tools/audio/render_music.sh PixelInvaders trench_pulse` (`Audio/music.wav`), wire `PixelInvadersAudio` with the accelerating 4-note heartbeat and music ducking, and add `AudioAssetTests` (non-silent, unclipped, loop seam). Commit: `feat(pixel-invaders): add arcade synth SFX and FluidSynth music loop`.
+- [x] Take a baseline `screen` capture of the Stage 2 scene.
+- [x] **Surfaces & 3D Trench:** write and run `Tools/textures/PixelInvaders/make_textures.py` (`metal_deck_albedo.png`, `metal_deck_normal.png`), `Tools/blender/PixelInvaders/make_trench.py` (`trench_deck.glb`, `trench_rail.glb`, `trench_markers.glb` with vertex `AO`), `SurfaceTextureImporter`, and `Shaders/PixelInvadersLit.shader`. Add `SurfaceAndModelTests` (shader compiles, textures tile/power-of-two/unit normals, `.glb` triangle count and vertex `AO` variation). Rebuild scene and inspect capture. Commit: `feat(pixel-invaders): add 3D command trench models, metal textures and lit shader`.
+- [x] **Lighting, post-processing & feel juice:** add URP Volume (Bloom, Vignette, Neutral tonemapping), projectile dynamic point lights, hit-flash frames, pixel explosion and spark pools, floating score popups, cannon tilt/recoil, camera shake (`ShakeState`), and hit-stop/slow-mo (`TimeFeel`). Verify on `screen`/`play` captures and test `effectStrength = 0`. Commit: `feat(pixel-invaders): add lighting, bloom, explosions and camera/time feel`.
+- [x] **Audio & FluidSynth music:** run `Tools/audio/PixelInvaders/make_sounds.py` (12 SFX clips) and `Tools/audio/render_music.sh PixelInvaders trench_pulse` (`Audio/music.wav`), wire `PixelInvadersAudio` with the accelerating 4-note heartbeat and music ducking, and add `AudioAssetTests` (non-silent, unclipped, loop seam). Commit: `feat(pixel-invaders): add arcade synth SFX and FluidSynth music loop`.
 
 ### Stage 4: play test and tidy
 - [ ] Run `Tools/unity/check.sh all` and `python3 Tools/agents/check_config.py`.
